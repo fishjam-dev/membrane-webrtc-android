@@ -1,0 +1,3 @@
+include ':MembraneRTC'
+include ':app'
+rootProject.name = "Membrane Videoroom Demo"
