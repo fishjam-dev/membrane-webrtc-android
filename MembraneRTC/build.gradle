@@ -1,9 +1,52 @@
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
+plugins {
+    id "com.android.library"
+    id "kotlin-android"
+}
+android {
+    compileSdkVersion androidSdk.compileVersion
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion androidSdk.minVersion
+        targetSdkVersion androidSdk.targetVersion
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+    compileOptions {
+        sourceCompatibility java_version
+        targetCompatibility java_version
+    }
+    kotlinOptions {
+        freeCompilerArgs = ["-Xinline-classes", "-Xopt-in=kotlin.RequiresOptIn"]
+        jvmTarget = java_version
+    }
+}
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation deps.coroutines.lib
+    implementation deps.timber
+    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.github.dsrees:JavaPhoenixClient:1.0.0'
+    api 'com.github.webrtc-sdk:android:93.4577.01'
+    implementation 'androidx.core:core:1.7.0'
 }
 
 sourceCompatibility = "1.7"
