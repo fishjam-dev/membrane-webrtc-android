@@ -3,20 +3,13 @@ package org.membraneframework.rtc.transport
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
-import okhttp3.Call
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import org.membraneframework.rtc.events.ReceivableEvent
 import org.membraneframework.rtc.events.SendableEvent
 import org.membraneframework.rtc.events.serializeToMap
 import org.membraneframework.rtc.utils.ClosableCoroutineScope
-import org.membraneframework.rtc.utils.Payload
 import org.phoenixframework.Channel
 import org.phoenixframework.Socket
 import timber.log.Timber
-import kotlin.reflect.typeOf
-
 
 public class PhoenixTransport constructor(
     val url: String,
@@ -91,6 +84,8 @@ public class PhoenixTransport constructor(
 
                     ReceivableEvent.decode(rawMessage)?.let {
                         listener.onEvent(it)
+                    } ?: run {
+                        Timber.d("Failed to decode event $rawMessage")
                     }
                 } catch (e: Exception) {
                     Timber.e(e)
