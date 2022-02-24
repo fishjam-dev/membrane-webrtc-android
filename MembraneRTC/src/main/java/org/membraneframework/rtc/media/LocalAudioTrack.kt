@@ -3,6 +3,7 @@ package org.membraneframework.rtc.media
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnectionFactory
@@ -13,13 +14,9 @@ public class LocalAudioTrack constructor(
 ): AudioTrack(mediaTrack), LocalTrack {
 
     override fun start() {
-
-
-        TODO("Not yet implemented")
     }
 
     override fun stop() {
-        TODO("Not yet implemented")
     }
 
     override fun enabled(): Boolean {

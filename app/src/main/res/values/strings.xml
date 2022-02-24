@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Membrane Videoroom Demo</string>
+    <string name="title_activity_room">RoomActivity</string>
 </resources>

@@ -12,13 +12,18 @@ import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
 import org.webrtc.*
 import org.webrtc.RendererCommon.RendererEvents
+import org.webrtc.RendererCommon.ScalingType
+import timber.log.Timber
 import java.util.concurrent.CountDownLatch
+import kotlin.math.max
 
 class VideoTextureViewRenderer : TextureView, SurfaceHolder.Callback, SurfaceTextureListener, VideoSink, RendererEvents {
     // Cached resource name.
     private val resourceName: String
     private val videoLayoutMeasure = RendererCommon.VideoLayoutMeasure()
     private val eglRenderer: SurfaceEglRenderer
+
+    private var scalingType: ScalingType? = null
 
     // Callback for reporting renderer events. Read-only after initialization so no lock required.
     private var rendererEvents: RendererEvents? = null
@@ -135,16 +140,18 @@ class VideoTextureViewRenderer : TextureView, SurfaceHolder.Callback, SurfaceTex
     /**
      * Set how the video will fill the allowed layout area.
      */
-    fun setScalingType(scalingType: RendererCommon.ScalingType?) {
+    fun setScalingType(scalingType: ScalingType?) {
         ThreadUtils.checkIsOnMainThread()
+
+        this.scalingType = scalingType
 
         videoLayoutMeasure.setScalingType(scalingType)
         requestLayout()
     }
 
     fun setScalingType(
-        scalingTypeMatchOrientation: RendererCommon.ScalingType?,
-        scalingTypeMismatchOrientation: RendererCommon.ScalingType?
+        scalingTypeMatchOrientation: ScalingType?,
+        scalingTypeMismatchOrientation: ScalingType?
     ) {
         ThreadUtils.checkIsOnMainThread()
 
@@ -187,9 +194,18 @@ class VideoTextureViewRenderer : TextureView, SurfaceHolder.Callback, SurfaceTex
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         ThreadUtils.checkIsOnMainThread()
 
-        eglRenderer.setLayoutAspectRatio((right - left) / (bottom - top).toFloat())
+        val aspectRatio = when (this.scalingType)  {
+            ScalingType.SCALE_ASPECT_FIT ->
+                rotatedFrameWidth.toFloat() / max(rotatedFrameHeight, 1)
 
+            else ->
+                (right - left) / (bottom - top).toFloat()
+        }
+
+        eglRenderer.setLayoutAspectRatio(aspectRatio)
         updateSurfaceSize()
+
+        logD("onLayout() aspect ratio $aspectRatio")
     }
 
     private fun updateSurfaceSize() {
@@ -201,12 +217,20 @@ class VideoTextureViewRenderer : TextureView, SurfaceHolder.Callback, SurfaceTex
             val drawnFrameWidth: Int
             val drawnFrameHeight: Int
 
-            if (frameAspectRatio > layoutAspectRatio) {
-                drawnFrameWidth = (rotatedFrameHeight * layoutAspectRatio).toInt()
-                drawnFrameHeight = rotatedFrameHeight
-            } else {
-                drawnFrameWidth = rotatedFrameWidth
-                drawnFrameHeight = (rotatedFrameWidth / layoutAspectRatio).toInt()
+            when (scalingType) {
+                ScalingType.SCALE_ASPECT_FILL ->
+                    if (frameAspectRatio > layoutAspectRatio) {
+                        drawnFrameWidth = (rotatedFrameHeight * layoutAspectRatio).toInt()
+                        drawnFrameHeight = rotatedFrameHeight
+                    } else {
+                        drawnFrameWidth = rotatedFrameWidth
+                        drawnFrameHeight = (rotatedFrameWidth / layoutAspectRatio).toInt()
+                    }
+
+                else -> {
+                    drawnFrameWidth = rotatedFrameWidth
+                    drawnFrameHeight = rotatedFrameHeight
+                }
             }
 
             // Aspect ratio of the drawn frame and the view is the same.
@@ -228,7 +252,7 @@ class VideoTextureViewRenderer : TextureView, SurfaceHolder.Callback, SurfaceTex
             }
         } else {
             surfaceHeight = 0
-            surfaceWidth = surfaceHeight
+            surfaceWidth = 0
         }
     }
 
@@ -263,7 +287,7 @@ class VideoTextureViewRenderer : TextureView, SurfaceHolder.Callback, SurfaceTex
         getTransform(txform)
         txform.setScale(newWidth.toFloat() / viewWidth, newHeight.toFloat() / viewHeight)
         txform.postTranslate(xoff.toFloat(), yoff.toFloat())
-        setTransform(txform)
+         setTransform(txform)
     }
 
     // SurfaceHolder.Callback interface.
@@ -326,6 +350,7 @@ class VideoTextureViewRenderer : TextureView, SurfaceHolder.Callback, SurfaceTex
     }
 
     override fun onFrameResolutionChanged(videoWidth: Int, videoHeight: Int, rotation: Int) {
+        logD("Resolution changed to $videoWidth x $videoHeight with rotation of $rotation")
         rendererEvents?.onFrameResolutionChanged(videoWidth, videoHeight, rotation)
 
         val rotatedWidth = if (rotation == 0 || rotation == 180) videoWidth else videoHeight
@@ -349,7 +374,7 @@ class VideoTextureViewRenderer : TextureView, SurfaceHolder.Callback, SurfaceTex
     }
 
     private fun logD(string: String) {
-        Logging.d(TAG, "$resourceName: $string")
+        Timber.i("$TAG [$resourceName] $string")
     }
 
     companion object {

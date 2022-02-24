@@ -18,7 +18,7 @@ public class PhoenixTransport constructor(
 ) : EventTransport {
 
     private lateinit var coroutineScope: CoroutineScope
-    private lateinit var socket: Socket
+    private var socket: Socket? = null
     private var channel: Channel? = null
     private var listener: EventTransportListener? = null
 
@@ -27,25 +27,26 @@ public class PhoenixTransport constructor(
     private var joinContinuation: CancellableContinuation<Unit>? = null
 
     override suspend fun connect(listener: EventTransportListener) {
+        Timber.i("Starting connection...")
         this.listener = listener
 
         coroutineScope = ClosableCoroutineScope(SupervisorJob() + ioDispatcher)
 
         socket = Socket(url, emptyMap())
-        socket.connect()
+        socket!!.connect()
 
         var socketRefs: Array<String> = emptyArray()
 
         suspendCancellableCoroutine<Unit> { continuation ->
-            val openRef = socket.onOpen {
+            val openRef = socket!!.onOpen {
                 continuation.resumeWith(Result.success(Unit))
             }
 
-            val errorRef = socket.onError { error, _ ->
+            val errorRef = socket!!.onError { error, _ ->
                 continuation.cancel(EventTransportError.ConnectionError(error.toString()))
             }
 
-            val closeRef = socket.onClose {
+            val closeRef = socket!!.onClose {
                 continuation.cancel(EventTransportError.ConnectionError("closed"))
             }
 
@@ -54,17 +55,17 @@ public class PhoenixTransport constructor(
             socketRefs += closeRef
         }
 
-        socket.off(socketRefs.toList())
+        socket!!.off(socketRefs.toList())
 
-        socket.onError { error, _ ->
+        socket!!.onError { error, _ ->
             this.listener?.onError(EventTransportError.ConnectionError(error.toString()))
         }
 
-        socket.onClose {
+        socket!!.onClose {
             this.listener?.onClose()
         }
 
-        channel = socket.channel(topic)
+        channel = socket!!.channel(topic)
 
         channel?.join(timeout = 3000L)
             ?.receive("ok") { _ ->
@@ -103,10 +104,10 @@ public class PhoenixTransport constructor(
             channel
                 ?.leave()
                 ?.receive("ok") {
-                    socket.disconnect()
+                    socket?.disconnect()
                 }
         } else {
-            socket.disconnect()
+            socket?.disconnect()
         }
     }
 

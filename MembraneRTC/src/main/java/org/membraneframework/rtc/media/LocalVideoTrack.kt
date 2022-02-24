@@ -2,14 +2,18 @@ package org.membraneframework.rtc.media
 
 import android.content.Context
 import android.provider.MediaStore
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import org.webrtc.*
 import java.util.*
 
-class LocalVideoTrack constructor(
+class LocalVideoTrack
+constructor(
     mediaTrack: org.webrtc.VideoTrack,
     private val capturer: Capturer,
-    private val eglBase: EglBase
-): VideoTrack(mediaTrack), LocalTrack{
+    private val eglBase: EglBase,
+    private val peerConnectionFactory: PeerConnectionFactory
+): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack{
     enum class Type {
         CAMERA,
         SCREENCAST
@@ -22,7 +26,7 @@ class LocalVideoTrack constructor(
 
             val capturer = capturerFor(type, context, eglBase, source)
 
-            return LocalVideoTrack(track, capturer, eglBase)
+            return LocalVideoTrack(track, capturer, eglBase, factory)
         }
 
         private fun capturerFor(type: Type, context: Context, eglBase: EglBase, source: VideoSource): Capturer {
@@ -118,6 +122,8 @@ class CameraCapturer constructor(
 
     override fun stopCapture() {
         videoCapturer.stopCapture()
+        // FIXME: stopping capture is not the same as disposing...
+        videoCapturer.dispose()
     }
 }
 

@@ -54,6 +54,7 @@ ext {
     versions = [
             androidx_core     : "1.7.0",
             androidx_lifecycle: "2.4.0",
+            preference_version: "1.2.0",
             autoService       : '1.0.1',
             dagger            : "2.27",
             groupie           : "2.9.0",
