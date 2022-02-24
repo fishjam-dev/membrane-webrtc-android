@@ -116,6 +116,7 @@ public class RoomViewModel(
     }
 
     fun flipCamera() {
+        mutableRoom.value?.localVideoTrack()?.flipCamera()
     }
 
     fun toggleScreenCast() {

@@ -63,6 +63,12 @@ constructor(
     override fun setEnabled(enabled: Boolean) {
         videoTrack.setEnabled(enabled)
     }
+
+    fun flipCamera() {
+        (capturer as? CameraCapturer)?.let {
+            it.flipCamera()
+        }
+    }
 }
 
 interface Capturer {
@@ -73,29 +79,52 @@ interface Capturer {
 }
 
 class CameraCapturer constructor(
-    context: Context,
-    source: VideoSource,
-    rootEglBase: EglBase,
+    private val context: Context,
+    private val source: VideoSource,
+    private val rootEglBase: EglBase,
     private val videoParameters: VideoParameters,
-): Capturer {
-    private lateinit var videoCapturer: VideoCapturer
+): Capturer, CameraVideoCapturer.CameraSwitchHandler {
+    private lateinit var cameraCapturer: CameraVideoCapturer
     private lateinit var size: Size
+    private var frontFacing = true
+    private var isCapturing = false
 
     init {
+        createCapturer()
+    }
+
+    override fun capturer(): VideoCapturer {
+        return cameraCapturer
+    }
+
+    override fun startCapture() {
+        isCapturing = true
+        cameraCapturer.startCapture(size.height, size.width, videoParameters.encoding.maxFps)
+    }
+
+    override fun stopCapture() {
+        isCapturing = false
+        cameraCapturer.stopCapture()
+        cameraCapturer.dispose()
+    }
+
+    fun flipCamera() {
+        cameraCapturer.switchCamera(this)
+    }
+
+    private fun createCapturer() {
         val enumerator = if (Camera2Enumerator.isSupported(context)) {
             Camera2Enumerator(context)
         } else {
             Camera1Enumerator(true)
         }
 
-        var targetDeviceName: String? = null
-
         for (deviceName in enumerator.deviceNames) {
             if (enumerator.isFrontFacing(deviceName)) {
-                // TODO: we may want to listen on camera events such as changing front to back facing
-                this.videoCapturer = enumerator.createCapturer(deviceName, null)
+                this.cameraCapturer = enumerator.createCapturer(deviceName, null)
 
-                this.videoCapturer.initialize(
+
+                this.cameraCapturer.initialize(
                     SurfaceTextureHelper.create("CameraCaptureThread", rootEglBase.eglBaseContext),
                     context,
                     source.capturerObserver
@@ -112,18 +141,12 @@ class CameraCapturer constructor(
         }
     }
 
-    override fun capturer(): VideoCapturer {
-        return videoCapturer
+    override fun onCameraSwitchDone(isFrontCamera: Boolean) {
+        frontFacing = isFrontCamera
     }
 
-    override fun startCapture() {
-        videoCapturer.startCapture(size.height, size.width, videoParameters.encoding.maxFps)
-    }
-
-    override fun stopCapture() {
-        videoCapturer.stopCapture()
-        // FIXME: stopping capture is not the same as disposing...
-        videoCapturer.dispose()
+    override fun onCameraSwitchError(errorDescription: String?) {
+        // FIXEME do nothing for now
     }
 }
 
