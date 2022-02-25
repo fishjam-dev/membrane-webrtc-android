@@ -1,15 +1,13 @@
 package org.membraneframework.rtc
 
 import android.content.Context
+import android.content.Intent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import org.membraneframework.rtc.events.*
-import org.membraneframework.rtc.media.LocalAudioTrack
-import org.membraneframework.rtc.media.LocalVideoTrack
-import org.membraneframework.rtc.media.RemoteAudioTrack
-import org.membraneframework.rtc.media.RemoteVideoTrack
+import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.transport.EventTransport
@@ -22,6 +20,8 @@ import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import timber.log.Timber
 import java.util.*
 import org.membraneframework.rtc.utils.*
+import org.webrtc.AudioTrack
+import org.webrtc.VideoTrack
 
 internal class InternalMembraneRTC
 @AssistedInject
@@ -57,6 +57,8 @@ constructor(
     var localAudioTrack: LocalAudioTrack? = null
         private set
 
+    var localScreencastTrack: LocalScreencastTrack? = null
+    private var localScreencastSender: RtpSender? = null
 
     private var iceServers: List<IceServer>? = null
     private var config: RTCConfiguration? = null
@@ -85,8 +87,9 @@ constructor(
                 listener.onConnected()
 
             } catch (e: Exception) {
-                // TODO: add better exception handling
                 Timber.i(e, "Failed to connect")
+
+                listener.onError(MembraneRTCError.Transport("Failed to connect"))
             }
         }
     }
@@ -110,8 +113,7 @@ constructor(
         this.localVideoTrack = LocalVideoTrack.create(
             context,
             peerConnectionFactory,
-            eglBase,
-            LocalVideoTrack.Type.CAMERA
+            eglBase
         )
         this.localAudioTrack = LocalAudioTrack.create(context, peerConnectionFactory)
 
@@ -130,6 +132,64 @@ constructor(
         )
 
         Timber.d("Tracks metadata ${localPeer.trackIdToMetadata}")
+    }
+
+
+    fun startScreencast(mediaProjectionPermission: Intent, onEnd: () -> Unit) {
+        val pc = peerConnection ?: return
+
+        val track = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission) {
+            onEnd()
+
+            stopScreencast()
+        }
+
+        coroutineScope.launch {
+            track.startForegroundService(null, null)
+            track.start()
+        }
+
+        this.localScreencastTrack = track
+
+        this.localScreencastSender = pc.addTrack(track.rtcTrack(), listOf(UUID.randomUUID().toString()))
+
+        pc.transceivers.forEach {
+            if (it.direction == RtpTransceiverDirection.SEND_RECV) {
+                it.direction = RtpTransceiverDirection.SEND_ONLY
+            }
+        }
+
+        coroutineScope.launch {
+            transport.send(RenegotiateTracks())
+        }
+
+        val trackIdToMetadata = localPeer.trackIdToMetadata.toMutableMap()
+        trackIdToMetadata[track.id()] = mapOf(
+            "type" to "screensharing",
+            "user_id" to (localPeer.metadata["displayName"] ?: "")
+        )
+
+        this.localPeer = localPeer.copy(
+            trackIdToMetadata = trackIdToMetadata
+        )
+    }
+
+    fun stopScreencast() {
+        val pc = peerConnection ?: return
+        val track = localScreencastTrack ?: return
+        val sender = localScreencastSender ?: return
+
+        val trackId = track.id()
+        track.stop()
+        pc.removeTrack(sender)
+
+        val trackIdToMetadata = localPeer.trackIdToMetadata.toMutableMap()
+        trackIdToMetadata.remove(trackId)
+        this.localPeer = localPeer.copy(trackIdToMetadata = trackIdToMetadata)
+
+        coroutineScope.launch {
+            transport.send(RenegotiateTracks())
+        }
     }
 
     private fun defaultStunServer(): IceServer {
@@ -295,11 +355,11 @@ constructor(
     }
 
     override fun onError(error: EventTransportError) {
-        print("MembraneRTC transport error...")
+        listener.onError(MembraneRTCError.Transport(error.message ?: "unknown transport message"))
     }
 
     override fun onClose() {
-        print("MembraneRTC closed...")
+        listener.onError(MembraneRTCError.Transport("transport has been closed"))
     }
 
     private suspend fun onOfferData(offerData: OfferData) {
@@ -561,4 +621,5 @@ constructor(
     override fun onRenegotiationNeeded() {
         Timber.d("Renegotiation needed")
     }
+
 }

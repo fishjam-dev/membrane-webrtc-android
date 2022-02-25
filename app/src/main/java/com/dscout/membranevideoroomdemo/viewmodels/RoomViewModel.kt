@@ -1,6 +1,7 @@
 package com.dscout.membranevideoroomdemo.viewmodels
 
 import android.app.Application
+import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -40,6 +41,9 @@ public class RoomViewModel(
     val isMicrophoneOn = MutableStateFlow<Boolean>(false)
     val isCameraOn = MutableStateFlow<Boolean>(false)
     val isScreenCastOn = MutableStateFlow<Boolean>(false)
+    val errorMessage = MutableStateFlow<String?>(null)
+
+    private var localScreencastId: String? = null
 
     private val globalToLocalTrackId = HashMap<String, String>()
 
@@ -117,9 +121,6 @@ public class RoomViewModel(
 
     fun flipCamera() {
         mutableRoom.value?.localVideoTrack()?.flipCamera()
-    }
-
-    fun toggleScreenCast() {
     }
 
     // MembraneRTCListener callbacks
@@ -236,6 +237,32 @@ public class RoomViewModel(
 
     override fun onError(error: MembraneRTCError) {
         Timber.e("Encountered an error $error")
+        errorMessage.value = "Encountered an error, go back and try again..."
     }
 
+    fun startScreencast(mediaProjectionPermission: Intent) {
+        isScreenCastOn.value = true
+
+        localScreencastId = UUID.randomUUID().toString()
+
+        mutableRoom.value?.startScreencast(mediaProjectionPermission, onEnd = {
+            stopScreencast()
+        })
+
+        mutableRoom.value?.localScreencastTrack()?.let {
+            mutableParticipants[localScreencastId!!] = Participant(id = localScreencastId!!, displayName = "Me (screen cast)", videoTrack = it)
+            emitParticipants()
+        }
+    }
+
+    fun stopScreencast() {
+        isScreenCastOn.value = false
+        mutableRoom.value?.stopScreencast()
+
+        localScreencastId?.let {
+            mutableParticipants.remove(it)
+
+            emitParticipants()
+        }
+    }
 }

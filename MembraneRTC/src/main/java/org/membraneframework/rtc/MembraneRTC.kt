@@ -1,9 +1,11 @@
 package org.membraneframework.rtc
 
 import android.content.Context
+import android.content.Intent
 import kotlinx.coroutines.Dispatchers
 import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
 import org.membraneframework.rtc.media.LocalAudioTrack
+import org.membraneframework.rtc.media.LocalScreencastTrack
 import org.membraneframework.rtc.media.LocalVideoTrack
 
 public class MembraneRTC
@@ -26,6 +28,18 @@ private constructor(
 
     public fun localAudioTrack(): LocalAudioTrack? {
         return client.localAudioTrack
+    }
+
+    public fun localScreencastTrack(): LocalScreencastTrack? {
+        return client.localScreencastTrack
+    }
+
+    fun startScreencast(mediaProjectionPermission: Intent, onEnd: () -> Unit) {
+        client.startScreencast(mediaProjectionPermission, onEnd)
+    }
+
+    fun stopScreencast() {
+        client.stopScreencast()
     }
 
     companion object {
