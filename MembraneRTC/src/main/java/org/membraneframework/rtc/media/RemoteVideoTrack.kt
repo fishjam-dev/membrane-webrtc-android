@@ -1,7 +1,6 @@
 package org.membraneframework.rtc.media
 
 import org.webrtc.EglBase
-import org.webrtc.PeerConnectionFactory
 
 public class RemoteVideoTrack(
     mediaTrack: org.webrtc.VideoTrack,

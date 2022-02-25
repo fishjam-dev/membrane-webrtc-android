@@ -9,7 +9,6 @@ import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.Payload
 import timber.log.Timber
 
-
 val gson = Gson()
 
 //convert a data class to a map
@@ -66,10 +65,9 @@ data class LocalCandidate(val type: String, val data: Payload): SendableEvent() 
 data class RenegotiateTracks(val type: String, val data: Payload): SendableEvent() {
     constructor():
             this("custom", mapOf(
-                "data" to mapOf(
                     "type" to "renegotiateTracks"
                 )
-            ))
+            )
 }
 
 public enum class ReceivableEventType() {

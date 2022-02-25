@@ -1,15 +1,17 @@
 package com.dscout.membranevideoroomdemo
 
+import android.app.Activity
+import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -20,6 +22,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,12 +34,19 @@ import com.dscout.membranevideoroomdemo.styles.darker
 import com.dscout.membranevideoroomdemo.viewmodels.RoomViewModel
 import com.dscout.membranevideoroomdemo.viewmodels.viewModelByFactory
 import kotlinx.android.parcel.Parcelize
-import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
 
 class RoomActivity : AppCompatActivity() {
     private val viewModel: RoomViewModel by viewModelByFactory {
         RoomViewModel(URL, application)
+    }
+
+    private val screencastLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+      if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+
+       result.data?.let {
+           viewModel.startScreencast(it)
+       }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,14 +63,23 @@ class RoomActivity : AppCompatActivity() {
         viewModel.connect(room, displayName)
 
         setContent {
-            Content(viewModel, onEnd = { finish() })
+            Content(
+                viewModel = viewModel,
+                startScreencast = {
+                    val mediaProjectionManager =
+                        getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                    screencastLauncher.launch(mediaProjectionManager.createScreenCaptureIntent())
+                },
+                onEnd = { finish() }
+            )
         }
     }
 
     @Composable
-    fun Content(viewModel: RoomViewModel, onEnd: () -> Unit) {
+    fun Content(viewModel: RoomViewModel, startScreencast: () -> Unit, onEnd: () -> Unit) {
         val participants = viewModel.participants.collectAsState()
         val primaryParticipant = viewModel.primaryParticipant.collectAsState()
+        val errorMessage = viewModel.errorMessage.collectAsState()
         val scrollState = rememberScrollState()
 
         Scaffold(
@@ -75,6 +94,10 @@ class RoomActivity : AppCompatActivity() {
                         .fillMaxWidth()
                         .fillMaxHeight()
                 ) {
+                    errorMessage.value?.let {
+                        Text(it, color = Color.Red, fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, textAlign = TextAlign.Center)
+                    }
+
                     primaryParticipant.value?.let {
                         ParticipantCard(
                             participant = it,
@@ -102,8 +125,9 @@ class RoomActivity : AppCompatActivity() {
                         }
                     }
                 }
+
                 Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-                    ControlIcons(roomViewModel = viewModel, onEnd = onEnd)
+                    ControlIcons(roomViewModel = viewModel, startScreencast = startScreencast, onEnd = onEnd)
                 }
             }
         }
@@ -167,6 +191,7 @@ fun ParticipantCard(
 @Composable
 fun ControlIcons(
     roomViewModel: RoomViewModel,
+    startScreencast: () -> Unit,
     onEnd: () -> Unit
 ) {
     val iconModifier =
@@ -221,7 +246,13 @@ fun ControlIcons(
             )
         }
 
-        IconButton(onClick = { roomViewModel.toggleScreenCast() }) {
+        IconButton(onClick = {
+            if (isScreenCastOn.value) {
+                roomViewModel.stopScreencast()
+            } else {
+                startScreencast()
+            }
+        }) {
             Icon(
                 painter = painterResource(if (!isScreenCastOn.value)  R.drawable.ic_screen_on else R.drawable.ic_screen_off),
                 contentDescription = "screen cast control",

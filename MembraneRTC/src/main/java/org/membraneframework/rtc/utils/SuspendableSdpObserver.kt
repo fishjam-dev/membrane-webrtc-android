@@ -1,6 +1,5 @@
 package org.membraneframework.rtc.utils
 
-import android.se.omapi.Session
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.SdpObserver
@@ -8,7 +7,6 @@ import org.webrtc.SessionDescription
 import java.lang.IllegalStateException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class SdpException(reason: String): Exception(reason) { }

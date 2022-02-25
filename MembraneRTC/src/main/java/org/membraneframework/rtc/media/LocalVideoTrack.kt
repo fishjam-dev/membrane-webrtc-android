@@ -1,9 +1,6 @@
 package org.membraneframework.rtc.media
 
 import android.content.Context
-import android.provider.MediaStore
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import org.webrtc.*
 import java.util.*
 
@@ -14,37 +11,20 @@ constructor(
     private val eglBase: EglBase,
     private val peerConnectionFactory: PeerConnectionFactory
 ): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack{
-    enum class Type {
-        CAMERA,
-        SCREENCAST
-    }
-
     companion object {
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, type: Type): LocalVideoTrack {
-            val source = factory.createVideoSource(type == Type.SCREENCAST)
+        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase): LocalVideoTrack {
+            val source = factory.createVideoSource(false)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
-            val capturer = capturerFor(type, context, eglBase, source)
+            val preset = VideoParameters.presetQHD169
+            val capturer = CameraCapturer(
+                context = context,
+                source = source,
+                rootEglBase = eglBase,
+                videoParameters = preset.copy(dimensions = preset.dimensions.flip())
+            )
 
             return LocalVideoTrack(track, capturer, eglBase, factory)
-        }
-
-        private fun capturerFor(type: Type, context: Context, eglBase: EglBase, source: VideoSource): Capturer {
-            val preset = VideoParameters.presetQHD169
-
-            return when (type) {
-                Type.CAMERA ->
-                    // we target vertical dimensions so flip it
-                    CameraCapturer(
-                        context = context,
-                        source = source,
-                        rootEglBase = eglBase,
-                        videoParameters = preset.copy(dimensions = preset.dimensions.flip())
-                    )
-
-                Type.SCREENCAST ->
-                    ScreenCapturer()
-            }
         }
     }
 
@@ -147,19 +127,5 @@ class CameraCapturer constructor(
 
     override fun onCameraSwitchError(errorDescription: String?) {
         // FIXEME do nothing for now
-    }
-}
-
-class ScreenCapturer constructor(): Capturer {
-    override fun capturer(): VideoCapturer {
-        TODO("Not yet implemented")
-    }
-
-    override fun startCapture() {
-        TODO("Not yet implemented")
-    }
-
-    override fun stopCapture() {
-        TODO("Not yet implemented")
     }
 }

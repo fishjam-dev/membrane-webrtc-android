@@ -6,9 +6,3 @@ interface LocalTrack {
     fun enabled(): Boolean
     fun setEnabled(enabled: Boolean)
 }
-
-public enum class LocalTrackType {
-    AUDIO,
-    VIDEO,
-    SCREENCAST
-}
