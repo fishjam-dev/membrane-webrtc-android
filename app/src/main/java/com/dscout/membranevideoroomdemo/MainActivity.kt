@@ -4,7 +4,6 @@ package com.dscout.membranevideoroomdemo
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.*
@@ -31,14 +30,9 @@ import com.dscout.membranevideoroomdemo.styles.AppButtonColors
 import com.dscout.membranevideoroomdemo.styles.AppTextFieldColors
 import com.dscout.membranevideoroomdemo.styles.Blue
 import com.dscout.membranevideoroomdemo.styles.darker
-import com.dscout.membranevideoroomdemo.viewmodels.RoomViewModel
 
-import com.dscout.membranevideoroomdemo.viewmodels.viewModelByFactory
-import kotlinx.android.parcel.Parcelize
-import timber.log.Timber
-
-
-val URL = "http://192.168.83.236:4000/socket"
+//val URL = "http://192.168.83.236:4000/socket"
+val URL = "https://dscout-us.membrane.work/socket"
 // val URL = "https://dscout.membrane.work/socket"
 // val URL = "http://192.168.1.71:4000/socket"
 
