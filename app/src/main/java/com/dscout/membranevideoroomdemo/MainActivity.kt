@@ -2,7 +2,10 @@
 
 package com.dscout.membranevideoroomdemo
 
+import android.Manifest.permission.CAMERA
+import android.Manifest.permission.RECORD_AUDIO
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -19,17 +22,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusOrder
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dscout.membranevideoroomdemo.styles.AppButtonColors
 import com.dscout.membranevideoroomdemo.styles.AppTextFieldColors
 import com.dscout.membranevideoroomdemo.styles.Blue
 import com.dscout.membranevideoroomdemo.styles.darker
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import timber.log.Timber
 
 //val URL = "https://dscout-us.membrane.work/socket"
 val URL = "http://192.168.83.84:4000/socket"
@@ -119,23 +129,89 @@ class MainActivity : AppCompatActivity() {
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     )
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
-                    onClick = {
-                        focusManager.clearFocus()
-                        keyboardController?.hide()
+                ConnectWithPermissions {
+                    Button(
+                        onClick = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
 
-                        onConnect(roomName.value.text, displayName.value.text)
-                    },
-                    enabled =  !(roomName.value.text.isEmpty() || displayName.value.text.isEmpty()),
+                            onConnect(roomName.value.text, displayName.value.text)
+                        },
+                        enabled =  !(roomName.value.text.isEmpty() || displayName.value.text.isEmpty()),
+                        colors = AppButtonColors(),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .width(200.dp)
+                            .focusOrder(third)
+                    ) {
+                        Text("Join room")
+                    }
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    @Composable
+    fun ConnectWithPermissions(content: @Composable () -> Unit) {
+        val multiplePermissionsState = rememberMultiplePermissionsState(
+            listOf(
+                RECORD_AUDIO,
+                CAMERA
+            )
+        )
+
+        val alreadyRequested = remember { mutableStateOf(false) }
+
+        if (multiplePermissionsState.allPermissionsGranted) {
+                content()
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val textToShow = when {
+                    multiplePermissionsState.shouldShowRationale ->
+                        "Application requires an access to a microphone and camera for it to work"
+
+                    !multiplePermissionsState.shouldShowRationale && alreadyRequested.value ->
+                        "You need to explicitly grant the access to the camera and microphone in system settings..."
+
+                    else ->
+                        null
+                }
+
+                Button(
                     colors = AppButtonColors(),
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .width(200.dp)
-                        .focusOrder(third)
+                    onClick = {
+                        if (!multiplePermissionsState.shouldShowRationale && alreadyRequested.value) {
+                            val intent =  Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            intent.addCategory(Intent.CATEGORY_DEFAULT)
+                            intent.data = Uri.parse("package:$packageName")
+
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+
+                            startActivity(intent)
+                        } else {
+                            multiplePermissionsState.launchMultiplePermissionRequest()
+                        }
+
+                        alreadyRequested.value = true
+                    }
                 ) {
-                    Text("Connect")
+                    Text("Request permissions")
+                }
+
+                textToShow?.let {
+                    Text(it, color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 }
             }
         }
