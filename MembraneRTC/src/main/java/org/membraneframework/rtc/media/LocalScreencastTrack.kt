@@ -68,12 +68,11 @@ constructor(
     }
 
     companion object {
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, mediaProjectionPermission: Intent, onStopped: () -> Unit): LocalScreencastTrack {
+        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, mediaProjectionPermission: Intent, onStopped: (track: LocalScreencastTrack) -> Unit): LocalScreencastTrack {
             val source = factory.createVideoSource(true)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
             val callback = ProjectionCallback()
-            callback.addCallback(onStopped)
 
 
             val capturer = ScreenCapturerAndroid(mediaProjectionPermission, callback)
@@ -84,7 +83,12 @@ constructor(
                 source.capturerObserver
             )
 
-            return LocalScreencastTrack(track, context, eglBase, capturer, callback)
+            val localScreencastTrack = LocalScreencastTrack(track, context, eglBase, capturer, callback)
+            callback.addCallback {
+                onStopped(localScreencastTrack)
+            }
+
+            return localScreencastTrack
         }
     }
 }

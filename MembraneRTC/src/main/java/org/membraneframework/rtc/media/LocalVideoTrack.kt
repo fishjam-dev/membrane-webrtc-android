@@ -10,7 +10,7 @@ constructor(
     private val capturer: Capturer,
     private val eglBase: EglBase,
     private val peerConnectionFactory: PeerConnectionFactory
-): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack{
+): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
     companion object {
         fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase): LocalVideoTrack {
             val source = factory.createVideoSource(false)

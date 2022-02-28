@@ -20,6 +20,7 @@ import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import timber.log.Timber
 import java.util.*
 import org.membraneframework.rtc.utils.*
+import org.membraneframework.rtc.utils.Metadata
 import org.webrtc.AudioTrack
 import org.webrtc.VideoTrack
 
@@ -50,15 +51,7 @@ constructor(
     // mapping from transceiver's mid to its remote track id
     private var midToTrackId: Map<String, String> = HashMap<String, String>()
 
-    // local media tracks
-    var localVideoTrack: LocalVideoTrack? = null
-        private set
-
-    var localAudioTrack: LocalAudioTrack? = null
-        private set
-
-    var localScreencastTrack: LocalScreencastTrack? = null
-    private var localScreencastSender: RtpSender? = null
+    private val localTracks = mutableListOf<LocalTrack>()
 
     private var iceServers: List<IceServer>? = null
     private var config: RTCConfiguration? = null
@@ -82,10 +75,7 @@ constructor(
             try {
                 transport.connect(this@InternalMembraneRTC)
 
-                setupMediaTracks()
-
                 listener.onConnected()
-
             } catch (e: Exception) {
                 Timber.i(e, "Failed to connect")
 
@@ -97,99 +87,95 @@ constructor(
     fun disconnect() {
         coroutineScope.launch {
             transport.disconnect()
-            localVideoTrack?.stop()
-            localAudioTrack?.stop()
+            localTracks.forEach { it.stop() }
             peerConnection?.close()
         }
     }
 
     fun join() {
+
         coroutineScope.launch {
             transport.send(Join(localPeer.metadata))
         }
     }
 
-    private fun setupMediaTracks() {
-        this.localVideoTrack = LocalVideoTrack.create(
+    public fun createLocalVideoTrack(metadata: Metadata = mapOf()): LocalVideoTrack {
+        val videoTrack = LocalVideoTrack.create(
             context,
             peerConnectionFactory,
-            eglBase
-        )
-        this.localAudioTrack = LocalAudioTrack.create(context, peerConnectionFactory)
+            eglBase).also {
+            it.start()
+        }
 
-        this.localVideoTrack?.start()
-        this.localAudioTrack?.start()
+        localTracks.add(videoTrack)
+        localPeer = localPeer.withTrack(videoTrack.id(), metadata)
 
-        val displayName = localPeer.metadata["displayName"] ?: ""
-
-        val trackMetadata = mapOf("user_id" to displayName)
-
-        this.localPeer = localPeer.copy(
-            trackIdToMetadata = mapOf(
-                localVideoTrack!!.rtcTrack().id() to trackMetadata,
-                localAudioTrack!!.rtcTrack().id() to trackMetadata
-            )
-        )
-
-        Timber.d("Tracks metadata ${localPeer.trackIdToMetadata}")
+        return videoTrack
     }
 
+    public fun createLocalAudioTrack(metadata: Metadata = mapOf()): LocalAudioTrack {
+        val audioTrack = LocalAudioTrack.create(context, peerConnectionFactory).also {
+            it.start()
+        }
 
-    fun startScreencast(mediaProjectionPermission: Intent, onEnd: () -> Unit) {
-        val pc = peerConnection ?: return
+        localTracks.add(audioTrack)
+        localPeer = localPeer.withTrack(audioTrack.id(), metadata)
 
-        val track = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission) {
+        return audioTrack
+    }
+
+    public fun createScreencastTrack(mediaProjectionPermission: Intent, metadata: Metadata = mapOf(), onEnd: () -> Unit): LocalScreencastTrack? {
+        val pc = peerConnection ?: return null
+
+        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission) {
             onEnd()
 
-            stopScreencast()
+            removeTrack(it.id())
         }
 
-        coroutineScope.launch {
-            track.startForegroundService(null, null)
-            track.start()
-        }
-
-        this.localScreencastTrack = track
-
-        this.localScreencastSender = pc.addTrack(track.rtcTrack(), listOf(UUID.randomUUID().toString()))
-
-        pc.transceivers.forEach {
-            if (it.direction == RtpTransceiverDirection.SEND_RECV) {
-                it.direction = RtpTransceiverDirection.SEND_ONLY
-            }
-        }
-
-        coroutineScope.launch {
-            transport.send(RenegotiateTracks())
-        }
-
-        val trackIdToMetadata = localPeer.trackIdToMetadata.toMutableMap()
-        trackIdToMetadata[track.id()] = mapOf(
+        localTracks.add(screencastTrack)
+        localPeer = localPeer.withTrack(screencastTrack.id(), mapOf(
             "type" to "screensharing",
             "user_id" to (localPeer.metadata["displayName"] ?: "")
-        )
+        ))
 
-        this.localPeer = localPeer.copy(
-            trackIdToMetadata = trackIdToMetadata
-        )
-    }
+        coroutineScope.launch {
+            screencastTrack.startForegroundService(null, null)
+            screencastTrack.start()
+        }
 
-    fun stopScreencast() {
-        val pc = peerConnection ?: return
-        val track = localScreencastTrack ?: return
-        val sender = localScreencastSender ?: return
+        pc.addTrack(screencastTrack.rtcTrack(), listOf(UUID.randomUUID().toString()))
 
-        val trackId = track.id()
-        track.stop()
-        pc.removeTrack(sender)
-
-        val trackIdToMetadata = localPeer.trackIdToMetadata.toMutableMap()
-        trackIdToMetadata.remove(trackId)
-        this.localPeer = localPeer.copy(trackIdToMetadata = trackIdToMetadata)
+        pc.enforceSendOnlyDirection()
 
         coroutineScope.launch {
             transport.send(RenegotiateTracks())
         }
+
+        return screencastTrack
+    }
+
+    public fun removeTrack(trackId: String): Boolean {
+        val pc = peerConnection ?: return false
+        val track = localTracks.find { it.id() == trackId } ?: run {
+            return@removeTrack false
+        }
+
+        // remove a sender that is associated with given track
+        val rtcTrack = track.rtcTrack()
+        pc.transceivers.find { it.sender.track() == rtcTrack }?.sender?.let {
+            pc.removeTrack(it)
+        }
+
+        localTracks.remove(track)
+        localPeer = localPeer.withoutTrack(trackId)
+        track.stop()
+
+        coroutineScope.launch {
+            transport.send(RenegotiateTracks())
+        }
+
+        return true
     }
 
     private fun defaultStunServer(): IceServer {
@@ -215,20 +201,11 @@ constructor(
 
         val streamIds = listOf(UUID.randomUUID().toString())
 
-        localVideoTrack?.let {
+        localTracks.forEach {
             pc.addTrack(it.rtcTrack(), streamIds)
         }
 
-        localAudioTrack?.let {
-            pc.addTrack(it.rtcTrack(), streamIds)
-        }
-
-        // servers only accepts SEND_ONLY therefore switch all SEND_RECV directions
-        pc.transceivers.forEach {
-            if (it.direction == RtpTransceiverDirection.SEND_RECV) {
-                it.direction = RtpTransceiverDirection.SEND_ONLY
-            }
-        }
+        pc.enforceSendOnlyDirection()
 
         this.peerConnection = pc
     }
@@ -621,5 +598,16 @@ constructor(
     override fun onRenegotiationNeeded() {
         Timber.d("Renegotiation needed")
     }
+}
 
+
+/**
+ * Enforces `SEND_ONLY` direction in case of `SEND_RECV` transceivers.
+ */
+fun PeerConnection.enforceSendOnlyDirection() {
+    this.transceivers.forEach {
+        if (it.direction == RtpTransceiverDirection.SEND_RECV) {
+            it.direction = RtpTransceiverDirection.SEND_ONLY
+        }
+    }
 }

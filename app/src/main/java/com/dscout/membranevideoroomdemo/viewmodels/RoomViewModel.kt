@@ -2,7 +2,6 @@ package com.dscout.membranevideoroomdemo.viewmodels
 
 import android.app.Application
 import android.content.Intent
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dscout.membranevideoroomdemo.models.Participant
@@ -13,10 +12,7 @@ import org.membraneframework.rtc.ConnectOptions
 import org.membraneframework.rtc.MembraneRTC
 import org.membraneframework.rtc.MembraneRTCError
 import org.membraneframework.rtc.MembraneRTCListener
-import org.membraneframework.rtc.media.AudioTrack
-import org.membraneframework.rtc.media.RemoteAudioTrack
-import org.membraneframework.rtc.media.RemoteVideoTrack
-import org.membraneframework.rtc.media.VideoTrack
+import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.transport.PhoenixTransport
@@ -29,18 +25,23 @@ public class RoomViewModel(
     val url: String,
     application: Application,
 ) : AndroidViewModel(application), MembraneRTCListener {
-    // NOTE: why do we differentiate that?
-    private var mutableRoom = MutableStateFlow<MembraneRTC?>(null)
-    val room: MutableStateFlow<MembraneRTC?> = mutableRoom
+    // media tracks
+    var localAudioTrack: LocalAudioTrack? = null
+    var localVideoTrack: LocalVideoTrack? = null
+    var localScreencastTrack: LocalScreencastTrack? = null
+
+    var localDisplayName: String? = null
+
+    private var room = MutableStateFlow<MembraneRTC?>(null)
 
     private val mutableParticipants = HashMap<String, Participant>()
 
     val primaryParticipant = MutableStateFlow<Participant?>(null)
     val participants = MutableStateFlow<List<Participant>>(emptyList())
 
-    val isMicrophoneOn = MutableStateFlow<Boolean>(false)
-    val isCameraOn = MutableStateFlow<Boolean>(false)
-    val isScreenCastOn = MutableStateFlow<Boolean>(false)
+    val isMicrophoneOn = MutableStateFlow(false)
+    val isCameraOn = MutableStateFlow(false)
+    val isScreenCastOn = MutableStateFlow(false)
     val errorMessage = MutableStateFlow<String?>(null)
 
     private var localScreencastId: String? = null
@@ -49,13 +50,13 @@ public class RoomViewModel(
 
     fun connect(roomName: String, displayName: String) {
         viewModelScope.launch {
+            localDisplayName = displayName
             // disconnect from the current view
-            mutableRoom.value?.disconnect()
+            room.value?.disconnect()
 
-            mutableRoom.value = MembraneRTC.connect(
+            room.value = MembraneRTC.connect(
                 appContext = getApplication(),
                 options = ConnectOptions(
-                    // TODO: DI for dispatcher and room name as an argument
                     transport = PhoenixTransport(url, "room:$roomName", Dispatchers.IO),
                     config = mapOf("displayName" to displayName)
                 ),
@@ -65,9 +66,9 @@ public class RoomViewModel(
     }
 
     fun disconnect() {
-        mutableRoom.value?.disconnect()
+        room.value?.disconnect()
 
-        mutableRoom.value = null
+        room.value = null
     }
 
     fun focusVideo(participantId: String) {
@@ -104,7 +105,7 @@ public class RoomViewModel(
 
     // controls
     fun toggleMicrophone() {
-        mutableRoom.value?.localAudioTrack()?.let {
+        localAudioTrack?.let {
             val enabled = !it.enabled()
             it.setEnabled(enabled)
             isMicrophoneOn.value = enabled
@@ -112,7 +113,7 @@ public class RoomViewModel(
     }
 
     fun toggleCamera() {
-        mutableRoom.value?.localVideoTrack()?.let {
+        localVideoTrack?.let {
             val enabled = !it.enabled()
             it.setEnabled(enabled)
             isCameraOn.value = enabled
@@ -120,20 +121,26 @@ public class RoomViewModel(
     }
 
     fun flipCamera() {
-        mutableRoom.value?.localVideoTrack()?.flipCamera()
+        localVideoTrack?.flipCamera()
     }
 
     // MembraneRTCListener callbacks
     override fun onConnected() {
-        mutableRoom.value?.let {
+        room.value?.let {
+            localAudioTrack = it.createAudioTrack(mapOf(
+                "user_id" to (localDisplayName ?: "")
+            ))
+
+            localVideoTrack = it.createVideoTrack(mapOf(
+                "user_id" to (localDisplayName ?: "")
+            ))
+
             it.join()
-            val localPeerId = UUID.randomUUID().toString()
-            val localVideoTrack = it.localVideoTrack()
-            val localAudioTrack = it.localAudioTrack()
 
             isCameraOn.value = localVideoTrack?.enabled() ?: false
             isMicrophoneOn.value = localAudioTrack?.enabled() ?: false
 
+            val localPeerId = UUID.randomUUID().toString()
             mutableParticipants[localPeerId] = Participant(localPeerId, "Me", localVideoTrack, localAudioTrack)
 
             emitParticipants()
@@ -253,15 +260,20 @@ public class RoomViewModel(
     }
 
     fun startScreencast(mediaProjectionPermission: Intent) {
+        if (localScreencastTrack != null) return
+
         isScreenCastOn.value = true
 
         localScreencastId = UUID.randomUUID().toString()
 
-        mutableRoom.value?.startScreencast(mediaProjectionPermission, onEnd = {
+        localScreencastTrack = room.value?.createScreencastTrack(mediaProjectionPermission, mapOf(
+            "type" to "screensharing",
+            "user_id" to (localDisplayName ?: ""),
+        )) {
             stopScreencast()
-        })
+        }
 
-        mutableRoom.value?.localScreencastTrack()?.let {
+        localScreencastTrack?.let {
             mutableParticipants[localScreencastId!!] = Participant(id = localScreencastId!!, displayName = "Me (screen cast)", videoTrack = it)
             emitParticipants()
         }
@@ -269,12 +281,17 @@ public class RoomViewModel(
 
     fun stopScreencast() {
         isScreenCastOn.value = false
-        mutableRoom.value?.stopScreencast()
 
-        localScreencastId?.let {
-            mutableParticipants.remove(it)
+        localScreencastTrack?.let {
+            room.value?.removeTrack(it.id())
 
-            emitParticipants()
+            localScreencastId?.let {
+                mutableParticipants.remove(it)
+
+                emitParticipants()
+            }
+
+            localScreencastTrack = null
         }
     }
 }
