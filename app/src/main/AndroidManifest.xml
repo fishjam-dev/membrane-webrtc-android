@@ -19,7 +19,8 @@
             android:name=".RoomActivity"
             android:exported="false"
             android:label="@string/title_activity_room"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

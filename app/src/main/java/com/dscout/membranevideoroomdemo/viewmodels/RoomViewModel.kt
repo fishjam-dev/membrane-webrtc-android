@@ -158,22 +158,26 @@ public class RoomViewModel(
         viewModelScope.launch {
             val participant = mutableParticipants[ctx.peer.id] ?: return@launch
 
-            val newParticipant = when (ctx.track) {
+            val (id, newParticipant) = when (ctx.track) {
                 is RemoteVideoTrack -> {
                     globalToLocalTrackId[ctx.trackId] = (ctx.track as RemoteVideoTrack).id()
 
-                    participant.copy(videoTrack = ctx.track as RemoteVideoTrack)
+                    if (ctx.metadata["type"] == "screensharing") {
+                        Pair(ctx.trackId, participant.copy(id = ctx.trackId, displayName = "${participant.displayName} (screencast)", videoTrack = ctx.track as RemoteVideoTrack))
+                    } else {
+                        Pair(ctx.peer.id, participant.copy(videoTrack = ctx.track as RemoteVideoTrack))
+                    }
                 }
                 is RemoteAudioTrack -> {
                     globalToLocalTrackId[ctx.trackId] = (ctx.track as RemoteAudioTrack).id()
 
-                     participant.copy(audioTrack = ctx.track as RemoteAudioTrack)
+                    Pair(ctx.peer.id, participant.copy(audioTrack = ctx.track as RemoteAudioTrack))
                 }
                 else ->
                     throw IllegalArgumentException("invalid type of incoming remote track")
             }
 
-            mutableParticipants[ctx.peer.id] = newParticipant
+            mutableParticipants[id] = newParticipant
 
             emitParticipants()
         }
@@ -187,28 +191,36 @@ public class RoomViewModel(
 
     override fun onTrackRemoved(ctx: TrackContext) {
         viewModelScope.launch {
-            val participant = mutableParticipants[ctx.peer.id] ?: return@launch
+            if (ctx.metadata["type"] == "screensharing") {
+                // screencast is a throw-away type of participant so remove it and emit participants once again
+                mutableParticipants.remove(ctx.trackId)
+                globalToLocalTrackId.remove(ctx.trackId)
 
-            val localTrackId = globalToLocalTrackId[ctx.trackId]
-            val audioTrackId = participant.audioTrack?.id()
-            val videoTrackId = participant.videoTrack?.id()
+                emitParticipants()
+            } else {
+                val participant = mutableParticipants[ctx.peer.id] ?: return@launch
 
-            val newParticipant = when {
-                localTrackId == videoTrackId ->
-                    participant.copy(videoTrack = null)
+                val localTrackId = globalToLocalTrackId[ctx.trackId]
+                val audioTrackId = participant.audioTrack?.id()
+                val videoTrackId = participant.videoTrack?.id()
 
-                localTrackId == audioTrackId ->
-                    participant.copy(audioTrack = null)
+                val newParticipant = when {
+                    localTrackId == videoTrackId ->
+                        participant.copy(videoTrack = null)
 
-                else ->
-                     throw IllegalArgumentException("track has not been found for given peer")
+                    localTrackId == audioTrackId ->
+                        participant.copy(audioTrack = null)
+
+                    else ->
+                        throw IllegalArgumentException("track has not been found for given peer")
+                }
+
+                globalToLocalTrackId.remove(ctx.trackId)
+
+                mutableParticipants[ctx.peer.id] = newParticipant
+
+                emitParticipants()
             }
-
-            globalToLocalTrackId.remove(ctx.trackId)
-
-            mutableParticipants[ctx.peer.id] = newParticipant
-
-            emitParticipants()
         }
 
         Timber.i("Track has been removed $ctx")

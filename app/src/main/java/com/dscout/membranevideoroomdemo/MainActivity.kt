@@ -31,11 +31,8 @@ import com.dscout.membranevideoroomdemo.styles.AppTextFieldColors
 import com.dscout.membranevideoroomdemo.styles.Blue
 import com.dscout.membranevideoroomdemo.styles.darker
 
-//val URL = "http://192.168.83.236:4000/socket"
-val URL = "https://dscout-us.membrane.work/socket"
-// val URL = "https://dscout.membrane.work/socket"
-// val URL = "http://192.168.1.71:4000/socket"
-
+//val URL = "https://dscout-us.membrane.work/socket"
+val URL = "http://192.168.83.84:4000/socket"
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
