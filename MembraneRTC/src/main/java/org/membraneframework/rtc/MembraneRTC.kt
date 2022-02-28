@@ -7,6 +7,7 @@ import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
 import org.membraneframework.rtc.media.LocalAudioTrack
 import org.membraneframework.rtc.media.LocalScreencastTrack
 import org.membraneframework.rtc.media.LocalVideoTrack
+import org.membraneframework.rtc.utils.Metadata
 
 public class MembraneRTC
 private constructor(
@@ -21,25 +22,20 @@ private constructor(
         client.disconnect()
     }
 
-    public fun localVideoTrack(): LocalVideoTrack? {
-        return client.localVideoTrack
-
+    public fun createVideoTrack(metadata: Metadata): LocalVideoTrack {
+        return client.createLocalVideoTrack(metadata)
     }
 
-    public fun localAudioTrack(): LocalAudioTrack? {
-        return client.localAudioTrack
+    public fun createAudioTrack(metadata: Metadata): LocalAudioTrack {
+        return client.createLocalAudioTrack(metadata)
     }
 
-    public fun localScreencastTrack(): LocalScreencastTrack? {
-        return client.localScreencastTrack
+    public fun createScreencastTrack(mediaProjectionPermission: Intent, metadata: Metadata, onEnd: () -> Unit): LocalScreencastTrack? {
+        return client.createScreencastTrack(mediaProjectionPermission, metadata, onEnd)
     }
 
-    fun startScreencast(mediaProjectionPermission: Intent, onEnd: () -> Unit) {
-        client.startScreencast(mediaProjectionPermission, onEnd)
-    }
-
-    fun stopScreencast() {
-        client.stopScreencast()
+    public fun removeTrack(trackId: String): Boolean {
+        return client.removeTrack(trackId)
     }
 
     companion object {
@@ -51,7 +47,6 @@ private constructor(
                 .factory()
                 .create(ctx)
 
-            // TODO: make the dispatchers to be intejcted by the dagger itself
             val client = component
                 .membraneRTCFactory()
                 .create(options, listener, Dispatchers.Default)

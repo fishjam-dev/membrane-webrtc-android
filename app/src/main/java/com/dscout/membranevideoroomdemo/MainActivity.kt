@@ -23,7 +23,6 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusOrder
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -39,7 +38,6 @@ import com.dscout.membranevideoroomdemo.styles.Blue
 import com.dscout.membranevideoroomdemo.styles.darker
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import timber.log.Timber
 
 //val URL = "https://dscout-us.membrane.work/socket"
 val URL = "http://192.168.83.84:4000/socket"
