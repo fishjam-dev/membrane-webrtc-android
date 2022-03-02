@@ -130,7 +130,10 @@ public class RoomViewModel(
                 "user_id" to (localDisplayName ?: "")
             ))
 
-            localVideoTrack = it.createVideoTrack(mapOf(
+            var videoParameters = VideoParameters.presetVGA169
+            videoParameters = videoParameters.copy(dimensions = videoParameters.dimensions.flip())
+
+            localVideoTrack = it.createVideoTrack(videoParameters, mapOf(
                 "user_id" to (localDisplayName ?: "")
             ))
 

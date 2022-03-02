@@ -99,11 +99,13 @@ constructor(
         }
     }
 
-    public fun createLocalVideoTrack(metadata: Metadata = mapOf()): LocalVideoTrack {
+    public fun createLocalVideoTrack(videoParameters: VideoParameters, metadata: Metadata = mapOf()): LocalVideoTrack {
         val videoTrack = LocalVideoTrack.create(
             context,
             peerConnectionFactory,
-            eglBase).also {
+            eglBase,
+            videoParameters
+        ).also {
             it.start()
         }
 

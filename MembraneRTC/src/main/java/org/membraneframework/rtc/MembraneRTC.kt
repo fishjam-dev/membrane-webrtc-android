@@ -23,8 +23,8 @@ private constructor(
         client.disconnect()
     }
 
-    public fun createVideoTrack(metadata: Metadata): LocalVideoTrack {
-        return client.createLocalVideoTrack(metadata)
+    public fun createVideoTrack(videoParameters: VideoParameters, metadata: Metadata): LocalVideoTrack {
+        return client.createLocalVideoTrack(videoParameters, metadata)
     }
 
     public fun createAudioTrack(metadata: Metadata): LocalAudioTrack {

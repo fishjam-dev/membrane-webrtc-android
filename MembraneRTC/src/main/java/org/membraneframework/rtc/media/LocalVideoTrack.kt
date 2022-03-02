@@ -8,23 +8,22 @@ class LocalVideoTrack
 constructor(
     mediaTrack: org.webrtc.VideoTrack,
     private val capturer: Capturer,
-    private val eglBase: EglBase,
-    private val peerConnectionFactory: PeerConnectionFactory
+    eglBase: EglBase
 ): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
     companion object {
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase): LocalVideoTrack {
+        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, videoParameters: VideoParameters): LocalVideoTrack {
             val source = factory.createVideoSource(false)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
-            val preset = VideoParameters.presetQHD169
+
             val capturer = CameraCapturer(
                 context = context,
                 source = source,
                 rootEglBase = eglBase,
-                videoParameters = preset.copy(dimensions = preset.dimensions.flip())
+                videoParameters = videoParameters
             )
 
-            return LocalVideoTrack(track, capturer, eglBase, factory)
+            return LocalVideoTrack(track, capturer, eglBase)
         }
     }
 
@@ -45,9 +44,7 @@ constructor(
     }
 
     fun flipCamera() {
-        (capturer as? CameraCapturer)?.let {
-            it.flipCamera()
-        }
+        (capturer as? CameraCapturer)?.flipCamera()
     }
 }
 
@@ -126,6 +123,6 @@ class CameraCapturer constructor(
     }
 
     override fun onCameraSwitchError(errorDescription: String?) {
-        // FIXEME do nothing for now
+        // FIXME do nothing for now
     }
 }
