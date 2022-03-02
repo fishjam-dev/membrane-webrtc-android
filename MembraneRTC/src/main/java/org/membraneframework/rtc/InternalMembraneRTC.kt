@@ -124,13 +124,13 @@ constructor(
         return audioTrack
     }
 
-    public fun createScreencastTrack(mediaProjectionPermission: Intent, metadata: Metadata = mapOf(), onEnd: () -> Unit): LocalScreencastTrack? {
+    public fun createScreencastTrack(mediaProjectionPermission: Intent, videoParameters: VideoParameters, metadata: Metadata = mapOf(), onEnd: () -> Unit): LocalScreencastTrack? {
         val pc = peerConnection ?: return null
 
-        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission) {
+        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission, videoParameters) { track ->
             onEnd()
 
-            removeTrack(it.id())
+            removeTrack(track.id())
         }
 
         localTracks.add(screencastTrack)
