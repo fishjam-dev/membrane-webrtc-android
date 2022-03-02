@@ -14,6 +14,7 @@ constructor(
     context: Context,
     eglBase: EglBase,
     private val capturer: ScreenCapturerAndroid,
+    private val videoParameters: VideoParameters,
     callback: ProjectionCallback
 ): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack{
     private val screencastConnection = ScreencastServiceConnector(context)
@@ -28,10 +29,7 @@ constructor(
     }
 
     override fun start() {
-        val preset = VideoParameters.presetScreenShareHD15
-        val dimensions = preset.dimensions.flip()
-
-        capturer.startCapture(dimensions.width, dimensions.height, preset.encoding.maxFps)
+        capturer.startCapture(videoParameters.dimensions.width, videoParameters.dimensions.height, videoParameters.encoding.maxFps)
     }
 
     override fun stop() {
@@ -68,7 +66,7 @@ constructor(
     }
 
     companion object {
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, mediaProjectionPermission: Intent, onStopped: (track: LocalScreencastTrack) -> Unit): LocalScreencastTrack {
+        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, mediaProjectionPermission: Intent, videoParameters: VideoParameters, onStopped: (track: LocalScreencastTrack) -> Unit): LocalScreencastTrack {
             val source = factory.createVideoSource(true)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
@@ -83,7 +81,7 @@ constructor(
                 source.capturerObserver
             )
 
-            val localScreencastTrack = LocalScreencastTrack(track, context, eglBase, capturer, callback)
+            val localScreencastTrack = LocalScreencastTrack(track, context, eglBase, capturer, videoParameters, callback)
             callback.addCallback {
                 onStopped(localScreencastTrack)
             }

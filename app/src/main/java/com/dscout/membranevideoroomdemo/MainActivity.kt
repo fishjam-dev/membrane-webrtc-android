@@ -40,7 +40,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 const val URL = "https://dscout-us.membrane.work/socket"
-//val URL = "http://192.168.83.84:4000/socket"
+//val URL = "http://192.168.83.56:4000/socket"
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -17,9 +17,8 @@ import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.transport.PhoenixTransport
 import timber.log.Timber
-import java.lang.IllegalArgumentException
 import java.util.*
-import kotlin.collections.HashMap
+
 
 public class RoomViewModel(
     val url: String,
@@ -131,7 +130,10 @@ public class RoomViewModel(
                 "user_id" to (localDisplayName ?: "")
             ))
 
-            localVideoTrack = it.createVideoTrack(mapOf(
+            var videoParameters = VideoParameters.presetVGA169
+            videoParameters = videoParameters.copy(dimensions = videoParameters.dimensions.flip())
+
+            localVideoTrack = it.createVideoTrack(videoParameters, mapOf(
                 "user_id" to (localDisplayName ?: "")
             ))
 
@@ -266,7 +268,11 @@ public class RoomViewModel(
 
         localScreencastId = UUID.randomUUID().toString()
 
-        localScreencastTrack = room.value?.createScreencastTrack(mediaProjectionPermission, mapOf(
+        var videoParameters = VideoParameters.presetScreenShareHD15
+        val dimensions = videoParameters.dimensions.flip()
+        videoParameters = videoParameters.copy(dimensions = dimensions)
+
+        localScreencastTrack = room.value?.createScreencastTrack(mediaProjectionPermission, videoParameters, mapOf(
             "type" to "screensharing",
             "user_id" to (localDisplayName ?: ""),
         )) {

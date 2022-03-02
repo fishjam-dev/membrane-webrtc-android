@@ -7,6 +7,7 @@ import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
 import org.membraneframework.rtc.media.LocalAudioTrack
 import org.membraneframework.rtc.media.LocalScreencastTrack
 import org.membraneframework.rtc.media.LocalVideoTrack
+import org.membraneframework.rtc.media.VideoParameters
 import org.membraneframework.rtc.utils.Metadata
 
 public class MembraneRTC
@@ -22,16 +23,16 @@ private constructor(
         client.disconnect()
     }
 
-    public fun createVideoTrack(metadata: Metadata): LocalVideoTrack {
-        return client.createLocalVideoTrack(metadata)
+    public fun createVideoTrack(videoParameters: VideoParameters, metadata: Metadata): LocalVideoTrack {
+        return client.createLocalVideoTrack(videoParameters, metadata)
     }
 
     public fun createAudioTrack(metadata: Metadata): LocalAudioTrack {
         return client.createLocalAudioTrack(metadata)
     }
 
-    public fun createScreencastTrack(mediaProjectionPermission: Intent, metadata: Metadata, onEnd: () -> Unit): LocalScreencastTrack? {
-        return client.createScreencastTrack(mediaProjectionPermission, metadata, onEnd)
+    public fun createScreencastTrack(mediaProjectionPermission: Intent, videoParameters: VideoParameters, metadata: Metadata, onEnd: () -> Unit): LocalScreencastTrack? {
+        return client.createScreencastTrack(mediaProjectionPermission, videoParameters, metadata, onEnd)
     }
 
     public fun removeTrack(trackId: String): Boolean {
