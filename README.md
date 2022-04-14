@@ -1,5 +1,4 @@
-# membrane-at-dscout-poc-android
-Android Proof-Of-Concept for Membrane SFU
+# membrane-webrtc-android
 
 ## Components
 The repository consists of 2 components:
@@ -31,3 +30,10 @@ The user has the following control buttons at hand:
 
 ## Necessary setup
 The only required constant is the media server's URL that can be found at the top of `MainActivity.kt`.
+
+
+## Credits
+This project has been built and is maintained thanks to the support from [dscout](https://dscout.com/) and [Software Mansion](https://swmansion.com).
+
+<img alt="expo sdk" height="100" src="./.github/dscout_logo.png"/>
+<img alt="Software Mansion" src="https://logo.swmansion.com/logo?color=white&variant=desktop&width=150&tag=react-native-reanimated-github"/>
