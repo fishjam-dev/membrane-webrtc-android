@@ -4,6 +4,10 @@ plugins {
     id "kotlin-kapt"
     id 'maven-publish'
 }
+
+group = 'com.github.membraneframework'
+version = '1.0'
+
 android {
     namespace = "org.membraneframework.rtc"
     compileSdkVersion androidSdk.compileVersion
@@ -38,12 +42,6 @@ android {
         freeCompilerArgs = ["-Xinline-classes", "-Xopt-in=kotlin.RequiresOptIn"]
         jvmTarget = java_version
     }
-
-    publishing {
-      singleVariant("release") {
-          withSourcesJar()
-      }
-    }
 }
 
 
@@ -58,6 +56,20 @@ dependencies {
     implementation 'com.github.dsrees:JavaPhoenixClient:1.0.0'
     api 'com.github.webrtc-sdk:android:93.4577.01'
     implementation 'androidx.core:core:1.7.0'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.membraneframework'
+                artifactId = 'membrane-webrtc-android'
+                version = '1.0'
+            }
+        }
+    }
 }
 
 sourceCompatibility = "1.7"
