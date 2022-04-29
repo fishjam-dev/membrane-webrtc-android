@@ -31,8 +31,27 @@ The user has the following control buttons at hand:
 ## Necessary setup
 The only required constant is the media server's URL that can be found at the top of `MainActivity.kt`.
 
+## Installation
+Add jitpack repo to your build.gradle:
+```gradle
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+
+Add the dependency:
+```gradle
+	dependencies {
+	  implementation 'com.github.membraneframework:membrane-webrtc-android:1.0.1'
+	}
+```
 
 ## Credits
+This project is highly inspired by the [LiveKit](https://livekit.io/) project and their implementation of the [Android SDK](https://github.com/livekit/client-sdk-android) and reuses a lot of their implemented solutions (mainly dealing with WebRTC SDK while the signalling got completely replaced with an internal solution).
+
 This project has been built and is maintained thanks to the support from [dscout](https://dscout.com/) and [Software Mansion](https://swmansion.com).
 
 <img alt="expo sdk" height="100" src="./.github/dscout_logo.png"/>
