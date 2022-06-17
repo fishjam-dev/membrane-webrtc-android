@@ -56,6 +56,7 @@ constructor(
     private var iceServers: List<IceServer>? = null
     private var config: RTCConfiguration? = null
     private var peerConnection: PeerConnection? = null
+    private var queuedRemoteCandidates: MutableList<IceCandidate>? = null
 
 
     private val coroutineScope: CoroutineScope =
@@ -178,12 +179,6 @@ constructor(
         }
 
         return true
-    }
-
-    private fun defaultStunServer(): IceServer {
-        return IceServer
-            .builder("stun:stun.l.google.com:19302")
-            .createIceServer()
     }
 
     private fun setupPeerConnection() {
@@ -354,7 +349,8 @@ constructor(
     }
 
     private suspend fun onOfferData(offerData: OfferData) {
-        prepareIceServers(offerData.data.integratedTurnServers, offerData.data.iceTransportPolicy)
+        this.queuedRemoteCandidates = mutableListOf()
+        prepareIceServers(offerData.data.integratedTurnServers)
 
         var needsRestart = true
         if (peerConnection == null) {
@@ -412,7 +408,18 @@ constructor(
 
             midToTrackId = sdpAnswer.data.midToTrackId
 
-            pc.setRemoteDescription(answer)
+            pc.setRemoteDescription(answer).onSuccess {
+                drainCandidates()
+            }
+        }
+    }
+
+    private fun drainCandidates() {
+        if (this.queuedRemoteCandidates != null) {
+            for (c in queuedRemoteCandidates!!) {
+                this.peerConnection!!.addIceCandidate(c)
+            }
+            this.queuedRemoteCandidates = null
         }
     }
 
@@ -424,7 +431,11 @@ constructor(
             remoteCandidate.data.candidate
         )
 
-         pc.addIceCandidate(candidate)
+        if (this.queuedRemoteCandidates == null) {
+            pc.addIceCandidate(candidate)
+        } else {
+            this.queuedRemoteCandidates!!.add(candidate)
+        }
     }
 
     private fun onLocalCandidate(localCandidate: IceCandidate) {
@@ -438,17 +449,9 @@ constructor(
         }
     }
 
-    private fun prepareIceServers(integratedTurnServers: List<OfferData.TurnServer>, iceTransportPolicy: String) {
+    private fun prepareIceServers(integratedTurnServers: List<OfferData.TurnServer>) {
         // config or ice servers are already initialized, skip the preparation
         if (config != null || iceServers != null) {
-            return
-        }
-
-        // if integrated
-        if (integratedTurnServers.isEmpty()) {
-            config = RTCConfiguration(listOf(defaultStunServer()))
-            config!!.iceTransportsType = IceTransportsType.ALL
-
             return
         }
 
@@ -467,14 +470,7 @@ constructor(
         }
 
         val config =  RTCConfiguration(iceServers)
-
-        when (iceTransportPolicy) {
-            "all" ->
-                config.iceTransportsType = IceTransportsType.ALL
-            "relay" ->
-                config.iceTransportsType = IceTransportsType.RELAY
-        }
-
+        config.iceTransportsType = IceTransportsType.RELAY
         this.config = config
     }
 
