@@ -181,7 +181,7 @@ data class PeerUpdated(val type: ReceivableEventType, val data: Data): Receivabl
 data class OfferData(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
     data class TurnServer(val username: String, val password: String, val serverAddr: String, val serverPort: UInt, val transport: String)
 
-    data class Data(val iceTransportPolicy: String, val integratedTurnServers: List<TurnServer>, val tracksTypes: Map<String, Int>)
+    data class Data(val integratedTurnServers: List<TurnServer>, val tracksTypes: Map<String, Int>)
 }
 
 data class TracksAdded(val type: ReceivableEventType, val data: Data): ReceivableEvent() {

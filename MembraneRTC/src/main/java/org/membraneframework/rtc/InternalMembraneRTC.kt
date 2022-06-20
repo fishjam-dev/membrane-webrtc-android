@@ -6,6 +6,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.*
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.Peer
@@ -56,6 +58,8 @@ constructor(
     private var iceServers: List<IceServer>? = null
     private var config: RTCConfiguration? = null
     private var peerConnection: PeerConnection? = null
+    private var queuedRemoteCandidates: MutableList<IceCandidate>? = null
+    private val qrcMutex = Mutex()
 
 
     private val coroutineScope: CoroutineScope =
@@ -178,12 +182,6 @@ constructor(
         }
 
         return true
-    }
-
-    private fun defaultStunServer(): IceServer {
-        return IceServer
-            .builder("stun:stun.l.google.com:19302")
-            .createIceServer()
     }
 
     private fun setupPeerConnection() {
@@ -354,7 +352,10 @@ constructor(
     }
 
     private suspend fun onOfferData(offerData: OfferData) {
-        prepareIceServers(offerData.data.integratedTurnServers, offerData.data.iceTransportPolicy)
+        qrcMutex.withLock {
+            this.queuedRemoteCandidates = mutableListOf()
+        }
+        prepareIceServers(offerData.data.integratedTurnServers)
 
         var needsRestart = true
         if (peerConnection == null) {
@@ -412,11 +413,24 @@ constructor(
 
             midToTrackId = sdpAnswer.data.midToTrackId
 
-            pc.setRemoteDescription(answer)
+            pc.setRemoteDescription(answer).onSuccess {
+                drainCandidates()
+            }
         }
     }
 
-    private fun onRemoteCandidate(remoteCandidate: RemoteCandidate) {
+    private suspend fun drainCandidates() {
+        qrcMutex.withLock {
+            this.queuedRemoteCandidates?.let {
+                for (candidate in it) {
+                    this.peerConnection?.addIceCandidate(candidate)
+                }
+                this.queuedRemoteCandidates = null
+            }
+        }
+    }
+
+    private suspend fun onRemoteCandidate(remoteCandidate: RemoteCandidate) {
         val pc = peerConnection ?: return
         val candidate = IceCandidate(
             remoteCandidate.data.sdpMid ?: "",
@@ -424,7 +438,13 @@ constructor(
             remoteCandidate.data.candidate
         )
 
-         pc.addIceCandidate(candidate)
+        qrcMutex.withLock {
+            if (this.queuedRemoteCandidates == null) {
+                pc.addIceCandidate(candidate)
+            } else {
+                this.queuedRemoteCandidates!!.add(candidate)
+            }
+        }
     }
 
     private fun onLocalCandidate(localCandidate: IceCandidate) {
@@ -438,17 +458,9 @@ constructor(
         }
     }
 
-    private fun prepareIceServers(integratedTurnServers: List<OfferData.TurnServer>, iceTransportPolicy: String) {
+    private fun prepareIceServers(integratedTurnServers: List<OfferData.TurnServer>) {
         // config or ice servers are already initialized, skip the preparation
         if (config != null || iceServers != null) {
-            return
-        }
-
-        // if integrated
-        if (integratedTurnServers.isEmpty()) {
-            config = RTCConfiguration(listOf(defaultStunServer()))
-            config!!.iceTransportsType = IceTransportsType.ALL
-
             return
         }
 
@@ -467,14 +479,7 @@ constructor(
         }
 
         val config =  RTCConfiguration(iceServers)
-
-        when (iceTransportPolicy) {
-            "all" ->
-                config.iceTransportsType = IceTransportsType.ALL
-            "relay" ->
-                config.iceTransportsType = IceTransportsType.RELAY
-        }
-
+        config.iceTransportsType = IceTransportsType.RELAY
         this.config = config
     }
 
