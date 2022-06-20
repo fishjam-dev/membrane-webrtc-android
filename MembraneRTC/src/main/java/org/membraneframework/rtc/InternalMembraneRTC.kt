@@ -6,6 +6,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.*
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.Peer
@@ -57,6 +59,7 @@ constructor(
     private var config: RTCConfiguration? = null
     private var peerConnection: PeerConnection? = null
     private var queuedRemoteCandidates: MutableList<IceCandidate>? = null
+    private val qrcMutex = Mutex()
 
 
     private val coroutineScope: CoroutineScope =
@@ -349,7 +352,9 @@ constructor(
     }
 
     private suspend fun onOfferData(offerData: OfferData) {
-        this.queuedRemoteCandidates = mutableListOf()
+        qrcMutex.withLock {
+            this.queuedRemoteCandidates = mutableListOf()
+        }
         prepareIceServers(offerData.data.integratedTurnServers)
 
         var needsRestart = true
@@ -414,16 +419,18 @@ constructor(
         }
     }
 
-    private fun drainCandidates() {
-        if (this.queuedRemoteCandidates != null) {
-            for (c in queuedRemoteCandidates!!) {
-                this.peerConnection!!.addIceCandidate(c)
+    private suspend fun drainCandidates() {
+        qrcMutex.withLock {
+            this.queuedRemoteCandidates?.let {
+                for (candidate in it) {
+                    this.peerConnection?.addIceCandidate(candidate)
+                }
+                this.queuedRemoteCandidates = null
             }
-            this.queuedRemoteCandidates = null
         }
     }
 
-    private fun onRemoteCandidate(remoteCandidate: RemoteCandidate) {
+    private suspend fun onRemoteCandidate(remoteCandidate: RemoteCandidate) {
         val pc = peerConnection ?: return
         val candidate = IceCandidate(
             remoteCandidate.data.sdpMid ?: "",
@@ -431,10 +438,12 @@ constructor(
             remoteCandidate.data.candidate
         )
 
-        if (this.queuedRemoteCandidates == null) {
-            pc.addIceCandidate(candidate)
-        } else {
-            this.queuedRemoteCandidates!!.add(candidate)
+        qrcMutex.withLock {
+            if (this.queuedRemoteCandidates == null) {
+                pc.addIceCandidate(candidate)
+            } else {
+                this.queuedRemoteCandidates!!.add(candidate)
+            }
         }
     }
 
