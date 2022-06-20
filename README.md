@@ -45,7 +45,7 @@ Add jitpack repo to your build.gradle:
 Add the dependency:
 ```gradle
 	dependencies {
-	  implementation 'com.github.membraneframework:membrane-webrtc-android:1.0.1'
+	  implementation 'com.github.membraneframework:membrane-webrtc-android:1.0.2'
 	}
 ```
 
