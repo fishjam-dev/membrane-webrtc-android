@@ -169,7 +169,7 @@ constructor(
 
         // remove a sender that is associated with given track
         val rtcTrack = track.rtcTrack()
-        pc.transceivers.find { it.sender.track() == rtcTrack }?.sender?.let {
+        pc.transceivers.find { it.sender.track()?.id() == rtcTrack.id() }?.sender?.let {
             pc.removeTrack(it)
         }
 
