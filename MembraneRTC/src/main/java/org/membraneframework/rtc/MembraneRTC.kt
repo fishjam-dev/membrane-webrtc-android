@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.Dispatchers
 import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
+import org.membraneframework.rtc.events.SelectEncoding
 import org.membraneframework.rtc.media.LocalAudioTrack
 import org.membraneframework.rtc.media.LocalScreencastTrack
 import org.membraneframework.rtc.media.LocalVideoTrack
@@ -66,8 +67,8 @@ private constructor(
      * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
      * @return an instance of the video track
      */
-    public fun createVideoTrack(videoParameters: VideoParameters, metadata: Metadata): LocalVideoTrack {
-        return client.createLocalVideoTrack(videoParameters, metadata)
+    public fun createVideoTrack(videoParameters: VideoParameters, metadata: Metadata, simulcastConfig: SimulcastConfig = SimulcastConfig(false)): LocalVideoTrack {
+        return client.createLocalVideoTrack(videoParameters, metadata, simulcastConfig)
     }
 
     /**
@@ -93,8 +94,8 @@ private constructor(
      * @param onEnd: callback that will be invoked once the screen capture ends
      * @return an instance of the screencast track
      */
-    public fun createScreencastTrack(mediaProjectionPermission: Intent, videoParameters: VideoParameters, metadata: Metadata, onEnd: () -> Unit): LocalScreencastTrack? {
-        return client.createScreencastTrack(mediaProjectionPermission, videoParameters, metadata, onEnd)
+    public fun createScreencastTrack(mediaProjectionPermission: Intent, videoParameters: VideoParameters, metadata: Metadata, simulcastConfig: SimulcastConfig = SimulcastConfig(false), onEnd: () -> Unit): LocalScreencastTrack? {
+        return client.createScreencastTrack(mediaProjectionPermission, videoParameters, metadata, simulcastConfig, onEnd)
     }
 
     /**
@@ -105,6 +106,18 @@ private constructor(
      */
     public fun removeTrack(trackId: String): Boolean {
         return client.removeTrack(trackId)
+    }
+
+    public fun selectEncoding(peerId: String, trackId: String, encoding: TrackEncoding) {
+        client.selectTrackEncoding(peerId, trackId, encoding)
+    }
+
+    public fun enableTrackEncoding(trackId: String, encoding: TrackEncoding) {
+        client.enableTrackEncoding(trackId, encoding)
+    }
+
+    public fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
+        client.disableTrackEncoding(trackId, encoding)
     }
 
     companion object {

@@ -1,6 +1,7 @@
 package org.membraneframework.rtc.media
 
 import android.content.Context
+import org.membraneframework.rtc.SimulcastConfig
 import org.webrtc.*
 import java.util.*
 
@@ -13,10 +14,11 @@ class LocalVideoTrack
 constructor(
     mediaTrack: org.webrtc.VideoTrack,
     private val capturer: Capturer,
-    eglBase: EglBase
+    eglBase: EglBase,
+    val simulcastConfig: SimulcastConfig,
 ): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
     companion object {
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, videoParameters: VideoParameters): LocalVideoTrack {
+        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, videoParameters: VideoParameters, simulcastConfig: SimulcastConfig): LocalVideoTrack {
             val source = factory.createVideoSource(false)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
@@ -28,7 +30,7 @@ constructor(
                 videoParameters = videoParameters
             )
 
-            return LocalVideoTrack(track, capturer, eglBase)
+            return LocalVideoTrack(track, capturer, eglBase, simulcastConfig)
         }
     }
 

@@ -70,6 +70,13 @@ data class RenegotiateTracks(val type: String, val data: Payload): SendableEvent
             )
 }
 
+data class SelectEncoding(val type: String, val data: Data): SendableEvent() {
+    data class Data(val peerId: String, val trackId: String, val encoding: String)
+
+    constructor(peerId: String, trackId: String, encoding: String):
+            this("selectEncoding", Data(peerId, trackId, encoding))
+}
+
 public enum class ReceivableEventType() {
     @SerializedName("peerAccepted")
     PeerAccepted,

@@ -8,10 +8,7 @@ import com.dscout.membranevideoroomdemo.models.Participant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.membraneframework.rtc.ConnectOptions
-import org.membraneframework.rtc.MembraneRTC
-import org.membraneframework.rtc.MembraneRTCError
-import org.membraneframework.rtc.MembraneRTCListener
+import org.membraneframework.rtc.*
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
@@ -47,6 +44,17 @@ public class RoomViewModel(
 
     private val globalToLocalTrackId = HashMap<String, String>()
 
+    val videoSimulcastConfig = MutableStateFlow(SimulcastConfig(enabled = true, activeEncodings = listOf(
+        TrackEncoding.L,
+        TrackEncoding.M,
+        TrackEncoding.H))
+    )
+    val screencastSimulcastConfig = MutableStateFlow(SimulcastConfig(enabled = true, activeEncodings = listOf(
+        TrackEncoding.L,
+        TrackEncoding.M,
+        TrackEncoding.H)
+    ))
+
     fun connect(roomName: String, displayName: String) {
         viewModelScope.launch {
             localDisplayName = displayName
@@ -77,8 +85,17 @@ public class RoomViewModel(
 
         candidates.find {
             it.id == participantId
-        }?.let {
+        }?.let { it ->
+            val primaryParticipantTrackId = primaryParticipant.value?.videoTrack?.id()
+            if(localVideoTrack?.id() != primaryParticipantTrackId && localScreencastTrack?.id() != primaryParticipantTrackId) {
+                val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == primaryParticipantTrackId }.keys.first()
+                primaryParticipant.value?.id?.let { it1 -> room.value?.selectEncoding(it1, globalId, TrackEncoding.L) }
+            }
             primaryParticipant.value = it
+            if(localVideoTrack?.id() != it.videoTrack?.id() && localScreencastTrack?.id() != it.videoTrack?.id()) {
+                val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == it.videoTrack?.id() }.keys.first()
+                room.value?.selectEncoding(participantId, globalId, TrackEncoding.H)
+            }
 
             participants.value = candidates.filter { candidate ->
                 candidate.id != it.id
@@ -130,12 +147,12 @@ public class RoomViewModel(
                 "user_id" to (localDisplayName ?: "")
             ))
 
-            var videoParameters = VideoParameters.presetVGA169
+            var videoParameters = VideoParameters.presetFHD169
             videoParameters = videoParameters.copy(dimensions = videoParameters.dimensions.flip())
 
             localVideoTrack = it.createVideoTrack(videoParameters, mapOf(
                 "user_id" to (localDisplayName ?: "")
-            ))
+            ), videoSimulcastConfig.value)
 
             it.join()
 
@@ -275,7 +292,7 @@ public class RoomViewModel(
         localScreencastTrack = room.value?.createScreencastTrack(mediaProjectionPermission, videoParameters, mapOf(
             "type" to "screensharing",
             "user_id" to (localDisplayName ?: ""),
-        )) {
+        ), screencastSimulcastConfig.value) {
             stopScreencast()
         }
 
@@ -299,5 +316,23 @@ public class RoomViewModel(
 
             localScreencastTrack = null
         }
+    }
+
+    private fun toggleTrackEncoding(simulcastConfig: MutableStateFlow<SimulcastConfig>, trackId: String, encoding: TrackEncoding) {
+        if(simulcastConfig.value.activeEncodings.contains(encoding)) {
+            room.value?.disableTrackEncoding(trackId, encoding)
+            simulcastConfig.value = SimulcastConfig(true, simulcastConfig.value.activeEncodings.filter { it != encoding })
+        } else {
+            room.value?.enableTrackEncoding(trackId, encoding)
+            simulcastConfig.value = SimulcastConfig(true, simulcastConfig.value.activeEncodings.plus(encoding))
+        }
+    }
+
+    fun toggleVideoTrackEncoding(encoding: TrackEncoding) {
+        localVideoTrack?.id()?.let { toggleTrackEncoding(videoSimulcastConfig, it, encoding) }
+    }
+
+    fun toggleScreencastTrackEncoding(encoding: TrackEncoding) {
+        localScreencastTrack?.id()?.let { toggleTrackEncoding(screencastSimulcastConfig, it, encoding) }
     }
 }
