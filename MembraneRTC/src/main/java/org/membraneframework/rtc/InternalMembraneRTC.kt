@@ -456,6 +456,15 @@ constructor(
 
             pc.setRemoteDescription(answer).onSuccess {
                 drainCandidates()
+                // temporary workaround, the backend doesn't add ~ in sdp answer
+                val videoTrack = localTracks.find { it.rtcTrack().kind() == "video" }
+                val config = (videoTrack as LocalVideoTrack).simulcastConfig
+                listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H)
+                    .forEach {
+                        if (!config.activeEncodings.contains(it)) {
+                            disableTrackEncoding(videoTrack.id(), it)
+                        }
+                    }
             }
         }
     }
