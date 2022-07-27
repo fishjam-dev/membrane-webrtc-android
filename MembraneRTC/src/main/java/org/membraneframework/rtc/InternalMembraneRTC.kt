@@ -22,7 +22,8 @@ import org.membraneframework.rtc.utils.*
 import org.webrtc.*
 import org.webrtc.AudioTrack
 import org.webrtc.PeerConnection.*
-import org.webrtc.RtpTransceiver.*
+import org.webrtc.RtpTransceiver.RtpTransceiverDirection
+import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.VideoTrack
 import timber.log.Timber
 import java.util.*
@@ -593,16 +594,13 @@ constructor(
 
     fun selectTrackEncoding(peerId: String, trackId: String, encoding: TrackEncoding) {
         coroutineScope.launch {
-            val globalTrackId = trackContexts[trackId]?.trackId
-            if(globalTrackId != null) {
-                transport.send(
-                    SelectEncoding(
-                        peerId,
-                        globalTrackId,
-                        encoding.rid
-                    )
+            transport.send(
+                SelectEncoding(
+                    peerId,
+                    trackId,
+                    encoding.rid
                 )
-            }
+            )
         }
     }
 
