@@ -138,9 +138,9 @@ constructor(
 
     private fun getSendEncodingsFromConfig(simulcastConfig: SimulcastConfig): List<RtpParameters.Encoding> {
         val sendEncodings = mutableListOf(
-            RtpParameters.Encoding("l", true, 4.0),
-            RtpParameters.Encoding("m", true, 2.0),
-            RtpParameters.Encoding("h", true, 1.0),
+            RtpParameters.Encoding("l", false, 4.0),
+            RtpParameters.Encoding("m", false, 2.0),
+            RtpParameters.Encoding("h", false, 1.0),
 
         )
         simulcastConfig.activeEncodings.forEach {
@@ -175,14 +175,14 @@ constructor(
             screencastTrack.start()
         }
 
-        if(simulcastConfig.enabled) {
+        val transceiverInit = if(simulcastConfig.enabled) {
             val sendEncodings = getSendEncodingsFromConfig(simulcastConfig)
-            val transceiverInit =
-                RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, listOf(UUID.randomUUID().toString()), sendEncodings)
-            pc.addTransceiver(screencastTrack.rtcTrack(), transceiverInit)
+            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, listOf(UUID.randomUUID().toString()), sendEncodings)
         } else {
-            pc.addTrack(screencastTrack.rtcTrack(), listOf(UUID.randomUUID().toString()))
+            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, listOf(UUID.randomUUID().toString()))
         }
+
+        pc.addTransceiver(screencastTrack.rtcTrack(), transceiverInit)
 
         pc.enforceSendOnlyDirection()
 
@@ -234,16 +234,13 @@ constructor(
         val streamIds = listOf(UUID.randomUUID().toString())
 
         localTracks.forEach {
-            if(it.rtcTrack().kind() == "video" && (it as LocalVideoTrack).simulcastConfig.enabled) {
+            val transceiverInit = if(it.rtcTrack().kind() == "video" && (it as LocalVideoTrack).simulcastConfig.enabled) {
                 val sendEncodings = getSendEncodingsFromConfig(it.simulcastConfig)
-                val transceiverInit =
-                    RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds, sendEncodings)
-                pc.addTransceiver(it.rtcTrack(), transceiverInit)
+                RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds, sendEncodings)
             } else {
-                val transceiverInit =
-                    RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds)
-                pc.addTransceiver(it.rtcTrack(), transceiverInit)
+                RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds)
             }
+            pc.addTransceiver(it.rtcTrack(), transceiverInit)
         }
 
         pc.enforceSendOnlyDirection()
@@ -588,7 +585,16 @@ constructor(
 
     fun selectTrackEncoding(peerId: String, trackId: String, encoding: TrackEncoding) {
         coroutineScope.launch {
-            transport.send(SelectEncoding(peerId, trackId, encoding.rid))
+            val globalTrackId = trackContexts[trackId]?.trackId
+            if(globalTrackId != null) {
+                transport.send(
+                    SelectEncoding(
+                        peerId,
+                        globalTrackId,
+                        encoding.rid
+                    )
+                )
+            }
         }
     }
 

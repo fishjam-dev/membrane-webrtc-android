@@ -65,6 +65,7 @@ private constructor(
      *
      * @param videoParameters: a set of target parameters such as camera resolution or a frame rate
      * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
+     * @param simulcastConfig: simulcast configuration. By default simulcast is disabled.
      * @return an instance of the video track
      */
     public fun createVideoTrack(videoParameters: VideoParameters, metadata: Metadata, simulcastConfig: SimulcastConfig = SimulcastConfig(false)): LocalVideoTrack {
@@ -91,6 +92,7 @@ private constructor(
      * @param mediaProjectionPermission: a valid media projection permission intent that can be used to starting a screen capture
      * @param videoParameters: a set of target parameters of the screen capture such as resolution and a frame rate
      * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
+     * @param simulcastConfig: simulcast configuration. By default simulcast is disabled.
      * @param onEnd: callback that will be invoked once the screen capture ends
      * @return an instance of the screencast track
      */
@@ -108,14 +110,33 @@ private constructor(
         return client.removeTrack(trackId)
     }
 
-    public fun selectEncoding(peerId: String, trackId: String, encoding: TrackEncoding) {
+    /**
+     * Selects track encoding that server should send to the client library.
+     *
+     * @param peerId: an id of a peer that owns the track
+     * @param trackId: an id of a remote track
+     * @param encoding: an encoding to receive
+     */
+    public fun selectTrackEncoding(peerId: String, trackId: String, encoding: TrackEncoding) {
         client.selectTrackEncoding(peerId, trackId, encoding)
     }
 
+    /**
+     * Enables track encoding so that it will be sent to the server.
+     *
+     * @param trackId: an id of a local track
+     * @param encoding: an encoding that will be enabled
+     */
     public fun enableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.enableTrackEncoding(trackId, encoding)
     }
 
+    /**
+     * Disables track encoding so that it will be no longer sent to the server.
+     *
+     * @param trackId: and id of a local track
+     * @param encoding: an encoding that will be disabled
+     */
     public fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.disableTrackEncoding(trackId, encoding)
     }

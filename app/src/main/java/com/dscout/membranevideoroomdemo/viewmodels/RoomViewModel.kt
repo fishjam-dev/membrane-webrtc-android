@@ -88,13 +88,20 @@ public class RoomViewModel(
         }?.let { it ->
             val primaryParticipantTrackId = primaryParticipant.value?.videoTrack?.id()
             if(localVideoTrack?.id() != primaryParticipantTrackId && localScreencastTrack?.id() != primaryParticipantTrackId) {
-                val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == primaryParticipantTrackId }.keys.first()
-                primaryParticipant.value?.id?.let { it1 -> room.value?.selectEncoding(it1, globalId, TrackEncoding.L) }
+                val primaryParticipantId = primaryParticipant.value?.id
+                if (primaryParticipantId != null && primaryParticipantTrackId != null) {
+                    room.value?.selectTrackEncoding(primaryParticipantId, primaryParticipantTrackId, TrackEncoding.L)
+                }
             }
             primaryParticipant.value = it
-            if(localVideoTrack?.id() != it.videoTrack?.id() && localScreencastTrack?.id() != it.videoTrack?.id()) {
-                val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == it.videoTrack?.id() }.keys.first()
-                room.value?.selectEncoding(participantId, globalId, TrackEncoding.H)
+            val videoTrackId = it.videoTrack?.id()
+            if(localVideoTrack?.id() != it.videoTrack?.id() && localScreencastTrack?.id() != videoTrackId) {
+                if (videoTrackId != null) {
+                    room.value?.selectTrackEncoding(
+                        participantId,
+                        videoTrackId, TrackEncoding.H
+                    )
+                }
             }
 
             participants.value = candidates.filter { candidate ->
