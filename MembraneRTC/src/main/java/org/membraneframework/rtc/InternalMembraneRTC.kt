@@ -158,7 +158,7 @@ constructor(
     ): LocalScreencastTrack? {
         val pc = peerConnection ?: return null
 
-        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission, videoParameters) { track ->
+        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission, videoParameters, simulcastConfig) { track ->
             onEnd()
 
             removeTrack(track.id())
@@ -454,14 +454,22 @@ constructor(
             pc.setRemoteDescription(answer).onSuccess {
                 drainCandidates()
                 // temporary workaround, the backend doesn't add ~ in sdp answer
-                val videoTrack = localTracks.find { it.rtcTrack().kind() == "video" }
-                val config = (videoTrack as LocalVideoTrack).simulcastConfig
-                listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H)
-                    .forEach {
-                        if (!config.activeEncodings.contains(it)) {
-                            disableTrackEncoding(videoTrack.id(), it)
-                        }
+                localTracks.forEach { localTrack ->
+                    if(localTrack.rtcTrack().kind() != "video") return@forEach
+                    var config: SimulcastConfig? = null
+                    if(localTrack is LocalVideoTrack) {
+                        config = localTrack.simulcastConfig
+                    } else if(localTrack is LocalScreencastTrack) {
+                        config = localTrack.simulcastConfig
                     }
+                    listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H)
+                        .forEach {
+                            if (config?.activeEncodings?.contains(it) == false) {
+                                disableTrackEncoding(localTrack.id(), it)
+                            }
+                        }
+                }
+
             }
         }
     }
