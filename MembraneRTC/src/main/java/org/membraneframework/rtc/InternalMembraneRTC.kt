@@ -221,9 +221,7 @@ constructor(
     fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
         coroutineScope.launch {
             transport.send(UpdateTrackMetadata(trackId, trackMetadata))
-            val trackIdToMetadata = HashMap(localPeer.trackIdToMetadata)
-            trackIdToMetadata[trackId] = trackMetadata
-            localPeer = localPeer.copy(trackIdToMetadata = trackIdToMetadata)
+            localPeer = localPeer.withTrack(trackId, trackMetadata)
         }
     }
 
