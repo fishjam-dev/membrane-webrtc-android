@@ -25,6 +25,7 @@ import org.membraneframework.rtc.utils.*
 import org.membraneframework.rtc.utils.Metadata
 import org.webrtc.AudioTrack
 import org.webrtc.VideoTrack
+import kotlin.collections.HashMap
 
 internal class InternalMembraneRTC
 @AssistedInject
@@ -208,6 +209,20 @@ constructor(
         pc.enforceSendOnlyDirection()
 
         this.peerConnection = pc
+    }
+
+    fun updatePeerMetadata(peerMetadata: Metadata) {
+        coroutineScope.launch {
+            transport.send(UpdatePeerMetadata(peerMetadata))
+            localPeer = localPeer.copy(metadata = peerMetadata)
+        }
+    }
+
+    fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
+        coroutineScope.launch {
+            transport.send(UpdateTrackMetadata(trackId, trackMetadata))
+            localPeer = localPeer.withTrack(trackId, trackMetadata)
+        }
     }
 
     override fun onEvent(event: ReceivableEvent) {
