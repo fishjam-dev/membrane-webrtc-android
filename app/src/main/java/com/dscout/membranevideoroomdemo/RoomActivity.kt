@@ -42,11 +42,11 @@ class RoomActivity : AppCompatActivity() {
     }
 
     private val screencastLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-      if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+        if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
 
-       result.data?.let {
-           viewModel.startScreencast(it)
-       }
+        result.data?.let {
+            viewModel.startScreencast(it)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
