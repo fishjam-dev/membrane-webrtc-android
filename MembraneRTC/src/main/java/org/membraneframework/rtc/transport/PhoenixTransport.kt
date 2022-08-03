@@ -7,14 +7,16 @@ import org.membraneframework.rtc.events.ReceivableEvent
 import org.membraneframework.rtc.events.SendableEvent
 import org.membraneframework.rtc.events.serializeToMap
 import org.membraneframework.rtc.utils.ClosableCoroutineScope
+import org.membraneframework.rtc.utils.SocketConnectionParams
 import org.phoenixframework.Channel
 import org.phoenixframework.Socket
 import timber.log.Timber
 
 public class PhoenixTransport constructor(
-    val url: String,
-    val topic: String,
-    private val ioDispatcher: CoroutineDispatcher
+    private val url: String,
+    private val topic: String,
+    private val ioDispatcher: CoroutineDispatcher,
+    private val params: SocketConnectionParams? = emptyMap()
 ) : EventTransport {
 
     private lateinit var coroutineScope: CoroutineScope
@@ -32,7 +34,7 @@ public class PhoenixTransport constructor(
 
         coroutineScope = ClosableCoroutineScope(SupervisorJob() + ioDispatcher)
 
-        socket = Socket(url, emptyMap())
+        socket = Socket(url, params)
         socket!!.connect()
 
         var socketRefs: Array<String> = emptyArray()

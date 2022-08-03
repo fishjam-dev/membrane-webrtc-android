@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity() {
         val alreadyRequested = remember { mutableStateOf(false) }
 
         if (multiplePermissionsState.allPermissionsGranted) {
-                content()
+            content()
         } else {
             Column(
                 modifier = Modifier
