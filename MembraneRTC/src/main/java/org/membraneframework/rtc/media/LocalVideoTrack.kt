@@ -83,7 +83,7 @@ class CameraCapturer constructor(
 
     override fun startCapture() {
         isCapturing = true
-        cameraCapturer.startCapture(size.height, size.width, videoParameters.encoding.maxFps)
+        cameraCapturer.startCapture(size.width, size.height, videoParameters.encoding.maxFps)
     }
 
     override fun stopCapture() {
@@ -118,7 +118,7 @@ class CameraCapturer constructor(
                     ?.map { Size(it.width, it.height)}
                     ?: emptyList()
 
-                this.size = CameraEnumerationAndroid.getClosestSupportedSize(sizes, videoParameters.dimensions.height, videoParameters.dimensions.width)
+                this.size = CameraEnumerationAndroid.getClosestSupportedSize(sizes, videoParameters.dimensions.width, videoParameters.dimensions.height)
 
                 break
             }

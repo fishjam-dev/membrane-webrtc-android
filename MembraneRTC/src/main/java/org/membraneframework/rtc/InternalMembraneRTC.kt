@@ -25,8 +25,10 @@ import org.webrtc.PeerConnection.*
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.VideoTrack
+import org.webrtc.audio.AudioDeviceModule
 import timber.log.Timber
 import java.util.*
+
 
 internal class InternalMembraneRTC
 @AssistedInject
@@ -37,9 +39,10 @@ constructor(
     private val listener: MembraneRTCListener,
     @Assisted
     private val defaultDispatcher: CoroutineDispatcher,
-    private val peerConnectionFactory: PeerConnectionFactory,
+    audioDeviceModule: AudioDeviceModule,
     private val eglBase: EglBase,
-    private val context: Context
+    private val context: Context,
+    appContext: Context
 ) : EventTransportListener, PeerConnection.Observer {
     private var transport: EventTransport = connectOptions.transport
 
@@ -66,6 +69,26 @@ constructor(
 
     private val coroutineScope: CoroutineScope =
         ClosableCoroutineScope(SupervisorJob() + defaultDispatcher)
+
+    private val peerConnectionFactory: PeerConnectionFactory
+
+    init {
+
+        PeerConnectionFactory.initialize(
+            PeerConnectionFactory.InitializationOptions
+                .builder(appContext)
+                .createInitializationOptions()
+        )
+
+        peerConnectionFactory = PeerConnectionFactory.builder()
+            .setAudioDeviceModule(audioDeviceModule)
+            .setVideoEncoderFactory(SimulcastVideoEncoderFactoryWrapper(
+                eglBase.eglBaseContext,
+                connectOptions.encoderOptions
+            ))
+            .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext))
+            .createPeerConnectionFactory()
+    }
 
     @AssistedFactory
     interface Factory {
@@ -138,12 +161,7 @@ constructor(
     }
 
     private fun getSendEncodingsFromConfig(simulcastConfig: SimulcastConfig): List<RtpParameters.Encoding> {
-        val sendEncodings = mutableListOf(
-            RtpParameters.Encoding("l", false, 4.0),
-            RtpParameters.Encoding("m", false, 2.0),
-            RtpParameters.Encoding("h", false, 1.0),
-
-        )
+        val sendEncodings = Constants.encodings
         simulcastConfig.activeEncodings.forEach {
             sendEncodings[it.ordinal].active = true
         }

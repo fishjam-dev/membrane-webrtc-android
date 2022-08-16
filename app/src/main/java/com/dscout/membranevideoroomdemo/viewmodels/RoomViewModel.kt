@@ -65,7 +65,10 @@ public class RoomViewModel(
                 appContext = getApplication(),
                 options = ConnectOptions(
                     transport = PhoenixTransport(url, "room:$roomName", Dispatchers.IO),
-                    config = mapOf("displayName" to displayName)
+                    config = mapOf("displayName" to displayName),
+                    encoderOptions = EncoderOptions(
+                        encoderType = EncoderType.SOFTWARE,
+                    )
                 ),
                 listener = this@RoomViewModel
             );
@@ -148,8 +151,8 @@ public class RoomViewModel(
                 "user_id" to (localDisplayName ?: "")
             ))
 
-            var videoParameters = VideoParameters.presetFHD169
-            videoParameters = videoParameters.copy(dimensions = videoParameters.dimensions.flip())
+            var videoParameters = VideoParameters.presetHD169
+            videoParameters = videoParameters.copy(dimensions = videoParameters.dimensions)
 
             localVideoTrack = it.createVideoTrack(videoParameters, mapOf(
                 "user_id" to (localDisplayName ?: "")

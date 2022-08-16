@@ -145,7 +145,7 @@ class RoomActivity : AppCompatActivity() {
                         ParticipantCard(
                             participant = it,
                             videoViewLayout = VideoViewLayout.FIT,
-                            size = Size(150f, 125 * (16f / 9f))
+                            size = Size(150f, 150 * (16f / 9f))
                         )
                     }
 
