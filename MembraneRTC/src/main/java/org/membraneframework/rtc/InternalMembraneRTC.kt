@@ -161,7 +161,7 @@ constructor(
     }
 
     private fun getSendEncodingsFromConfig(simulcastConfig: SimulcastConfig): List<RtpParameters.Encoding> {
-        val sendEncodings = Constants.encodings
+        val sendEncodings = Constants.simulcastEncodings()
         simulcastConfig.activeEncodings.forEach {
             sendEncodings[it.ordinal].active = true
         }
