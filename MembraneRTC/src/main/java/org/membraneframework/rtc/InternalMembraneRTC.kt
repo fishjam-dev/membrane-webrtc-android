@@ -141,10 +141,7 @@ constructor(
         }
 
         localTracks.add(screencastTrack)
-        localPeer = localPeer.withTrack(screencastTrack.id(), metadata + mapOf(
-            "type" to "screensharing",
-            "user_id" to (localPeer.metadata["displayName"] ?: "")
-        ))
+        localPeer = localPeer.withTrack(screencastTrack.id(), metadata)
 
         coroutineScope.launch {
             screencastTrack.startForegroundService(null, null)
