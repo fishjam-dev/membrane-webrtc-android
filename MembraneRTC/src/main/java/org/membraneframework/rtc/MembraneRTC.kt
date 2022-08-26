@@ -140,6 +140,28 @@ private constructor(
     public fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.disableTrackEncoding(trackId, encoding)
     }
+    /**
+     * Updates the metadata for the current peer.
+     * @param peerMetadata - Data about this peer that other peers will receive upon joining.
+     *
+     * If the metadata is different from what is already tracked in the room, the optional
+     * callback `onPeerUpdated` will be triggered for other peers in the room.
+     */
+    public fun updatePeerMetadata(peerMetadata: Metadata) {
+        client.updatePeerMetadata(peerMetadata)
+    }
+
+    /**
+     * Updates the metadata for a specific track.
+     * @param trackId - local track id of audio or video track.
+     * @param trackMetadata - Data about this track that other peers will receive upon joining.
+     *
+     * If the metadata is different from what is already tracked in the room, the optional
+     * callback `onTrackUpdated` will be triggered for other peers in the room.
+     */
+    public fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
+        client.updateTrackMetadata(trackId, trackMetadata)
+    }
 
     companion object {
         /**

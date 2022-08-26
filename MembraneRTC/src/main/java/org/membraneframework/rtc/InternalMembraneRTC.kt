@@ -29,6 +29,8 @@ import org.webrtc.audio.AudioDeviceModule
 import timber.log.Timber
 import java.util.*
 
+import org.membraneframework.rtc.utils.Metadata
+import kotlin.collections.HashMap
 
 internal class InternalMembraneRTC
 @AssistedInject
@@ -184,10 +186,7 @@ constructor(
         }
 
         localTracks.add(screencastTrack)
-        localPeer = localPeer.withTrack(screencastTrack.id(), metadata + mapOf(
-            "type" to "screensharing",
-            "user_id" to (localPeer.metadata["displayName"] ?: "")
-        ))
+        localPeer = localPeer.withTrack(screencastTrack.id(), metadata)
 
         coroutineScope.launch {
             screencastTrack.startForegroundService(null, null)
@@ -265,6 +264,20 @@ constructor(
         pc.enforceSendOnlyDirection()
 
         this.peerConnection = pc
+    }
+
+    fun updatePeerMetadata(peerMetadata: Metadata) {
+        coroutineScope.launch {
+            transport.send(UpdatePeerMetadata(peerMetadata))
+            localPeer = localPeer.copy(metadata = peerMetadata)
+        }
+    }
+
+    fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
+        coroutineScope.launch {
+            transport.send(UpdateTrackMetadata(trackId, trackMetadata))
+            localPeer = localPeer.withTrack(trackId, trackMetadata)
+        }
     }
 
     override fun onEvent(event: ReceivableEvent) {

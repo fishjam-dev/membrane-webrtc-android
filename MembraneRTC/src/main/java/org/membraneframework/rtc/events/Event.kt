@@ -77,6 +77,18 @@ data class SelectEncoding(val type: String, val data: Data): SendableEvent() {
             this("selectEncoding", Data(peerId, trackId, encoding))
 }
 
+data class UpdatePeerMetadata(val type: String, val data: Data): SendableEvent() {
+    data class Data(val metadata: Metadata)
+
+    constructor(metadata: Metadata): this("updatePeerMetadata", Data(metadata))
+}
+
+data class UpdateTrackMetadata(val type: String, val data: Data): SendableEvent() {
+    data class Data(val trackId: String, val trackMetadata: Metadata)
+
+    constructor(trackId: String, trackMetadata: Metadata): this("updateTrackMetadata", Data(trackId, trackMetadata))
+}
+
 public enum class ReceivableEventType() {
     @SerializedName("peerAccepted")
     PeerAccepted,

@@ -13,6 +13,7 @@ import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.transport.PhoenixTransport
+import org.membraneframework.rtc.utils.SocketConnectionParams
 import timber.log.Timber
 import java.util.*
 
@@ -43,6 +44,8 @@ public class RoomViewModel(
     private var localScreencastId: String? = null
 
     private val globalToLocalTrackId = HashMap<String, String>()
+    private val params = mapOf<String, Any>("token" to "mocktoken")
+
 
     val videoSimulcastConfig = MutableStateFlow(SimulcastConfig(enabled = true, activeEncodings = listOf(
         TrackEncoding.L,
@@ -64,7 +67,7 @@ public class RoomViewModel(
             room.value = MembraneRTC.connect(
                 appContext = getApplication(),
                 options = ConnectOptions(
-                    transport = PhoenixTransport(url, "room:$roomName", Dispatchers.IO),
+                    transport = PhoenixTransport(url, "room:$roomName", Dispatchers.IO, params),
                     config = mapOf("displayName" to displayName),
                     encoderOptions = EncoderOptions(
                         encoderType = EncoderType.SOFTWARE,
@@ -119,7 +122,7 @@ public class RoomViewModel(
             primaryParticipant.value = primary
 
             // filter out participants that have no active video tracks for now
-           participants.value = candidates.drop(1).toList()
+            participants.value = candidates.drop(1).toList()
         }
     }
 
