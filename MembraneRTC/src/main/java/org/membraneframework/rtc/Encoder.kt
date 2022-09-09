@@ -2,7 +2,7 @@ package org.membraneframework.rtc
 
 /**
  * Enum describing possible encoder types
- * `"SOFTWARE"` - use software encoder, probably vp8
+ * `"SOFTWARE"` - use software encoder, in most cases vp8
  * `"HARDWARE"` - use hardware encoder, depends on the device
  *
  * TODO: for the current webrtc version simulcast doesn't work with hardware encoders

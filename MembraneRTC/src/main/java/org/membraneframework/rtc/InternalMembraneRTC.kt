@@ -170,6 +170,21 @@ constructor(
         return sendEncodings
     }
 
+    private fun addTrack(track: LocalTrack, streamIds: List<String>) {
+        val pc = peerConnection ?: return
+
+        val simulcastConfig = (track as? LocalVideoTrack)?.simulcastConfig ?: (track as? LocalScreencastTrack)?.simulcastConfig
+
+        val transceiverInit =  if(track.rtcTrack().kind() == "video" && simulcastConfig != null && simulcastConfig.enabled) {
+            val sendEncodings = getSendEncodingsFromConfig(simulcastConfig)
+            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds, sendEncodings)
+        } else {
+            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds)
+        }
+
+        pc.addTransceiver(track.rtcTrack(), transceiverInit)
+    }
+
     fun createScreencastTrack(
         mediaProjectionPermission: Intent,
         videoParameters: VideoParameters,
@@ -193,14 +208,9 @@ constructor(
             screencastTrack.start()
         }
 
-        val transceiverInit = if(simulcastConfig.enabled) {
-            val sendEncodings = getSendEncodingsFromConfig(simulcastConfig)
-            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, listOf(UUID.randomUUID().toString()), sendEncodings)
-        } else {
-            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, listOf(UUID.randomUUID().toString()))
-        }
+        val streamIds = listOf(UUID.randomUUID().toString())
 
-        pc.addTransceiver(screencastTrack.rtcTrack(), transceiverInit)
+        addTrack(screencastTrack, streamIds)
 
         pc.enforceSendOnlyDirection()
 
@@ -249,21 +259,16 @@ constructor(
         val pc = peerConnectionFactory.createPeerConnection(config, this)
             ?: throw IllegalStateException("Failed to create a peerConnection")
 
+        this.peerConnection = pc
+
         val streamIds = listOf(UUID.randomUUID().toString())
 
         localTracks.forEach {
-            val transceiverInit = if(it.rtcTrack().kind() == "video" && (it as LocalVideoTrack).simulcastConfig.enabled) {
-                val sendEncodings = getSendEncodingsFromConfig(it.simulcastConfig)
-                RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds, sendEncodings)
-            } else {
-                RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds)
-            }
-            pc.addTransceiver(it.rtcTrack(), transceiverInit)
+            addTrack(it, streamIds)
         }
 
         pc.enforceSendOnlyDirection()
-
-        this.peerConnection = pc
+        
     }
 
     fun updatePeerMetadata(peerMetadata: Metadata) {
