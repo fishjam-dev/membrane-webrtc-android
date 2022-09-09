@@ -17,7 +17,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusOrder
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -29,11 +31,13 @@ import androidx.compose.ui.unit.sp
 import com.dscout.membranevideoroomdemo.components.VideoViewLayout
 import com.dscout.membranevideoroomdemo.components.ParticipantVideoView
 import com.dscout.membranevideoroomdemo.models.Participant
+import com.dscout.membranevideoroomdemo.styles.AppButtonColors
 import com.dscout.membranevideoroomdemo.styles.Blue
 import com.dscout.membranevideoroomdemo.styles.darker
 import com.dscout.membranevideoroomdemo.viewmodels.RoomViewModel
 import com.dscout.membranevideoroomdemo.viewmodels.viewModelByFactory
 import kotlinx.android.parcel.Parcelize
+import org.membraneframework.rtc.TrackEncoding
 import timber.log.Timber
 
 class RoomActivity : AppCompatActivity() {
@@ -80,6 +84,9 @@ class RoomActivity : AppCompatActivity() {
         val participants = viewModel.participants.collectAsState()
         val primaryParticipant = viewModel.primaryParticipant.collectAsState()
         val errorMessage = viewModel.errorMessage.collectAsState()
+        val videoSimulcastConfig = viewModel.videoSimulcastConfig.collectAsState()
+        val screencastSimulcastConfig = viewModel.screencastSimulcastConfig.collectAsState()
+        val isScreenCastOn = viewModel.isScreenCastOn.collectAsState()
         val scrollState = rememberScrollState()
 
         Scaffold(
@@ -98,11 +105,47 @@ class RoomActivity : AppCompatActivity() {
                         Text(it, color = Color.Red, fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, textAlign = TextAlign.Center)
                     }
 
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                    ) {
+                        Text(text = "Video quality:")
+                        listOf(TrackEncoding.H, TrackEncoding.M, TrackEncoding.L).map {
+                            Button(
+                                onClick = {
+                                    viewModel.toggleVideoTrackEncoding(it)
+                                },
+                                colors = AppButtonColors(),
+                                modifier = Modifier.then(if(videoSimulcastConfig.value.activeEncodings.contains(it)) Modifier.alpha(1f) else Modifier.alpha(0.5f) ),
+                                shape = RoundedCornerShape(12.dp),
+                        ) {
+                            Text(it.name)
+                        } }
+                    }
+
+                    if(isScreenCastOn.value) {
+                        Row(
+                            horizontalArrangement = Arrangement.Start,
+                        ) {
+                            Text(text = "Screencast quality:")
+                            listOf(TrackEncoding.H, TrackEncoding.M, TrackEncoding.L).map {
+                                Button(
+                                    onClick = {
+                                        viewModel.toggleScreencastTrackEncoding(it)
+                                    },
+                                    colors = AppButtonColors(),
+                                    modifier = Modifier.then(if(screencastSimulcastConfig.value.activeEncodings.contains(it)) Modifier.alpha(1f) else Modifier.alpha(0.5f) ),
+                                    shape = RoundedCornerShape(12.dp),
+                                ) {
+                                    Text(it.name)
+                                } }
+                        }
+                    }
+
                     primaryParticipant.value?.let {
                         ParticipantCard(
                             participant = it,
                             videoViewLayout = VideoViewLayout.FIT,
-                            size = Size(300f, 250 * (16f / 9f))
+                            size = Size(150f, 150 * (16f / 9f))
                         )
                     }
 

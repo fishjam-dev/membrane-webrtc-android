@@ -4,6 +4,7 @@ import android.app.Notification
 import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjection
+import org.membraneframework.rtc.SimulcastConfig
 import org.membraneframework.rtc.media.screencast.ScreencastServiceConnector
 import org.webrtc.*
 import java.util.*
@@ -22,7 +23,8 @@ constructor(
     eglBase: EglBase,
     private val capturer: ScreenCapturerAndroid,
     private val videoParameters: VideoParameters,
-    callback: ProjectionCallback
+    val simulcastConfig: SimulcastConfig,
+    callback: ProjectionCallback,
 ): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack{
     private val screencastConnection = ScreencastServiceConnector(context)
 
@@ -78,9 +80,10 @@ constructor(
          *
          * @param context: context of the current application
          * @param factory: an instance of <strong>PeerConnectionFactory</strong> used for creating video sources and tracks
+         * @param simulcastConfig: simulcast configuration. By default simulcast is disabled.
          * @param eglBase: an instance of <strong>EglBase</strong> used for rendering the video
          */
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, mediaProjectionPermission: Intent, videoParameters: VideoParameters, onStopped: (track: LocalScreencastTrack) -> Unit): LocalScreencastTrack {
+        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, mediaProjectionPermission: Intent, videoParameters: VideoParameters, simulcastConfig: SimulcastConfig, onStopped: (track: LocalScreencastTrack) -> Unit): LocalScreencastTrack {
             val source = factory.createVideoSource(true)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
@@ -95,7 +98,7 @@ constructor(
                 source.capturerObserver
             )
 
-            val localScreencastTrack = LocalScreencastTrack(track, context, eglBase, capturer, videoParameters, callback)
+            val localScreencastTrack = LocalScreencastTrack(track, context, eglBase, capturer, videoParameters, simulcastConfig, callback)
             callback.addCallback {
                 onStopped(localScreencastTrack)
             }

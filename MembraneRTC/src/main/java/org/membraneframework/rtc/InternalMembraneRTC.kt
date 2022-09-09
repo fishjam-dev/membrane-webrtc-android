@@ -5,7 +5,10 @@ import android.content.Intent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.*
@@ -15,16 +18,18 @@ import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.transport.EventTransport
 import org.membraneframework.rtc.transport.EventTransportError
 import org.membraneframework.rtc.transport.EventTransportListener
-import org.membraneframework.rtc.utils.ClosableCoroutineScope
+import org.membraneframework.rtc.utils.*
 import org.webrtc.*
+import org.webrtc.AudioTrack
 import org.webrtc.PeerConnection.*
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
+import org.webrtc.RtpTransceiver.RtpTransceiverInit
+import org.webrtc.VideoTrack
+import org.webrtc.audio.AudioDeviceModule
 import timber.log.Timber
 import java.util.*
-import org.membraneframework.rtc.utils.*
+
 import org.membraneframework.rtc.utils.Metadata
-import org.webrtc.AudioTrack
-import org.webrtc.VideoTrack
 import kotlin.collections.HashMap
 
 internal class InternalMembraneRTC
@@ -36,9 +41,10 @@ constructor(
     private val listener: MembraneRTCListener,
     @Assisted
     private val defaultDispatcher: CoroutineDispatcher,
-    private val peerConnectionFactory: PeerConnectionFactory,
+    audioDeviceModule: AudioDeviceModule,
     private val eglBase: EglBase,
-    private val context: Context
+    private val context: Context,
+    appContext: Context
 ) : EventTransportListener, PeerConnection.Observer {
     private var transport: EventTransport = connectOptions.transport
 
@@ -65,6 +71,26 @@ constructor(
 
     private val coroutineScope: CoroutineScope =
         ClosableCoroutineScope(SupervisorJob() + defaultDispatcher)
+
+    private val peerConnectionFactory: PeerConnectionFactory
+
+    init {
+
+        PeerConnectionFactory.initialize(
+            PeerConnectionFactory.InitializationOptions
+                .builder(appContext)
+                .createInitializationOptions()
+        )
+
+        peerConnectionFactory = PeerConnectionFactory.builder()
+            .setAudioDeviceModule(audioDeviceModule)
+            .setVideoEncoderFactory(SimulcastVideoEncoderFactoryWrapper(
+                eglBase.eglBaseContext,
+                connectOptions.encoderOptions
+            ))
+            .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext))
+            .createPeerConnectionFactory()
+    }
 
     @AssistedFactory
     interface Factory {
@@ -104,12 +130,17 @@ constructor(
         }
     }
 
-    fun createLocalVideoTrack(videoParameters: VideoParameters, metadata: Metadata = mapOf()): LocalVideoTrack {
+    fun createLocalVideoTrack(
+        videoParameters: VideoParameters,
+        metadata: Metadata = mapOf(),
+        simulcastConfig: SimulcastConfig = SimulcastConfig(false)
+    ): LocalVideoTrack {
         val videoTrack = LocalVideoTrack.create(
             context,
             peerConnectionFactory,
             eglBase,
-            videoParameters
+            videoParameters,
+            simulcastConfig,
         ).also {
             it.start()
         }
@@ -131,10 +162,39 @@ constructor(
         return audioTrack
     }
 
-    fun createScreencastTrack(mediaProjectionPermission: Intent, videoParameters: VideoParameters, metadata: Metadata = mapOf(), onEnd: () -> Unit): LocalScreencastTrack? {
+    private fun getSendEncodingsFromConfig(simulcastConfig: SimulcastConfig): List<RtpParameters.Encoding> {
+        val sendEncodings = Constants.simulcastEncodings()
+        simulcastConfig.activeEncodings.forEach {
+            sendEncodings[it.ordinal].active = true
+        }
+        return sendEncodings
+    }
+
+    private fun addTrack(track: LocalTrack, streamIds: List<String>) {
+        val pc = peerConnection ?: return
+
+        val simulcastConfig = (track as? LocalVideoTrack)?.simulcastConfig ?: (track as? LocalScreencastTrack)?.simulcastConfig
+
+        val transceiverInit =  if(track.rtcTrack().kind() == "video" && simulcastConfig != null && simulcastConfig.enabled) {
+            val sendEncodings = getSendEncodingsFromConfig(simulcastConfig)
+            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds, sendEncodings)
+        } else {
+            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds)
+        }
+
+        pc.addTransceiver(track.rtcTrack(), transceiverInit)
+    }
+
+    fun createScreencastTrack(
+        mediaProjectionPermission: Intent,
+        videoParameters: VideoParameters,
+        metadata: Metadata = mapOf(),
+        simulcastConfig: SimulcastConfig = SimulcastConfig(false),
+        onEnd: () -> Unit
+    ): LocalScreencastTrack? {
         val pc = peerConnection ?: return null
 
-        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission, videoParameters) { track ->
+        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission, videoParameters, simulcastConfig) { track ->
             onEnd()
 
             removeTrack(track.id())
@@ -148,7 +208,9 @@ constructor(
             screencastTrack.start()
         }
 
-        pc.addTrack(screencastTrack.rtcTrack(), listOf(UUID.randomUUID().toString()))
+        val streamIds = listOf(UUID.randomUUID().toString())
+
+        addTrack(screencastTrack, streamIds)
 
         pc.enforceSendOnlyDirection()
 
@@ -197,15 +259,16 @@ constructor(
         val pc = peerConnectionFactory.createPeerConnection(config, this)
             ?: throw IllegalStateException("Failed to create a peerConnection")
 
+        this.peerConnection = pc
+
         val streamIds = listOf(UUID.randomUUID().toString())
 
         localTracks.forEach {
-            pc.addTrack(it.rtcTrack(), streamIds)
+            addTrack(it, streamIds)
         }
 
         pc.enforceSendOnlyDirection()
-
-        this.peerConnection = pc
+        
     }
 
     fun updatePeerMetadata(peerMetadata: Metadata) {
@@ -427,6 +490,23 @@ constructor(
 
             pc.setRemoteDescription(answer).onSuccess {
                 drainCandidates()
+                // temporary workaround, the backend doesn't add ~ in sdp answer
+                localTracks.forEach { localTrack ->
+                    if(localTrack.rtcTrack().kind() != "video") return@forEach
+                    var config: SimulcastConfig? = null
+                    if(localTrack is LocalVideoTrack) {
+                        config = localTrack.simulcastConfig
+                    } else if(localTrack is LocalScreencastTrack) {
+                        config = localTrack.simulcastConfig
+                    }
+                    listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H)
+                        .forEach {
+                            if (config?.activeEncodings?.contains(it) == false) {
+                                disableTrackEncoding(localTrack.id(), it)
+                            }
+                        }
+                }
+
             }
         }
     }
@@ -546,6 +626,34 @@ constructor(
         }
 
         return mapping
+    }
+
+    fun selectTrackEncoding(peerId: String, trackId: String, encoding: TrackEncoding) {
+        coroutineScope.launch {
+            transport.send(
+                SelectEncoding(
+                    peerId,
+                    trackId,
+                    encoding.rid
+                )
+            )
+        }
+    }
+
+    private fun setTrackEncoding(trackId: String, trackEncoding: TrackEncoding, enabled: Boolean) {
+        val sender = peerConnection?.senders?.find { it -> it.track()?.id() == trackId}
+        val params = sender?.parameters
+        val encoding = params?.encodings?.find { it.rid == trackEncoding.rid }
+        encoding?.active = enabled
+        sender?.parameters = params
+    }
+
+    fun enableTrackEncoding(trackId: String, encoding: TrackEncoding) {
+        setTrackEncoding(trackId, encoding, true)
+    }
+
+    fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
+        setTrackEncoding(trackId, encoding, false)
     }
 
     // PeerConnection callbacks

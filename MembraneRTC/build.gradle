@@ -54,7 +54,7 @@ dependencies {
     implementation deps.timber
     implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'com.github.dsrees:JavaPhoenixClient:1.0.0'
-    api 'com.github.webrtc-sdk:android:93.4577.01'
+    api 'com.github.webrtc-sdk:android:104.5112.01'
     implementation 'androidx.core:core:1.8.0'
 }
 

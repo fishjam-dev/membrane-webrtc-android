@@ -7,7 +7,6 @@ import org.webrtc.*
 import org.webrtc.audio.AudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule
 import timber.log.Timber
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -90,55 +89,4 @@ object RTCModule {
             .setAudioTrackStateCallback(audioTrackStateCallback)
             .createAudioDeviceModule()
     }
-
-    @Provides
-    fun videoEncoderFactory(
-        @Named(InjectedNames.OPTIONS_VIDEO_HW_ACCEL)
-        videoHwAccel: Boolean,
-        eglContext: EglBase.Context
-    ): VideoEncoderFactory {
-        return if (videoHwAccel) {
-            DefaultVideoEncoderFactory(eglContext, true, false)
-        } else {
-            SoftwareVideoEncoderFactory()
-        }
-    }
-
-    @Provides
-    fun videoDecoderFactory(
-        @Named(InjectedNames.OPTIONS_VIDEO_HW_ACCEL)
-        videoHwAccel: Boolean,
-        eglContext: EglBase.Context,
-    ): VideoDecoderFactory {
-        return if (videoHwAccel) {
-            DefaultVideoDecoderFactory(eglContext)
-        } else {
-            SoftwareVideoDecoderFactory()
-        }
-    }
-
-    @Singleton
-    @Provides
-    fun peerConnectionFactory(
-        appContext: Context,
-        audioDeviceModule: AudioDeviceModule,
-        videoEncoderFactory: VideoEncoderFactory,
-        videoDecoderFactory: VideoDecoderFactory
-    ): PeerConnectionFactory {
-        PeerConnectionFactory.initialize(
-            PeerConnectionFactory.InitializationOptions
-                .builder(appContext)
-                .createInitializationOptions()
-        )
-
-        return PeerConnectionFactory.builder()
-            .setAudioDeviceModule(audioDeviceModule)
-            .setVideoEncoderFactory(videoEncoderFactory)
-            .setVideoDecoderFactory(videoDecoderFactory)
-            .createPeerConnectionFactory()
-    }
-
-    @Provides
-    @Named(InjectedNames.OPTIONS_VIDEO_HW_ACCEL)
-    fun videoHwAccel() = true
 }
