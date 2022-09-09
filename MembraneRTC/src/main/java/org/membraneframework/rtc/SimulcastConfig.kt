@@ -21,7 +21,7 @@ data class SimulcastConfig(
     /**
      * Whether to simulcast track or not.
      */
-    val enabled: Boolean,
+    val enabled: Boolean = false,
     /**
      * List of initially active encodings.
      *

@@ -22,8 +22,7 @@ constructor(
     context: Context,
     eglBase: EglBase,
     private val capturer: ScreenCapturerAndroid,
-    private val videoParameters: VideoParameters,
-    val simulcastConfig: SimulcastConfig,
+    val videoParameters: VideoParameters,
     callback: ProjectionCallback,
 ): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack{
     private val screencastConnection = ScreencastServiceConnector(context)
@@ -38,7 +37,7 @@ constructor(
     }
 
     override fun start() {
-        capturer.startCapture(videoParameters.dimensions.width, videoParameters.dimensions.height, videoParameters.encoding.maxFps)
+        capturer.startCapture(videoParameters.dimensions.width, videoParameters.dimensions.height, videoParameters.maxFps)
     }
 
     override fun stop() {
@@ -83,7 +82,7 @@ constructor(
          * @param simulcastConfig: simulcast configuration. By default simulcast is disabled.
          * @param eglBase: an instance of <strong>EglBase</strong> used for rendering the video
          */
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, mediaProjectionPermission: Intent, videoParameters: VideoParameters, simulcastConfig: SimulcastConfig, onStopped: (track: LocalScreencastTrack) -> Unit): LocalScreencastTrack {
+        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, mediaProjectionPermission: Intent, videoParameters: VideoParameters, onStopped: (track: LocalScreencastTrack) -> Unit): LocalScreencastTrack {
             val source = factory.createVideoSource(true)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
@@ -98,7 +97,7 @@ constructor(
                 source.capturerObserver
             )
 
-            val localScreencastTrack = LocalScreencastTrack(track, context, eglBase, capturer, videoParameters, simulcastConfig, callback)
+            val localScreencastTrack = LocalScreencastTrack(track, context, eglBase, capturer, videoParameters, callback)
             callback.addCallback {
                 onStopped(localScreencastTrack)
             }

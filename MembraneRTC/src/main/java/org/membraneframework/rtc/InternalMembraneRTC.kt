@@ -31,6 +31,7 @@ import java.util.*
 
 import org.membraneframework.rtc.utils.Metadata
 import kotlin.collections.HashMap
+import kotlin.math.pow
 
 internal class InternalMembraneRTC
 @AssistedInject
@@ -133,14 +134,12 @@ constructor(
     fun createLocalVideoTrack(
         videoParameters: VideoParameters,
         metadata: Metadata = mapOf(),
-        simulcastConfig: SimulcastConfig = SimulcastConfig(false)
     ): LocalVideoTrack {
         val videoTrack = LocalVideoTrack.create(
             context,
             peerConnectionFactory,
             eglBase,
             videoParameters,
-            simulcastConfig,
         ).also {
             it.start()
         }
@@ -173,28 +172,83 @@ constructor(
     private fun addTrack(track: LocalTrack, streamIds: List<String>) {
         val pc = peerConnection ?: return
 
-        val simulcastConfig = (track as? LocalVideoTrack)?.simulcastConfig ?: (track as? LocalScreencastTrack)?.simulcastConfig
-
-        val transceiverInit =  if(track.rtcTrack().kind() == "video" && simulcastConfig != null && simulcastConfig.enabled) {
-            val sendEncodings = getSendEncodingsFromConfig(simulcastConfig)
-            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds, sendEncodings)
+        val videoParameters = (track as? LocalVideoTrack)?.videoParameters ?: (track as? LocalScreencastTrack)?.videoParameters
+        val simulcastConfig = videoParameters?.simulcastConfig
+        val sendEncodings = if(track.rtcTrack().kind() == "video" && simulcastConfig != null && simulcastConfig.enabled) {
+            getSendEncodingsFromConfig(simulcastConfig)
         } else {
-            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds)
+            listOf(RtpParameters.Encoding(null, true, null))
         }
 
+        if(videoParameters?.maxBitrate != null) {
+            applyBitrate(sendEncodings, videoParameters.maxBitrate)
+        }
+
+        val transceiverInit = RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, streamIds, sendEncodings)
         pc.addTransceiver(track.rtcTrack(), transceiverInit)
     }
+
+    private fun applyBitrate(encodings: List<RtpParameters.Encoding>, maxBitrate: TrackBandwidthLimit) {
+        when(maxBitrate) {
+            is TrackBandwidthLimit.BandwidthLimit -> splitBitrate(encodings, maxBitrate)
+            is TrackBandwidthLimit.SimulcastBandwidthLimit ->
+                encodings.forEach {
+                    val encodingLimit = maxBitrate.limit[it.rid]?.limit ?: 0
+                    it.maxBitrateBps = if (encodingLimit == 0) null else encodingLimit * 1024
+                }
+        }
+    }
+
+    private fun splitBitrate(encodings: List<RtpParameters.Encoding>, maxBitrate: TrackBandwidthLimit.BandwidthLimit) {
+        if(encodings.isEmpty()) return
+        if(maxBitrate.limit == 0) {
+            encodings.forEach { it.maxBitrateBps = null }
+            return
+        }
+
+        val k0 = encodings.minByOrNull { it.scaleResolutionDownBy ?: 1.0 }
+
+        val bitrateParts = encodings.sumOf { ((k0?.scaleResolutionDownBy ?: 1.0) / (it.scaleResolutionDownBy ?: 1.0)).pow(2) }
+
+        val x = maxBitrate.limit / bitrateParts
+
+        encodings.forEach {
+            it.maxBitrateBps = (x * ((k0?.scaleResolutionDownBy ?: 1.0)/(it.scaleResolutionDownBy ?: 1.0)).pow(2) * 1024).toInt()
+        }
+    }
+
+    fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit) {
+        val pc = peerConnection ?: return
+        val sender = pc.senders.find { it.track()?.id() == trackId} ?: return
+        val params = sender.parameters
+
+        applyBitrate(params.encodings, bandwidthLimit)
+
+        sender.parameters = params
+    }
+
+    fun setLayerBandwidth(trackId: String, layer: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+        val pc = peerConnection ?: return
+        val sender = pc.senders.find { it.track()?.id() == trackId} ?: return
+
+        val params = sender.parameters
+        val encoding = params.encodings.find { it.rid == layer } ?: return
+
+        encoding.maxBitrateBps = bandwidthLimit.limit * 1024
+
+        sender.parameters = params
+    }
+
 
     fun createScreencastTrack(
         mediaProjectionPermission: Intent,
         videoParameters: VideoParameters,
         metadata: Metadata = mapOf(),
-        simulcastConfig: SimulcastConfig = SimulcastConfig(false),
         onEnd: () -> Unit
     ): LocalScreencastTrack? {
         val pc = peerConnection ?: return null
 
-        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission, videoParameters, simulcastConfig) { track ->
+        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission, videoParameters) { track ->
             onEnd()
 
             removeTrack(track.id())
@@ -495,9 +549,9 @@ constructor(
                     if(localTrack.rtcTrack().kind() != "video") return@forEach
                     var config: SimulcastConfig? = null
                     if(localTrack is LocalVideoTrack) {
-                        config = localTrack.simulcastConfig
+                        config = localTrack.videoParameters.simulcastConfig
                     } else if(localTrack is LocalScreencastTrack) {
-                        config = localTrack.simulcastConfig
+                        config = localTrack.videoParameters.simulcastConfig
                     }
                     listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H)
                         .forEach {

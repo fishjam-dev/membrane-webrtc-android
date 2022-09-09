@@ -1,6 +1,6 @@
 package org.membraneframework.rtc.media
 
-import kotlin.math.abs
+import org.membraneframework.rtc.SimulcastConfig
 
 data class Dimensions(val width: Int, val height: Int) {
     fun flip(): Dimensions {
@@ -10,82 +10,100 @@ data class Dimensions(val width: Int, val height: Int) {
 
 /**
  * Represents a set of video encoding parameters
- * @property maxBitrate: specifies maximum bitrate of video stream
- * @property maxFps: specifies maximum frame rate of the video stream
+
  */
-public data class VideoEncoding(val maxBitrate: Int, val maxFps: Int)
 
 /**
  * A set of parameters representing a video feed.
+ *
+ * @property dimensions: specified width x height of the video
+ * @property maxBitrate: specifies maximum bitrate of video stream
+ * @property maxFps: specifies maximum frame rate of the video stream
+ * @property simulcastConfig: specifies the simulcast configuration, by default it's turned off
  * <p>
  * Contains a set of useful presets.
  */
-public data class VideoParameters(val dimensions: Dimensions, val encoding: VideoEncoding) {
+public data class VideoParameters(val dimensions: Dimensions, val maxBitrate: TrackBandwidthLimit, val maxFps: Int, val simulcastConfig: SimulcastConfig = SimulcastConfig()) {
     companion object {
         // 4:3 aspect ratio
         val presetQVGA43 = VideoParameters(
             dimensions = Dimensions(width = 240, height = 180),
-            encoding = VideoEncoding(maxBitrate = 90000, maxFps = 10)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(90),
+            maxFps = 10,
         )
         val presetVGA43 = VideoParameters(
             dimensions = Dimensions(width= 480, height= 360),
-            encoding= VideoEncoding(maxBitrate= 225_000, maxFps= 20)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(225),
+            maxFps = 20,
         )
         val presetQHD43 = VideoParameters(
             dimensions = Dimensions(width= 720, height= 540),
-            encoding= VideoEncoding(maxBitrate= 450_000, maxFps= 25)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(450),
+            maxFps = 25,
         )
         val presetHD43 = VideoParameters(
             dimensions = Dimensions(width= 960, height= 720),
-            encoding= VideoEncoding(maxBitrate= 1_500_000, maxFps= 30)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(1_500),
+            maxFps = 30,
         )
         val presetFHD43 = VideoParameters(
             dimensions = Dimensions(width= 1440, height= 1080),
-            encoding= VideoEncoding(maxBitrate= 2_800_000, maxFps= 30)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(2_800),
+            maxFps = 30,
         )
 
         // 16:9 aspect ratio
         val presetQVGA169 = VideoParameters(
             dimensions = Dimensions(width= 320, height= 180),
-            encoding= VideoEncoding(maxBitrate= 120_000, maxFps= 10)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(120),
+            maxFps = 10,
         )
         val presetVGA169 = VideoParameters(
             dimensions = Dimensions(width= 640, height= 360),
-            encoding= VideoEncoding(maxBitrate= 300_000, maxFps= 20)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(300),
+            maxFps = 20,
         )
         val presetQHD169 = VideoParameters(
             dimensions = Dimensions(width= 960, height= 540),
-            encoding= VideoEncoding(maxBitrate= 600_000, maxFps= 25)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(600),
+            maxFps = 25,
         )
         val presetHD169 = VideoParameters(
             dimensions = Dimensions(width= 1280, height= 720),
-            encoding= VideoEncoding(maxBitrate= 2_000_000, maxFps= 30)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(2_000),
+            maxFps = 30,
         )
-        val  presetFHD169 = VideoParameters(
+        val presetFHD169 = VideoParameters(
             dimensions = Dimensions(width= 1920, height= 1080),
-            encoding= VideoEncoding(maxBitrate= 3_000_000, maxFps= 30)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(3_000),
+            maxFps = 30,
         )
 
         // Screen share
         val presetScreenShareVGA = VideoParameters(
             dimensions = Dimensions(width= 640, height= 360),
-            encoding= VideoEncoding(maxBitrate= 200_000, maxFps= 3)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(200),
+            maxFps = 3,
         )
         val presetScreenShareHD5 = VideoParameters(
             dimensions = Dimensions(width= 1280, height= 720),
-            encoding= VideoEncoding(maxBitrate= 400_000, maxFps= 5)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(400),
+            maxFps = 5,
         )
         val presetScreenShareHD15 = VideoParameters(
             dimensions = Dimensions(width= 1280, height= 720),
-            encoding= VideoEncoding(maxBitrate= 1_000_000, maxFps= 15)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(1_000),
+            maxFps = 15,
         )
         val presetScreenShareFHD15 = VideoParameters(
             dimensions = Dimensions(width= 1920, height= 1080),
-            encoding= VideoEncoding(maxBitrate= 1_500_000, maxFps= 15)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(1_500),
+            maxFps = 15,
         )
         val presetScreenShareFHD30 = VideoParameters(
             dimensions = Dimensions(width= 1920, height= 1080),
-            encoding= VideoEncoding(maxBitrate= 3_000_000, maxFps= 30)
+            maxBitrate = TrackBandwidthLimit.BandwidthLimit(3_000),
+            maxFps = 30,
         )
 
         val presets43 = listOf(

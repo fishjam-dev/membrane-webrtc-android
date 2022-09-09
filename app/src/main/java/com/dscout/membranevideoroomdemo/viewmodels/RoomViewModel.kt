@@ -155,11 +155,11 @@ public class RoomViewModel(
             ))
 
             var videoParameters = VideoParameters.presetHD169
-            videoParameters = videoParameters.copy(dimensions = videoParameters.dimensions)
+            videoParameters = videoParameters.copy(dimensions = videoParameters.dimensions, simulcastConfig = videoSimulcastConfig.value)
 
             localVideoTrack = it.createVideoTrack(videoParameters, mapOf(
                 "user_id" to (localDisplayName ?: "")
-            ), videoSimulcastConfig.value)
+            ))
 
             it.join()
 
@@ -294,12 +294,12 @@ public class RoomViewModel(
 
         var videoParameters = VideoParameters.presetScreenShareHD15
         val dimensions = videoParameters.dimensions.flip()
-        videoParameters = videoParameters.copy(dimensions = dimensions)
+        videoParameters = videoParameters.copy(dimensions = dimensions, simulcastConfig = screencastSimulcastConfig.value)
 
         localScreencastTrack = room.value?.createScreencastTrack(mediaProjectionPermission, videoParameters, mapOf(
             "type" to "screensharing",
             "user_id" to (localDisplayName ?: ""),
-        ), screencastSimulcastConfig.value) {
+        )) {
             stopScreencast()
         }
 
