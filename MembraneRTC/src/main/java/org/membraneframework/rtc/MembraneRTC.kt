@@ -171,11 +171,11 @@ private constructor(
     /**
      * Updates maximum bandwidth for the given simulcast encoding of the given track.
      * @param trackId - track id of a video track
-     * @param layer - rid of the encoding
+     * @param encoding - rid of the encoding
      * @param bandwidthLimit - bandwidth in kbps
      */
-    public fun setEncodingBandwidth(trackId: String, layer: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
-        client.setEncodingBandwidth(trackId, layer, bandwidthLimit)
+    public fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+        client.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
     }
 
     companion object {

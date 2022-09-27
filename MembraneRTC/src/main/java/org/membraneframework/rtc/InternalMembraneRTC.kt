@@ -227,14 +227,14 @@ constructor(
         sender.parameters = params
     }
 
-    fun setEncodingBandwidth(trackId: String, layer: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+    fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         val pc = peerConnection ?: return
         val sender = pc.senders.find { it.track()?.id() == trackId} ?: return
 
         val params = sender.parameters
-        val encoding = params.encodings.find { it.rid == layer } ?: return
+        val encodingParameters = params.encodings.find { it.rid == encoding } ?: return
 
-        encoding.maxBitrateBps = bandwidthLimit.limit * 1024
+        encodingParameters.maxBitrateBps = bandwidthLimit.limit * 1024
 
         sender.parameters = params
     }
