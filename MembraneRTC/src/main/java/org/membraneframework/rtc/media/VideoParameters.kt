@@ -9,11 +9,6 @@ data class Dimensions(val width: Int, val height: Int) {
 }
 
 /**
- * Represents a set of video encoding parameters
-
- */
-
-/**
  * A set of parameters representing a video feed.
  *
  * @property dimensions: specified width x height of the video

@@ -217,7 +217,7 @@ constructor(
         }
     }
 
-    fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit) {
+    fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         val pc = peerConnection ?: return
         val sender = pc.senders.find { it.track()?.id() == trackId} ?: return
         val params = sender.parameters
@@ -227,7 +227,7 @@ constructor(
         sender.parameters = params
     }
 
-    fun setLayerBandwidth(trackId: String, layer: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+    fun setEncodingBandwidth(trackId: String, layer: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         val pc = peerConnection ?: return
         val sender = pc.senders.find { it.track()?.id() == trackId} ?: return
 

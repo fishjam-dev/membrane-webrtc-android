@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.Dispatchers
 import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
-import org.membraneframework.rtc.events.SelectEncoding
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.utils.Metadata
 
@@ -60,7 +59,7 @@ private constructor(
      * <p>
      * The client assumes that the user has already granted camera permissions.
      *
-     * @param videoParameters: a set of target parameters such as camera resolution or a frame rate
+     * @param videoParameters: a set of target parameters such as camera resolution, frame rate or simulcast configuration
      * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
      * @return an instance of the video track
      */
@@ -86,7 +85,7 @@ private constructor(
      * The method requires a media projection permission to be able to start the recording. The client assumes that the intent is valid.
      *
      * @param mediaProjectionPermission: a valid media projection permission intent that can be used to starting a screen capture
-     * @param videoParameters: a set of target parameters of the screen capture such as resolution and a frame rate
+     * @param videoParameters: a set of target parameters of the screen capture such as resolution, frame rate or simulcast configuration
      * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
      * @param onEnd: callback that will be invoked once the screen capture ends
      * @return an instance of the screencast track
@@ -165,7 +164,7 @@ private constructor(
      * @param trackId - track id of a video track
      * @param bandwidthLimit - bandwidth in kbps
      */
-    public fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit) {
+    public fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         client.setTrackBandwidth(trackId, bandwidthLimit)
     }
 
@@ -175,8 +174,8 @@ private constructor(
      * @param layer - rid of the encoding
      * @param bandwidthLimit - bandwidth in kbps
      */
-    public fun setLayerBandwidth(trackId: String, layer: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
-        client.setLayerBandwidth(trackId, layer, bandwidthLimit)
+    public fun setEncodingBandwidth(trackId: String, layer: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+        client.setEncodingBandwidth(trackId, layer, bandwidthLimit)
     }
 
     companion object {
