@@ -4,11 +4,7 @@ import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.Dispatchers
 import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
-import org.membraneframework.rtc.events.SelectEncoding
-import org.membraneframework.rtc.media.LocalAudioTrack
-import org.membraneframework.rtc.media.LocalScreencastTrack
-import org.membraneframework.rtc.media.LocalVideoTrack
-import org.membraneframework.rtc.media.VideoParameters
+import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.utils.Metadata
 
 /**
@@ -63,13 +59,12 @@ private constructor(
      * <p>
      * The client assumes that the user has already granted camera permissions.
      *
-     * @param videoParameters: a set of target parameters such as camera resolution or a frame rate
+     * @param videoParameters: a set of target parameters such as camera resolution, frame rate or simulcast configuration
      * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
-     * @param simulcastConfig: simulcast configuration. By default simulcast is disabled.
      * @return an instance of the video track
      */
-    public fun createVideoTrack(videoParameters: VideoParameters, metadata: Metadata, simulcastConfig: SimulcastConfig = SimulcastConfig(false)): LocalVideoTrack {
-        return client.createLocalVideoTrack(videoParameters, metadata, simulcastConfig)
+    public fun createVideoTrack(videoParameters: VideoParameters, metadata: Metadata): LocalVideoTrack {
+        return client.createLocalVideoTrack(videoParameters, metadata)
     }
 
     /**
@@ -90,14 +85,13 @@ private constructor(
      * The method requires a media projection permission to be able to start the recording. The client assumes that the intent is valid.
      *
      * @param mediaProjectionPermission: a valid media projection permission intent that can be used to starting a screen capture
-     * @param videoParameters: a set of target parameters of the screen capture such as resolution and a frame rate
+     * @param videoParameters: a set of target parameters of the screen capture such as resolution, frame rate or simulcast configuration
      * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
-     * @param simulcastConfig: simulcast configuration. By default simulcast is disabled.
      * @param onEnd: callback that will be invoked once the screen capture ends
      * @return an instance of the screencast track
      */
-    public fun createScreencastTrack(mediaProjectionPermission: Intent, videoParameters: VideoParameters, metadata: Metadata, simulcastConfig: SimulcastConfig = SimulcastConfig(false), onEnd: () -> Unit): LocalScreencastTrack? {
-        return client.createScreencastTrack(mediaProjectionPermission, videoParameters, metadata, simulcastConfig, onEnd)
+    public fun createScreencastTrack(mediaProjectionPermission: Intent, videoParameters: VideoParameters, metadata: Metadata, onEnd: () -> Unit): LocalScreencastTrack? {
+        return client.createScreencastTrack(mediaProjectionPermission, videoParameters, metadata, onEnd)
     }
 
     /**
@@ -161,6 +155,27 @@ private constructor(
      */
     public fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
         client.updateTrackMetadata(trackId, trackMetadata)
+    }
+
+    /**
+     * Updates maximum bandwidth for the track identified by trackId.
+     * This value directly translates to quality of the stream and, in case of video, to the amount of RTP packets being sent.
+     * In case trackId points at the simulcast track bandwidth is split between all of the variant streams proportionally to their resolution.
+     * @param trackId - track id of a video track
+     * @param bandwidthLimit - bandwidth in kbps
+     */
+    public fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+        client.setTrackBandwidth(trackId, bandwidthLimit)
+    }
+
+    /**
+     * Updates maximum bandwidth for the given simulcast encoding of the given track.
+     * @param trackId - track id of a video track
+     * @param encoding - rid of the encoding
+     * @param bandwidthLimit - bandwidth in kbps
+     */
+    public fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+        client.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
     }
 
     companion object {

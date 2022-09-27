@@ -15,10 +15,10 @@ constructor(
     mediaTrack: org.webrtc.VideoTrack,
     private val capturer: Capturer,
     eglBase: EglBase,
-    val simulcastConfig: SimulcastConfig,
+    val videoParameters: VideoParameters
 ): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
     companion object {
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, videoParameters: VideoParameters, simulcastConfig: SimulcastConfig): LocalVideoTrack {
+        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, videoParameters: VideoParameters): LocalVideoTrack {
             val source = factory.createVideoSource(false)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
@@ -30,7 +30,7 @@ constructor(
                 videoParameters = videoParameters
             )
 
-            return LocalVideoTrack(track, capturer, eglBase, simulcastConfig)
+            return LocalVideoTrack(track, capturer, eglBase, videoParameters)
         }
     }
 
@@ -83,7 +83,7 @@ class CameraCapturer constructor(
 
     override fun startCapture() {
         isCapturing = true
-        cameraCapturer.startCapture(size.width, size.height, videoParameters.encoding.maxFps)
+        cameraCapturer.startCapture(size.width, size.height, videoParameters.maxFps)
     }
 
     override fun stopCapture() {
