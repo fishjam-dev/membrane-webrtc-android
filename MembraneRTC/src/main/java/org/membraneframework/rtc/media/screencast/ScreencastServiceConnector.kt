@@ -54,7 +54,7 @@ class ScreencastServiceConnector(private val context: Context) {
 
         return suspendCancellableCoroutine {
             synchronized(this) {
-                if (connected)  {
+                if (connected) {
                     it.resume(Unit)
                 } else {
                     awaitingConnects.add(it)

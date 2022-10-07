@@ -90,7 +90,12 @@ private constructor(
      * @param onEnd: callback that will be invoked once the screen capture ends
      * @return an instance of the screencast track
      */
-    public fun createScreencastTrack(mediaProjectionPermission: Intent, videoParameters: VideoParameters, metadata: Metadata, onEnd: () -> Unit): LocalScreencastTrack? {
+    public fun createScreencastTrack(
+        mediaProjectionPermission: Intent,
+        videoParameters: VideoParameters,
+        metadata: Metadata,
+        onEnd: () -> Unit
+    ): LocalScreencastTrack? {
         return client.createScreencastTrack(mediaProjectionPermission, videoParameters, metadata, onEnd)
     }
 
@@ -134,6 +139,7 @@ private constructor(
     public fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.disableTrackEncoding(trackId, encoding)
     }
+
     /**
      * Updates the metadata for the current peer.
      * @param peerMetadata - Data about this peer that other peers will receive upon joining.
@@ -174,7 +180,11 @@ private constructor(
      * @param encoding - rid of the encoding
      * @param bandwidthLimit - bandwidth in kbps
      */
-    public fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+    public fun setEncodingBandwidth(
+        trackId: String,
+        encoding: String,
+        bandwidthLimit: TrackBandwidthLimit.BandwidthLimit
+    ) {
         client.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
     }
 
@@ -188,7 +198,6 @@ private constructor(
          * @return an instance of the client in connecting state
          */
         fun connect(appContext: Context, options: ConnectOptions, listener: MembraneRTCListener): MembraneRTC {
-
             val ctx = appContext.applicationContext
 
             val component = DaggerMembraneRTCComponent

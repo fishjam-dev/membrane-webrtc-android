@@ -15,9 +15,7 @@ inline fun <reified VM : ViewModel> FragmentActivity.viewModelByFactory(
     }
 }
 
-fun <VM> createViewModelFactoryFactory(
-    create: CreateViewModel<VM>
-): ViewModelProvider.Factory {
+fun <VM> createViewModelFactoryFactory(create: CreateViewModel<VM>): ViewModelProvider.Factory {
     return object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")

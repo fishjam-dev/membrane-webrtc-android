@@ -6,7 +6,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 
-
 fun AppButtonColors(): ButtonColors {
     return DefaultButtonColors(
         backgroundColor = Blue,

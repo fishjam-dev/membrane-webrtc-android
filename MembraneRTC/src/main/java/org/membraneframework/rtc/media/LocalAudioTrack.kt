@@ -3,7 +3,6 @@ package org.membraneframework.rtc.media
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnectionFactory
@@ -16,7 +15,7 @@ import java.util.*
  */
 public class LocalAudioTrack constructor(
     var mediaTrack: org.webrtc.AudioTrack
-): AudioTrack(mediaTrack), LocalTrack {
+) : AudioTrack(mediaTrack), LocalTrack {
 
     override fun start() {
     }
@@ -45,7 +44,7 @@ public class LocalAudioTrack constructor(
                 MediaConstraints.KeyValuePair("googAutoGainControl", "true"),
                 MediaConstraints.KeyValuePair("googHighpassFilter", "true"),
                 MediaConstraints.KeyValuePair("googNoiseSuppression", "true"),
-                MediaConstraints.KeyValuePair("googTypingNoiseDetection", "true"),
+                MediaConstraints.KeyValuePair("googTypingNoiseDetection", "true")
             )
 
             val audioConstraints = MediaConstraints()

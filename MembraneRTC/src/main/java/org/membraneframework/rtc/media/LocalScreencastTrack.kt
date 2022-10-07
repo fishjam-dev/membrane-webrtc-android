@@ -4,7 +4,6 @@ import android.app.Notification
 import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjection
-import org.membraneframework.rtc.SimulcastConfig
 import org.membraneframework.rtc.media.screencast.ScreencastServiceConnector
 import org.webrtc.*
 import java.util.*
@@ -23,8 +22,8 @@ constructor(
     eglBase: EglBase,
     private val capturer: ScreenCapturerAndroid,
     val videoParameters: VideoParameters,
-    callback: ProjectionCallback,
-): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack{
+    callback: ProjectionCallback
+) : VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
     private val screencastConnection = ScreencastServiceConnector(context)
 
     init {
@@ -37,7 +36,11 @@ constructor(
     }
 
     override fun start() {
-        capturer.startCapture(videoParameters.dimensions.width, videoParameters.dimensions.height, videoParameters.maxFps)
+        capturer.startCapture(
+            videoParameters.dimensions.width,
+            videoParameters.dimensions.height,
+            videoParameters.maxFps
+        )
     }
 
     override fun stop() {
@@ -56,8 +59,8 @@ constructor(
     /*
         MediaProjection callback wrapper holding several callbacks that
         will be invoked once the media projections stops.
-    */
-    class ProjectionCallback: MediaProjection.Callback() {
+     */
+    class ProjectionCallback : MediaProjection.Callback() {
         var callbacks: ArrayList<() -> Unit> = arrayListOf()
 
         override fun onStop() {
@@ -82,12 +85,18 @@ constructor(
          * @param simulcastConfig: simulcast configuration. By default simulcast is disabled.
          * @param eglBase: an instance of <strong>EglBase</strong> used for rendering the video
          */
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, mediaProjectionPermission: Intent, videoParameters: VideoParameters, onStopped: (track: LocalScreencastTrack) -> Unit): LocalScreencastTrack {
+        fun create(
+            context: Context,
+            factory: PeerConnectionFactory,
+            eglBase: EglBase,
+            mediaProjectionPermission: Intent,
+            videoParameters: VideoParameters,
+            onStopped: (track: LocalScreencastTrack) -> Unit
+        ): LocalScreencastTrack {
             val source = factory.createVideoSource(true)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
             val callback = ProjectionCallback()
-
 
             val capturer = ScreenCapturerAndroid(mediaProjectionPermission, callback)
 
@@ -97,7 +106,14 @@ constructor(
                 source.capturerObserver
             )
 
-            val localScreencastTrack = LocalScreencastTrack(track, context, eglBase, capturer, videoParameters, callback)
+            val localScreencastTrack = LocalScreencastTrack(
+                track,
+                context,
+                eglBase,
+                capturer,
+                videoParameters,
+                callback
+            )
             callback.addCallback {
                 onStopped(localScreencastTrack)
             }

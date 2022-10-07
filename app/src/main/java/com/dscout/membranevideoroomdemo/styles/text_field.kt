@@ -37,7 +37,6 @@ fun AppTextFieldColors(): TextFieldColors {
         disabledLabelColor = Color.Gray.darker(0.4f),
         errorLabelColor = Color.Red,
 
-
         backgroundColor = Blue.darker(0.4f),
         placeholderColor = Color.White.darker(0.3f),
         disabledPlaceholderColor = Color.Gray.darker(0.5f)
@@ -121,11 +120,7 @@ internal data class DefaultTextFieldColors(
     }
 
     @Composable
-    override fun labelColor(
-        enabled: Boolean,
-        error: Boolean,
-        interactionSource: InteractionSource
-    ): State<Color> {
+    override fun labelColor(enabled: Boolean, error: Boolean, interactionSource: InteractionSource): State<Color> {
         val focused by interactionSource.collectIsFocusedAsState()
 
         val targetValue = when {

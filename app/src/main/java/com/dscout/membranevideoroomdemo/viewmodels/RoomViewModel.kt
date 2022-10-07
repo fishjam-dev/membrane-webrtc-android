@@ -13,14 +13,12 @@ import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.transport.PhoenixTransport
-import org.membraneframework.rtc.utils.SocketConnectionParams
 import timber.log.Timber
 import java.util.*
 
-
-public class RoomViewModel(
+class RoomViewModel(
     val url: String,
-    application: Application,
+    application: Application
 ) : AndroidViewModel(application), MembraneRTCListener {
     // media tracks
     var localAudioTrack: LocalAudioTrack? = null
@@ -46,17 +44,26 @@ public class RoomViewModel(
     private val globalToLocalTrackId = HashMap<String, String>()
     private val params = mapOf<String, Any>("token" to "mocktoken")
 
-
-    val videoSimulcastConfig = MutableStateFlow(SimulcastConfig(enabled = true, activeEncodings = listOf(
-        TrackEncoding.L,
-        TrackEncoding.M,
-        TrackEncoding.H))
+    val videoSimulcastConfig = MutableStateFlow(
+        SimulcastConfig(
+            enabled = true,
+            activeEncodings = listOf(
+                TrackEncoding.L,
+                TrackEncoding.M,
+                TrackEncoding.H
+            )
+        )
     )
-    val screencastSimulcastConfig = MutableStateFlow(SimulcastConfig(enabled = true, activeEncodings = listOf(
-        TrackEncoding.L,
-        TrackEncoding.M,
-        TrackEncoding.H)
-    ))
+    val screencastSimulcastConfig = MutableStateFlow(
+        SimulcastConfig(
+            enabled = true,
+            activeEncodings = listOf(
+                TrackEncoding.L,
+                TrackEncoding.M,
+                TrackEncoding.H
+            )
+        )
+    )
 
     fun connect(roomName: String, displayName: String) {
         viewModelScope.launch {
@@ -70,11 +77,11 @@ public class RoomViewModel(
                     transport = PhoenixTransport(url, "room:$roomName", Dispatchers.IO, params),
                     config = mapOf("displayName" to displayName),
                     encoderOptions = EncoderOptions(
-                        encoderType = EncoderType.SOFTWARE,
+                        encoderType = EncoderType.SOFTWARE
                     )
                 ),
                 listener = this@RoomViewModel
-            );
+            )
         }
     }
 
@@ -93,13 +100,22 @@ public class RoomViewModel(
             it.id == participantId
         }?.let { it ->
             val primaryParticipantTrackId = primaryParticipant.value?.videoTrack?.id()
-            if(localVideoTrack?.id() != primaryParticipantTrackId && localScreencastTrack?.id() != primaryParticipantTrackId) {
-                val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == primaryParticipantTrackId }.keys.first()
-                primaryParticipant.value?.id?.let { it1 -> room.value?.selectTrackEncoding(it1, globalId, TrackEncoding.L) }
+            if (localVideoTrack?.id() != primaryParticipantTrackId &&
+                localScreencastTrack?.id() != primaryParticipantTrackId
+            ) {
+                val globalId =
+                    globalToLocalTrackId.filterValues { it1 -> it1 == primaryParticipantTrackId }.keys.first()
+                primaryParticipant.value?.id?.let { it1 ->
+                    room.value?.selectTrackEncoding(
+                        it1,
+                        globalId,
+                        TrackEncoding.L
+                    )
+                }
             }
             primaryParticipant.value = it
             val videoTrackId = it.videoTrack?.id()
-            if(localVideoTrack?.id() != it.videoTrack?.id() && localScreencastTrack?.id() != videoTrackId) {
+            if (localVideoTrack?.id() != it.videoTrack?.id() && localScreencastTrack?.id() != videoTrackId) {
                 val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == it.videoTrack?.id() }.keys.first()
                 room.value?.selectTrackEncoding(participantId, globalId, TrackEncoding.H)
             }
@@ -150,16 +166,24 @@ public class RoomViewModel(
     // MembraneRTCListener callbacks
     override fun onConnected() {
         room.value?.let {
-            localAudioTrack = it.createAudioTrack(mapOf(
-                "user_id" to (localDisplayName ?: "")
-            ))
+            localAudioTrack = it.createAudioTrack(
+                mapOf(
+                    "user_id" to (localDisplayName ?: "")
+                )
+            )
 
             var videoParameters = VideoParameters.presetHD169
-            videoParameters = videoParameters.copy(dimensions = videoParameters.dimensions, simulcastConfig = videoSimulcastConfig.value)
+            videoParameters = videoParameters.copy(
+                dimensions = videoParameters.dimensions,
+                simulcastConfig = videoSimulcastConfig.value
+            )
 
-            localVideoTrack = it.createVideoTrack(videoParameters, mapOf(
-                "user_id" to (localDisplayName ?: "")
-            ))
+            localVideoTrack = it.createVideoTrack(
+                videoParameters,
+                mapOf(
+                    "user_id" to (localDisplayName ?: "")
+                )
+            )
 
             it.join()
 
@@ -196,7 +220,14 @@ public class RoomViewModel(
                     globalToLocalTrackId[ctx.trackId] = (ctx.track as RemoteVideoTrack).id()
 
                     if (ctx.metadata["type"] == "screensharing") {
-                        Pair(ctx.trackId, participant.copy(id = ctx.trackId, displayName = "${participant.displayName} (screencast)", videoTrack = ctx.track as RemoteVideoTrack))
+                        Pair(
+                            ctx.trackId,
+                            participant.copy(
+                                id = ctx.trackId,
+                                displayName = "${participant.displayName} (screencast)",
+                                videoTrack = ctx.track as RemoteVideoTrack
+                            )
+                        )
                     } else {
                         Pair(ctx.peer.id, participant.copy(videoTrack = ctx.track as RemoteVideoTrack))
                     }
@@ -264,7 +295,10 @@ public class RoomViewModel(
     }
 
     override fun onPeerJoined(peer: Peer) {
-        mutableParticipants[peer.id] = Participant(id = peer.id, displayName = peer.metadata["displayName"] ?: "UNKNOWN")
+        mutableParticipants[peer.id] = Participant(
+            id = peer.id,
+            displayName = peer.metadata["displayName"] ?: "UNKNOWN"
+        )
 
         Timber.i("Peer has joined the room $peer")
     }
@@ -294,17 +328,28 @@ public class RoomViewModel(
 
         var videoParameters = VideoParameters.presetScreenShareHD15
         val dimensions = videoParameters.dimensions.flip()
-        videoParameters = videoParameters.copy(dimensions = dimensions, simulcastConfig = screencastSimulcastConfig.value)
+        videoParameters = videoParameters.copy(
+            dimensions = dimensions,
+            simulcastConfig = screencastSimulcastConfig.value
+        )
 
-        localScreencastTrack = room.value?.createScreencastTrack(mediaProjectionPermission, videoParameters, mapOf(
-            "type" to "screensharing",
-            "user_id" to (localDisplayName ?: ""),
-        )) {
+        localScreencastTrack = room.value?.createScreencastTrack(
+            mediaProjectionPermission,
+            videoParameters,
+            mapOf(
+                "type" to "screensharing",
+                "user_id" to (localDisplayName ?: "")
+            )
+        ) {
             stopScreencast()
         }
 
         localScreencastTrack?.let {
-            mutableParticipants[localScreencastId!!] = Participant(id = localScreencastId!!, displayName = "Me (screen cast)", videoTrack = it)
+            mutableParticipants[localScreencastId!!] = Participant(
+                id = localScreencastId!!,
+                displayName = "Me (screen cast)",
+                videoTrack = it
+            )
             emitParticipants()
         }
     }
@@ -325,10 +370,17 @@ public class RoomViewModel(
         }
     }
 
-    private fun toggleTrackEncoding(simulcastConfig: MutableStateFlow<SimulcastConfig>, trackId: String, encoding: TrackEncoding) {
-        if(simulcastConfig.value.activeEncodings.contains(encoding)) {
+    private fun toggleTrackEncoding(
+        simulcastConfig: MutableStateFlow<SimulcastConfig>,
+        trackId: String,
+        encoding: TrackEncoding
+    ) {
+        if (simulcastConfig.value.activeEncodings.contains(encoding)) {
             room.value?.disableTrackEncoding(trackId, encoding)
-            simulcastConfig.value = SimulcastConfig(true, simulcastConfig.value.activeEncodings.filter { it != encoding })
+            simulcastConfig.value = SimulcastConfig(
+                true,
+                simulcastConfig.value.activeEncodings.filter { it != encoding }
+            )
         } else {
             room.value?.enableTrackEncoding(trackId, encoding)
             simulcastConfig.value = SimulcastConfig(true, simulcastConfig.value.activeEncodings.plus(encoding))

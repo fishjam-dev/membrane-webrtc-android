@@ -8,7 +8,7 @@ class Constants {
             return listOf(
                 RtpParameters.Encoding("l", false, 4.0),
                 RtpParameters.Encoding("m", false, 2.0),
-                RtpParameters.Encoding("h", false, 1.0),
+                RtpParameters.Encoding("h", false, 1.0)
             )
         }
     }

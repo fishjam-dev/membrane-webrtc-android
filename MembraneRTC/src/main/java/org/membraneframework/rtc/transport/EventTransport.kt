@@ -5,10 +5,10 @@ import org.membraneframework.rtc.events.*
 /**
  * A base class of exceptions that can be emitted by the <strong>EventTransport</strong> implementations.
  */
-sealed class EventTransportError: Exception() {
-    data class Unauthorized(val reason: String): EventTransportError()
-    data class ConnectionError(val reason: String): EventTransportError()
-    data class Unexpected(val reason: String): EventTransportError()
+sealed class EventTransportError : Exception() {
+    data class Unauthorized(val reason: String) : EventTransportError()
+    data class ConnectionError(val reason: String) : EventTransportError()
+    data class Unexpected(val reason: String) : EventTransportError()
 
     override fun toString(): String {
         return when (this) {

@@ -13,7 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 
 // TODO: this is stolen, consider giving some props to livekit team
-class ScreencastService: Service() {
+class ScreencastService : Service() {
     private var binder: IBinder = ScreencastBinder()
     private var bindCount = 0
 

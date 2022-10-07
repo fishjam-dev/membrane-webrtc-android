@@ -8,7 +8,6 @@ import org.membraneframework.rtc.media.VideoTrack
 import org.membraneframework.rtc.ui.VideoTextureViewRenderer
 import org.webrtc.RendererCommon
 
-
 public enum class VideoViewLayout {
     FIT,
     FILL;
@@ -22,11 +21,7 @@ public enum class VideoViewLayout {
 }
 
 @Composable
-fun ParticipantVideoView(
-    participant: Participant,
-    videoViewLayout: VideoViewLayout,
-    modifier: Modifier = Modifier
-) {
+fun ParticipantVideoView(participant: Participant, videoViewLayout: VideoViewLayout, modifier: Modifier = Modifier) {
     var activeVideoTrack by remember { mutableStateOf<VideoTrack?>(null) }
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 

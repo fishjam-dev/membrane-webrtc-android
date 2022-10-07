@@ -40,7 +40,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 const val URL = "https://dscout-us.membrane.work/socket"
-//val URL = "http://192.168.83.26:4000/socket"
+// val URL = "http://192.168.83.26:4000/socket"
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,11 +63,10 @@ class MainActivity : AppCompatActivity() {
     @OptIn(ExperimentalComposeUiApi::class)
     @Preview(
         showBackground = true,
-        showSystemUi = true,
+        showSystemUi = true
     )
     @Composable
     fun MainContent(onConnect: (String, String) -> Unit = { _, _ -> }) {
-
         val scrollableState = rememberScrollState()
         val roomName = remember { mutableStateOf(TextFieldValue("room")) }
         val displayName = remember { mutableStateOf(TextFieldValue("Android User")) }
@@ -78,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         val keyboardController = LocalSoftwareKeyboardController.current
 
         Scaffold(
-            modifier = Modifier .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             backgroundColor = Blue.darker(0.5f)
         ) {
             Column(
@@ -93,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                 Image(
                     painter = painterResource(R.drawable.logo),
                     contentDescription = "Application logo",
-                    modifier= Modifier
+                    modifier = Modifier
                         .height(200.dp)
                         .fillMaxWidth(0.9f)
                 )
@@ -103,11 +102,11 @@ class MainActivity : AppCompatActivity() {
                     shape = RoundedCornerShape(12.dp),
                     colors = AppTextFieldColors(),
                     value = roomName.value,
-                    onValueChange =  { roomName.value = it},
-                    placeholder = { Text("Room name...")},
+                    onValueChange = { roomName.value = it },
+                    placeholder = { Text("Room name...") },
                     label = { Text("Room name") },
                     modifier = Modifier.focusOrder(first) { down = second },
-                    keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next ),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     )
@@ -118,11 +117,11 @@ class MainActivity : AppCompatActivity() {
                     shape = RoundedCornerShape(12.dp),
                     colors = AppTextFieldColors(),
                     value = displayName.value,
-                    onValueChange =  { displayName.value = it},
-                    placeholder = { Text("Display name...")},
+                    onValueChange = { displayName.value = it },
+                    placeholder = { Text("Display name...") },
                     label = { Text("Display name") },
                     modifier = Modifier.focusOrder(second) { down = third },
-                    keyboardOptions = KeyboardOptions( imeAction = ImeAction.Next ),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     )
@@ -138,7 +137,7 @@ class MainActivity : AppCompatActivity() {
 
                             onConnect(roomName.value.text, displayName.value.text)
                         },
-                        enabled =  !(roomName.value.text.isEmpty() || displayName.value.text.isEmpty()),
+                        enabled = !(roomName.value.text.isEmpty() || displayName.value.text.isEmpty()),
                         colors = AppButtonColors(),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
@@ -189,7 +188,7 @@ class MainActivity : AppCompatActivity() {
                     shape = RoundedCornerShape(12.dp),
                     onClick = {
                         if (!multiplePermissionsState.shouldShowRationale && alreadyRequested.value) {
-                            val intent =  Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                             intent.addCategory(Intent.CATEGORY_DEFAULT)
                             intent.data = Uri.parse("package:$packageName")
 
