@@ -145,7 +145,7 @@ class RoomActivity : AppCompatActivity() {
                         ParticipantCard(
                             participant = it,
                             videoViewLayout = VideoViewLayout.FIT,
-                            size = Size(150f, 150 * (16f / 9f))
+                            size = Size(200f, 200 * (16f / 9f))
                         )
                     }
 
@@ -204,15 +204,18 @@ fun ParticipantCard(
         ) {
             onClick?.invoke()
         }
+            .clip(RoundedCornerShape(10.dp))
+            .height(size.height.dp)
+            .width(size.width.dp)
+            .background(Blue.darker(0.7f))
     ) {
         ParticipantVideoView(
             participant = participant,
             videoViewLayout = videoViewLayout ,
             modifier = Modifier
-                .padding(10.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .height(size.height.dp)
-                .width(size.width.dp)
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .fillMaxHeight()
                 .background(Blue.darker(0.7f))
         )
 
