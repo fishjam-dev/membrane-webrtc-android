@@ -1,4 +1,4 @@
 #!/bin/bash
 brew install ktlint release-it
-ktlint installGitPreCommitHook
+cp .githooks/* .git/hooks/
 chmod +x ./.git/hooks/pre-commit
