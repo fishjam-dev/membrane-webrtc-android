@@ -4,7 +4,8 @@ import org.webrtc.EglBase
 import org.webrtc.MediaStreamTrack
 import org.webrtc.VideoSink
 
-open class VideoTrack(protected val videoTrack: org.webrtc.VideoTrack, val eglContext: EglBase.Context): MediaTrackProvider {
+open class VideoTrack(protected val videoTrack: org.webrtc.VideoTrack, val eglContext: EglBase.Context) :
+    MediaTrackProvider {
     override fun id(): String {
         return videoTrack.id()
     }

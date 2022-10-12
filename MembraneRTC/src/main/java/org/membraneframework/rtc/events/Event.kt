@@ -11,17 +11,17 @@ import timber.log.Timber
 
 val gson = Gson()
 
-//convert a data class to a map
+// convert a data class to a map
 fun <T> T.serializeToMap(): Map<String, Any?> {
     return convert()
 }
 
-//convert a map to a data class
+// convert a map to a data class
 inline fun <reified T> Map<String, Any?>.toDataClass(): T {
     return convert()
 }
 
-//convert an object of type I to type O
+// convert an object of type I to type O
 inline fun <I, reified O> I.convert(): O {
     val json = gson.toJson(this)
     return gson.fromJson(json, object : TypeToken<O>() {}.type)
@@ -29,15 +29,17 @@ inline fun <I, reified O> I.convert(): O {
 
 sealed class SendableEvent
 
-data class Join(val type: String, val data: Data): SendableEvent() {
+data class Join(val type: String, val data: Data) : SendableEvent() {
     data class Data(val metadata: Metadata)
 
-    constructor(metadata: Metadata): this("join", Data(metadata))
+    constructor(metadata: Metadata) : this("join", Data(metadata))
 }
 
-data class SdpOffer(val type: String, val data: Payload): SendableEvent() {
-    constructor(sdp: String, trackIdToTrackMetadata: Map<String, Metadata>, midToTrackId: Map<String, String>):
-            this("custom", mapOf(
+data class SdpOffer(val type: String, val data: Payload) : SendableEvent() {
+    constructor(sdp: String, trackIdToTrackMetadata: Map<String, Metadata>, midToTrackId: Map<String, String>) :
+        this(
+            "custom",
+            mapOf(
                 "type" to "sdpOffer",
                 "data" to mapOf(
                     "sdpOffer" to mapOf(
@@ -48,76 +50,96 @@ data class SdpOffer(val type: String, val data: Payload): SendableEvent() {
                     "midToTrackId" to midToTrackId
                 )
 
-            ))
+            )
+        )
 }
 
-data class LocalCandidate(val type: String, val data: Payload): SendableEvent() {
-    constructor(candidate: String, sdpMLineIndex: Int):
-            this("custom", mapOf(
+data class LocalCandidate(val type: String, val data: Payload) : SendableEvent() {
+    constructor(candidate: String, sdpMLineIndex: Int) :
+        this(
+            "custom",
+            mapOf(
                 "type" to "candidate",
                 "data" to mapOf(
                     "candidate" to candidate,
                     "sdpMLineIndex" to sdpMLineIndex
                 )
-            ))
-}
-
-data class RenegotiateTracks(val type: String, val data: Payload): SendableEvent() {
-    constructor():
-            this("custom", mapOf(
-                    "type" to "renegotiateTracks"
-                )
             )
+        )
 }
 
-data class SelectEncoding(val type: String, val data: Payload): SendableEvent() {
-    constructor(trackId: String, encoding: String):
-            this("custom", mapOf(
+data class RenegotiateTracks(val type: String, val data: Payload) : SendableEvent() {
+    constructor() :
+        this(
+            "custom",
+            mapOf(
+                "type" to "renegotiateTracks"
+            )
+        )
+}
+
+data class SelectEncoding(val type: String, val data: Payload) : SendableEvent() {
+    constructor(trackId: String, encoding: String) :
+        this(
+            "custom",
+            mapOf(
                 "type" to "setTargetTrackVariant",
                 "data" to mapOf(
                     "trackId" to trackId,
                     "variant" to encoding
                 )
-            ))
+            )
+        )
 }
 
-data class UpdatePeerMetadata(val type: String, val data: Data): SendableEvent() {
+data class UpdatePeerMetadata(val type: String, val data: Data) : SendableEvent() {
     data class Data(val metadata: Metadata)
 
-    constructor(metadata: Metadata): this("updatePeerMetadata", Data(metadata))
+    constructor(metadata: Metadata) : this("updatePeerMetadata", Data(metadata))
 }
 
-data class UpdateTrackMetadata(val type: String, val data: Data): SendableEvent() {
+data class UpdateTrackMetadata(val type: String, val data: Data) : SendableEvent() {
     data class Data(val trackId: String, val trackMetadata: Metadata)
 
-    constructor(trackId: String, trackMetadata: Metadata): this("updateTrackMetadata", Data(trackId, trackMetadata))
+    constructor(trackId: String, trackMetadata: Metadata) : this("updateTrackMetadata", Data(trackId, trackMetadata))
 }
 
 public enum class ReceivableEventType() {
     @SerializedName("peerAccepted")
     PeerAccepted,
+
     @SerializedName("peerDenied")
     PeerDenied,
+
     @SerializedName("peerJoined")
     PeerJoined,
+
     @SerializedName("peerLeft")
     PeerLeft,
+
     @SerializedName("peerUpdated")
     PeerUpdated,
+
     @SerializedName("custom")
     Custom,
+
     @SerializedName("offerData")
     OfferData,
+
     @SerializedName("candidate")
     Candidate,
+
     @SerializedName("tracksAdded")
     TracksAdded,
+
     @SerializedName("tracksRemoved")
     TracksRemoved,
+
     @SerializedName("trackUpdated")
     TrackUpdated,
+
     @SerializedName("sdpAnswer")
-    SdpAnswer,
+    SdpAnswer
 }
 
 internal data class BaseReceivableEvent(val type: ReceivableEventType)
@@ -175,7 +197,7 @@ sealed class ReceivableEvent {
                     else ->
                         null
                 }
-            } catch(e: JsonParseException) {
+            } catch (e: JsonParseException) {
                 Timber.e(e)
                 return null
             }
@@ -183,52 +205,58 @@ sealed class ReceivableEvent {
     }
 }
 
-data class PeerAccepted(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
-    data class Data(val id : String, val peersInRoom: List<Peer>)
+data class PeerAccepted(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(val id: String, val peersInRoom: List<Peer>)
 }
 
-data class PeerDenied(val type: ReceivableEventType): ReceivableEvent() { }
+data class PeerDenied(val type: ReceivableEventType) : ReceivableEvent()
 
-data class PeerJoined(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
+data class PeerJoined(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val peer: Peer)
 }
 
-data class PeerLeft(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
+data class PeerLeft(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val peerId: String)
 }
 
-data class PeerUpdated(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
+data class PeerUpdated(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val peerId: String, val metadata: Metadata)
 }
 
-data class OfferData(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
-    data class TurnServer(val username: String, val password: String, val serverAddr: String, val serverPort: UInt, val transport: String)
+data class OfferData(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class TurnServer(
+        val username: String,
+        val password: String,
+        val serverAddr: String,
+        val serverPort: UInt,
+        val transport: String
+    )
 
     data class Data(val integratedTurnServers: List<TurnServer>, val tracksTypes: Map<String, Int>)
 }
 
-data class TracksAdded(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
+data class TracksAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val peerId: String, val trackIdToMetadata: Map<String, Metadata>)
 }
 
-data class TracksRemoved(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
+data class TracksRemoved(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val peerId: String, val trackIds: List<String>)
 }
 
-data class TrackUpdated(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
+data class TrackUpdated(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val peerId: String, val trackId: String, val metadata: Metadata)
 }
 
-data class SdpAnswer(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
+data class SdpAnswer(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val type: String, val sdp: String, val midToTrackId: Map<String, String>)
 }
 
-data class RemoteCandidate(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
+data class RemoteCandidate(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val candidate: String, val sdpMLineIndex: Int, val sdpMid: String?)
 }
 
-data class BaseCustomEvent(val type: ReceivableEventType, val data: Data): ReceivableEvent() {
+data class BaseCustomEvent(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val type: ReceivableEventType)
 }
 
-class CustomEvent<Event: ReceivableEvent>(val type: ReceivableEventType, val data: Event)
+class CustomEvent<Event : ReceivableEvent>(val type: ReceivableEventType, val data: Event)

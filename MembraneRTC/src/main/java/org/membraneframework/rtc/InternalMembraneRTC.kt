@@ -28,9 +28,6 @@ import org.webrtc.VideoTrack
 import org.webrtc.audio.AudioDeviceModule
 import timber.log.Timber
 import java.util.*
-
-import org.membraneframework.rtc.utils.Metadata
-import kotlin.collections.HashMap
 import kotlin.math.pow
 
 internal class InternalMembraneRTC
@@ -69,7 +66,6 @@ constructor(
     private var queuedRemoteCandidates: MutableList<IceCandidate>? = null
     private val qrcMutex = Mutex()
 
-
     private val coroutineScope: CoroutineScope =
         ClosableCoroutineScope(SupervisorJob() + defaultDispatcher)
 
@@ -85,10 +81,12 @@ constructor(
 
         peerConnectionFactory = PeerConnectionFactory.builder()
             .setAudioDeviceModule(audioDeviceModule)
-            .setVideoEncoderFactory(SimulcastVideoEncoderFactoryWrapper(
-                eglBase.eglBaseContext,
-                connectOptions.encoderOptions
-            ))
+            .setVideoEncoderFactory(
+                SimulcastVideoEncoderFactoryWrapper(
+                    eglBase.eglBaseContext,
+                    connectOptions.encoderOptions
+                )
+            )
             .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext))
             .createPeerConnectionFactory()
     }
@@ -125,21 +123,17 @@ constructor(
     }
 
     fun join() {
-
         coroutineScope.launch {
             transport.send(Join(localPeer.metadata))
         }
     }
 
-    fun createLocalVideoTrack(
-        videoParameters: VideoParameters,
-        metadata: Metadata = mapOf(),
-    ): LocalVideoTrack {
+    fun createLocalVideoTrack(videoParameters: VideoParameters, metadata: Metadata = mapOf()): LocalVideoTrack {
         val videoTrack = LocalVideoTrack.create(
             context,
             peerConnectionFactory,
             eglBase,
-            videoParameters,
+            videoParameters
         ).also {
             it.start()
         }
@@ -172,15 +166,17 @@ constructor(
     private fun addTrack(track: LocalTrack, streamIds: List<String>) {
         val pc = peerConnection ?: return
 
-        val videoParameters = (track as? LocalVideoTrack)?.videoParameters ?: (track as? LocalScreencastTrack)?.videoParameters
+        val videoParameters =
+            (track as? LocalVideoTrack)?.videoParameters ?: (track as? LocalScreencastTrack)?.videoParameters
         val simulcastConfig = videoParameters?.simulcastConfig
-        val sendEncodings = if(track.rtcTrack().kind() == "video" && simulcastConfig != null && simulcastConfig.enabled) {
-            getSendEncodingsFromConfig(simulcastConfig)
-        } else {
-            listOf(RtpParameters.Encoding(null, true, null))
-        }
+        val sendEncodings =
+            if (track.rtcTrack().kind() == "video" && simulcastConfig != null && simulcastConfig.enabled) {
+                getSendEncodingsFromConfig(simulcastConfig)
+            } else {
+                listOf(RtpParameters.Encoding(null, true, null))
+            }
 
-        if(videoParameters?.maxBitrate != null) {
+        if (videoParameters?.maxBitrate != null) {
             applyBitrate(sendEncodings, videoParameters.maxBitrate)
         }
 
@@ -189,7 +185,7 @@ constructor(
     }
 
     private fun applyBitrate(encodings: List<RtpParameters.Encoding>, maxBitrate: TrackBandwidthLimit) {
-        when(maxBitrate) {
+        when (maxBitrate) {
             is TrackBandwidthLimit.BandwidthLimit -> splitBitrate(encodings, maxBitrate)
             is TrackBandwidthLimit.SimulcastBandwidthLimit ->
                 encodings.forEach {
@@ -200,26 +196,31 @@ constructor(
     }
 
     private fun splitBitrate(encodings: List<RtpParameters.Encoding>, maxBitrate: TrackBandwidthLimit.BandwidthLimit) {
-        if(encodings.isEmpty()) return
-        if(maxBitrate.limit == 0) {
+        if (encodings.isEmpty()) return
+        if (maxBitrate.limit == 0) {
             encodings.forEach { it.maxBitrateBps = null }
             return
         }
 
         val k0 = encodings.minByOrNull { it.scaleResolutionDownBy ?: 1.0 }
 
-        val bitrateParts = encodings.sumOf { ((k0?.scaleResolutionDownBy ?: 1.0) / (it.scaleResolutionDownBy ?: 1.0)).pow(2) }
+        val bitrateParts = encodings.sumOf {
+            ((k0?.scaleResolutionDownBy ?: 1.0) / (it.scaleResolutionDownBy ?: 1.0)).pow(
+                2
+            )
+        }
 
         val x = maxBitrate.limit / bitrateParts
 
         encodings.forEach {
-            it.maxBitrateBps = (x * ((k0?.scaleResolutionDownBy ?: 1.0)/(it.scaleResolutionDownBy ?: 1.0)).pow(2) * 1024).toInt()
+            it.maxBitrateBps =
+                (x * ((k0?.scaleResolutionDownBy ?: 1.0) / (it.scaleResolutionDownBy ?: 1.0)).pow(2) * 1024).toInt()
         }
     }
 
     fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         val pc = peerConnection ?: return
-        val sender = pc.senders.find { it.track()?.id() == trackId} ?: return
+        val sender = pc.senders.find { it.track()?.id() == trackId } ?: return
         val params = sender.parameters
 
         applyBitrate(params.encodings, bandwidthLimit)
@@ -229,7 +230,7 @@ constructor(
 
     fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         val pc = peerConnection ?: return
-        val sender = pc.senders.find { it.track()?.id() == trackId} ?: return
+        val sender = pc.senders.find { it.track()?.id() == trackId } ?: return
 
         val params = sender.parameters
         val encodingParameters = params.encodings.find { it.rid == encoding } ?: return
@@ -239,7 +240,6 @@ constructor(
         sender.parameters = params
     }
 
-
     fun createScreencastTrack(
         mediaProjectionPermission: Intent,
         videoParameters: VideoParameters,
@@ -248,7 +248,13 @@ constructor(
     ): LocalScreencastTrack? {
         val pc = peerConnection ?: return null
 
-        val screencastTrack = LocalScreencastTrack.create(context, peerConnectionFactory, eglBase, mediaProjectionPermission, videoParameters) { track ->
+        val screencastTrack = LocalScreencastTrack.create(
+            context,
+            peerConnectionFactory,
+            eglBase,
+            mediaProjectionPermission,
+            videoParameters
+        ) { track ->
             onEnd()
 
             removeTrack(track.id())
@@ -322,7 +328,6 @@ constructor(
         }
 
         pc.enforceSendOnlyDirection()
-        
     }
 
     fun updatePeerMetadata(peerMetadata: Metadata) {
@@ -469,7 +474,6 @@ constructor(
             else ->
                 Timber.e("Failed to process unknown event: $event")
         }
-
     }
 
     override fun onError(error: EventTransportError) {
@@ -515,7 +519,6 @@ constructor(
                 Timber.i("Setting local description")
                 pc.setLocalDescription(offer).getOrThrow()
 
-
                 Timber.i("Sending an offer")
                 transport.send(
                     SdpOffer(
@@ -529,7 +532,6 @@ constructor(
             }
         }
     }
-
 
     private suspend fun onSdpAnswer(sdpAnswer: SdpAnswer) {
         val pc = peerConnection ?: return
@@ -546,11 +548,11 @@ constructor(
                 drainCandidates()
                 // temporary workaround, the backend doesn't add ~ in sdp answer
                 localTracks.forEach { localTrack ->
-                    if(localTrack.rtcTrack().kind() != "video") return@forEach
+                    if (localTrack.rtcTrack().kind() != "video") return@forEach
                     var config: SimulcastConfig? = null
-                    if(localTrack is LocalVideoTrack) {
+                    if (localTrack is LocalVideoTrack) {
                         config = localTrack.videoParameters.simulcastConfig
-                    } else if(localTrack is LocalScreencastTrack) {
+                    } else if (localTrack is LocalScreencastTrack) {
                         config = localTrack.videoParameters.simulcastConfig
                     }
                     listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H)
@@ -560,7 +562,6 @@ constructor(
                             }
                         }
                 }
-
             }
         }
     }
@@ -612,9 +613,13 @@ constructor(
 
         this.iceServers = integratedTurnServers.map {
             val url = listOf(
-                "turn", ":",
-                it.serverAddr, ":",
-                it.serverPort.toString(), "?transport=", it.transport
+                "turn",
+                ":",
+                it.serverAddr,
+                ":",
+                it.serverPort.toString(),
+                "?transport=",
+                it.transport
             ).joinToString("")
 
             IceServer
@@ -624,7 +629,7 @@ constructor(
                 .createIceServer()
         }
 
-        val config =  RTCConfiguration(iceServers)
+        val config = RTCConfiguration(iceServers)
         config.iceTransportsType = IceTransportsType.RELAY
         this.config = config
     }
@@ -694,7 +699,7 @@ constructor(
     }
 
     private fun setTrackEncoding(trackId: String, trackEncoding: TrackEncoding, enabled: Boolean) {
-        val sender = peerConnection?.senders?.find { it -> it.track()?.id() == trackId}
+        val sender = peerConnection?.senders?.find { it -> it.track()?.id() == trackId }
         val params = sender?.parameters
         val encoding = params?.encodings?.find { it.rid == trackEncoding.rid }
         encoding?.active = enabled
@@ -758,7 +763,8 @@ constructor(
         val mid = transceiver.mid
 
         val trackId = midToTrackId[mid] ?: return // throw IllegalStateException("onAddTrack track has not been found")
-        val trackContext = trackContexts[trackId] ?: return // throw IllegalStateException("onAddTrack track context has not been found")
+        val trackContext = trackContexts[trackId]
+            ?: return // throw IllegalStateException("onAddTrack track context has not been found")
 
         val newTrackContext = when (val track = receiver!!.track()) {
             is VideoTrack ->
@@ -788,7 +794,6 @@ constructor(
         Timber.d("Renegotiation needed")
     }
 }
-
 
 /**
  * Enforces `SEND_ONLY` direction in case of `SEND_RECV` transceivers.

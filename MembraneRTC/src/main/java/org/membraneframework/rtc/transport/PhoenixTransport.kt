@@ -74,7 +74,9 @@ public class PhoenixTransport constructor(
                 joinContinuation?.resumeWith(Result.success(Unit))
             }
             ?.receive("error") { _ ->
-                joinContinuation?.resumeWith(Result.failure(EventTransportError.Unauthorized("couldn't join phoenix channel")))
+                joinContinuation?.resumeWith(
+                    Result.failure(EventTransportError.Unauthorized("couldn't join phoenix channel"))
+                )
             }
 
         channel?.on("mediaEvent") { message ->

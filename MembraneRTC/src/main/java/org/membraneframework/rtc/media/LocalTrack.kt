@@ -1,6 +1,6 @@
 package org.membraneframework.rtc.media
 
-interface LocalTrack: MediaTrackProvider {
+interface LocalTrack : MediaTrackProvider {
     fun start()
     fun stop()
     fun enabled(): Boolean

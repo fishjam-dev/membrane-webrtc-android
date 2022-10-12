@@ -1,7 +1,6 @@
 package org.membraneframework.rtc.media
 
 import android.content.Context
-import org.membraneframework.rtc.SimulcastConfig
 import org.webrtc.*
 import java.util.*
 
@@ -16,12 +15,16 @@ constructor(
     private val capturer: Capturer,
     eglBase: EglBase,
     val videoParameters: VideoParameters
-): VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
+) : VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
     companion object {
-        fun create(context: Context, factory: PeerConnectionFactory, eglBase: EglBase, videoParameters: VideoParameters): LocalVideoTrack {
+        fun create(
+            context: Context,
+            factory: PeerConnectionFactory,
+            eglBase: EglBase,
+            videoParameters: VideoParameters
+        ): LocalVideoTrack {
             val source = factory.createVideoSource(false)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
-
 
             val capturer = CameraCapturer(
                 context = context,
@@ -59,15 +62,14 @@ interface Capturer {
     fun capturer(): VideoCapturer
     fun startCapture()
     fun stopCapture()
-
 }
 
 class CameraCapturer constructor(
     private val context: Context,
     private val source: VideoSource,
     private val rootEglBase: EglBase,
-    private val videoParameters: VideoParameters,
-): Capturer, CameraVideoCapturer.CameraSwitchHandler {
+    private val videoParameters: VideoParameters
+) : Capturer, CameraVideoCapturer.CameraSwitchHandler {
     private lateinit var cameraCapturer: CameraVideoCapturer
     private lateinit var size: Size
     private var frontFacing = true
@@ -107,7 +109,6 @@ class CameraCapturer constructor(
             if (enumerator.isFrontFacing(deviceName)) {
                 this.cameraCapturer = enumerator.createCapturer(deviceName, null)
 
-
                 this.cameraCapturer.initialize(
                     SurfaceTextureHelper.create("CameraCaptureThread", rootEglBase.eglBaseContext),
                     context,
@@ -115,10 +116,14 @@ class CameraCapturer constructor(
                 )
 
                 val sizes = enumerator.getSupportedFormats(deviceName)
-                    ?.map { Size(it.width, it.height)}
+                    ?.map { Size(it.width, it.height) }
                     ?: emptyList()
 
-                this.size = CameraEnumerationAndroid.getClosestSupportedSize(sizes, videoParameters.dimensions.width, videoParameters.dimensions.height)
+                this.size = CameraEnumerationAndroid.getClosestSupportedSize(
+                    sizes,
+                    videoParameters.dimensions.width,
+                    videoParameters.dimensions.height
+                )
 
                 break
             }

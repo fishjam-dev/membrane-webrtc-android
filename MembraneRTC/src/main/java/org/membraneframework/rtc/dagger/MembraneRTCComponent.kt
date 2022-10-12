@@ -3,10 +3,8 @@ package org.membraneframework.rtc.dagger
 import android.content.Context
 import dagger.BindsInstance
 import dagger.Component
-import org.membraneframework.rtc.ConnectOptions
 import org.membraneframework.rtc.InternalMembraneRTC
 import org.webrtc.EglBase
-import org.webrtc.PeerConnectionFactory
 import org.webrtc.audio.AudioDeviceModule
 import javax.inject.Singleton
 
@@ -25,8 +23,6 @@ internal interface MembraneRTCComponent {
 
     @Component.Factory
     interface Factory {
-        fun create(
-            @BindsInstance appContext: Context
-        ): MembraneRTCComponent
+        fun create(@BindsInstance appContext: Context): MembraneRTCComponent
     }
 }

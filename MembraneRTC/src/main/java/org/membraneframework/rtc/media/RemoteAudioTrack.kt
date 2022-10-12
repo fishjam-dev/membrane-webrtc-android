@@ -3,7 +3,7 @@ package org.membraneframework.rtc.media
 public class RemoteAudioTrack constructor(
     mediaTrack: org.webrtc.AudioTrack
 
-): AudioTrack(mediaTrack), RemoteTrack {
+) : AudioTrack(mediaTrack), RemoteTrack {
     override fun enabled(): Boolean {
         return this.audioTrack.enabled()
     }

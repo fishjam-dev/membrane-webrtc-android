@@ -7,9 +7,12 @@ import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -19,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusOrder
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -28,8 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dscout.membranevideoroomdemo.components.VideoViewLayout
 import com.dscout.membranevideoroomdemo.components.ParticipantVideoView
+import com.dscout.membranevideoroomdemo.components.VideoViewLayout
 import com.dscout.membranevideoroomdemo.models.Participant
 import com.dscout.membranevideoroomdemo.styles.AppButtonColors
 import com.dscout.membranevideoroomdemo.styles.Blue
@@ -45,13 +47,14 @@ class RoomActivity : AppCompatActivity() {
         RoomViewModel(URL, application)
     }
 
-    private val screencastLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+    private val screencastLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
 
-        result.data?.let {
-            viewModel.startScreencast(it)
+            result.data?.let {
+                viewModel.startScreencast(it)
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,11 +93,10 @@ class RoomActivity : AppCompatActivity() {
         val scrollState = rememberScrollState()
 
         Scaffold(
-            modifier = Modifier .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             backgroundColor = Blue.darker(0.5f)
         ) {
             Box {
-
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
@@ -102,11 +104,17 @@ class RoomActivity : AppCompatActivity() {
                         .fillMaxHeight()
                 ) {
                     errorMessage.value?.let {
-                        Text(it, color = Color.Red, fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, textAlign = TextAlign.Center)
+                        Text(
+                            it,
+                            color = Color.Red,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 30.sp,
+                            textAlign = TextAlign.Center
+                        )
                     }
 
                     Row(
-                        horizontalArrangement = Arrangement.Start,
+                        horizontalArrangement = Arrangement.Start
                     ) {
                         Text(text = "Video quality:")
                         listOf(TrackEncoding.H, TrackEncoding.M, TrackEncoding.L).map {
@@ -115,16 +123,25 @@ class RoomActivity : AppCompatActivity() {
                                     viewModel.toggleVideoTrackEncoding(it)
                                 },
                                 colors = AppButtonColors(),
-                                modifier = Modifier.then(if(videoSimulcastConfig.value.activeEncodings.contains(it)) Modifier.alpha(1f) else Modifier.alpha(0.5f) ),
-                                shape = RoundedCornerShape(12.dp),
-                        ) {
-                            Text(it.name)
-                        } }
+                                modifier = Modifier.then(
+                                    if (videoSimulcastConfig.value.activeEncodings.contains(it)) {
+                                        Modifier.alpha(1f)
+                                    } else {
+                                        Modifier.alpha(
+                                            0.5f
+                                        )
+                                    }
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(it.name)
+                            }
+                        }
                     }
 
-                    if(isScreenCastOn.value) {
+                    if (isScreenCastOn.value) {
                         Row(
-                            horizontalArrangement = Arrangement.Start,
+                            horizontalArrangement = Arrangement.Start
                         ) {
                             Text(text = "Screencast quality:")
                             listOf(TrackEncoding.H, TrackEncoding.M, TrackEncoding.L).map {
@@ -133,11 +150,20 @@ class RoomActivity : AppCompatActivity() {
                                         viewModel.toggleScreencastTrackEncoding(it)
                                     },
                                     colors = AppButtonColors(),
-                                    modifier = Modifier.then(if(screencastSimulcastConfig.value.activeEncodings.contains(it)) Modifier.alpha(1f) else Modifier.alpha(0.5f) ),
-                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.then(
+                                        if (screencastSimulcastConfig.value.activeEncodings.contains(it)) {
+                                            Modifier.alpha(
+                                                1f
+                                            )
+                                        } else {
+                                            Modifier.alpha(0.5f)
+                                        }
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Text(it.name)
-                                } }
+                                }
+                            }
                         }
                     }
 
@@ -154,7 +180,7 @@ class RoomActivity : AppCompatActivity() {
                         modifier = Modifier
                             .padding(10.dp)
                             .fillMaxWidth()
-                            .horizontalScroll(scrollState),
+                            .horizontalScroll(scrollState)
                     ) {
                         participants.value.forEach {
                             ParticipantCard(
@@ -211,7 +237,7 @@ fun ParticipantCard(
     ) {
         ParticipantVideoView(
             participant = participant,
-            videoViewLayout = videoViewLayout ,
+            videoViewLayout = videoViewLayout,
             modifier = Modifier
                 .align(Alignment.Center)
                 .fillMaxWidth()
@@ -235,11 +261,7 @@ fun ParticipantCard(
 }
 
 @Composable
-fun ControlIcons(
-    roomViewModel: RoomViewModel,
-    startScreencast: () -> Unit,
-    onEnd: () -> Unit
-) {
+fun ControlIcons(roomViewModel: RoomViewModel, startScreencast: () -> Unit, onEnd: () -> Unit) {
     val iconModifier =
         Modifier
             .padding(10.dp)
@@ -256,7 +278,7 @@ fun ControlIcons(
     ) {
         IconButton(onClick = { roomViewModel.toggleMicrophone() }) {
             Icon(
-                painter = painterResource(if (isMicOn.value)  R.drawable.ic_mic_on else R.drawable.ic_mic_off),
+                painter = painterResource(if (isMicOn.value) R.drawable.ic_mic_on else R.drawable.ic_mic_off),
                 contentDescription = "microphone control",
                 modifier = iconModifier,
                 tint = Color.White
@@ -265,7 +287,7 @@ fun ControlIcons(
 
         IconButton(onClick = { roomViewModel.toggleCamera() }) {
             Icon(
-                painter = painterResource(if (isCamOn.value)  R.drawable.ic_video_on else R.drawable.ic_video_off),
+                painter = painterResource(if (isCamOn.value) R.drawable.ic_video_on else R.drawable.ic_video_off),
                 contentDescription = "camera control",
                 modifier = iconModifier,
                 tint = Color.White
@@ -300,7 +322,9 @@ fun ControlIcons(
             }
         }) {
             Icon(
-                painter = painterResource(if (!isScreenCastOn.value)  R.drawable.ic_screen_on else R.drawable.ic_screen_off),
+                painter = painterResource(
+                    if (!isScreenCastOn.value) R.drawable.ic_screen_on else R.drawable.ic_screen_off
+                ),
                 contentDescription = "screen cast control",
                 modifier = iconModifier,
                 tint = Color.White
@@ -308,4 +332,3 @@ fun ControlIcons(
         }
     }
 }
-

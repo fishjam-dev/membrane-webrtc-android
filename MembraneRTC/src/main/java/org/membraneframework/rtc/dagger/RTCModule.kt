@@ -25,46 +25,45 @@ object RTCModule {
     fun audioDeviceModule(appContext: Context): AudioDeviceModule {
         val audioRecordErrorCallback = object : JavaAudioDeviceModule.AudioRecordErrorCallback {
             override fun onWebRtcAudioRecordInitError(errorMessage: String?) {
-                Timber.e ( "onWebRtcAudioRecordInitError: $errorMessage" )
+                Timber.e("onWebRtcAudioRecordInitError: $errorMessage")
             }
 
             override fun onWebRtcAudioRecordStartError(
                 errorCode: JavaAudioDeviceModule.AudioRecordStartErrorCode?,
                 errorMessage: String?
             ) {
-                Timber.e ( "onWebRtcAudioRecordStartError: $errorCode. $errorMessage" )
+                Timber.e("onWebRtcAudioRecordStartError: $errorCode. $errorMessage")
             }
 
             override fun onWebRtcAudioRecordError(errorMessage: String?) {
-                Timber.e ( "onWebRtcAudioRecordError: $errorMessage" )
+                Timber.e("onWebRtcAudioRecordError: $errorMessage")
             }
         }
 
         val audioTrackErrorCallback = object : JavaAudioDeviceModule.AudioTrackErrorCallback {
             override fun onWebRtcAudioTrackInitError(errorMessage: String?) {
-                Timber.e ( "onWebRtcAudioTrackInitError: $errorMessage" )
+                Timber.e("onWebRtcAudioTrackInitError: $errorMessage")
             }
 
             override fun onWebRtcAudioTrackStartError(
                 errorCode: JavaAudioDeviceModule.AudioTrackStartErrorCode?,
                 errorMessage: String?
             ) {
-                Timber.e ( "onWebRtcAudioTrackStartError: $errorCode. $errorMessage" )
+                Timber.e("onWebRtcAudioTrackStartError: $errorCode. $errorMessage")
             }
 
             override fun onWebRtcAudioTrackError(errorMessage: String?) {
-                Timber.e ( "onWebRtcAudioTrackError: $errorMessage" )
+                Timber.e("onWebRtcAudioTrackError: $errorMessage")
             }
-
         }
         val audioRecordStateCallback: JavaAudioDeviceModule.AudioRecordStateCallback = object :
             JavaAudioDeviceModule.AudioRecordStateCallback {
             override fun onWebRtcAudioRecordStart() {
-                Timber.i ( "Audio recording starts" )
+                Timber.i("Audio recording starts")
             }
 
             override fun onWebRtcAudioRecordStop() {
-                Timber.i ( "Audio recording stops" )
+                Timber.i("Audio recording stops")
             }
         }
 
@@ -72,11 +71,11 @@ object RTCModule {
         val audioTrackStateCallback: JavaAudioDeviceModule.AudioTrackStateCallback = object :
             JavaAudioDeviceModule.AudioTrackStateCallback {
             override fun onWebRtcAudioTrackStart() {
-                Timber.i ( "Audio playout starts" )
+                Timber.i("Audio playout starts")
             }
 
             override fun onWebRtcAudioTrackStop() {
-                Timber.i ( "Audio playout stops" )
+                Timber.i("Audio playout stops")
             }
         }
 

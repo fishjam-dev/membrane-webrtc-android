@@ -9,9 +9,9 @@ import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class SdpException(reason: String): Exception(reason) { }
+class SdpException(reason: String) : Exception(reason)
 
-class SuspendableSdpObserver: SdpObserver {
+class SuspendableSdpObserver : SdpObserver {
     private var createCont: Continuation<Result<SessionDescription>>? = null
     private var setCont: Continuation<Result<Unit>>? = null
 
@@ -58,7 +58,7 @@ class SuspendableSdpObserver: SdpObserver {
         }
     }
 
-    suspend fun awaitCreate() = suspendCoroutine<Result<SessionDescription>> {  cont ->
+    suspend fun awaitCreate() = suspendCoroutine<Result<SessionDescription>> { cont ->
         if (returnedResults) throw IllegalStateException("observer already returned")
         createCont = cont
 
@@ -66,10 +66,9 @@ class SuspendableSdpObserver: SdpObserver {
             cont.resume(it)
             returnedResults = true
         }
-
     }
 
-    suspend fun awaitSet() = suspendCoroutine<Result<Unit>> {  cont ->
+    suspend fun awaitSet() = suspendCoroutine<Result<Unit>> { cont ->
         if (returnedResults) throw IllegalStateException("observer already returned")
         setCont = cont
 

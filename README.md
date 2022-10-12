@@ -49,6 +49,10 @@ Add the dependency:
 	}
 ```
 
+## Developing
+1. Run `./scripts/init.sh` in the main directory to install ktlint and release-it and set up git hooks
+2. Run `release-it` to release. Follow the prompts, it should add a commit and a git tag and jitpack should pick it up automatically and put the new version in the jitpack repo.
+
 ## Credits
 This project is highly inspired by the [LiveKit](https://livekit.io/) project and their implementation of the [Android SDK](https://github.com/livekit/client-sdk-android) and reuses a lot of their implemented solutions (mainly dealing with WebRTC SDK while the signalling got completely replaced with an internal solution).
 

@@ -3,7 +3,6 @@ package com.dscout.membranevideoroomdemo.styles
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 
-
 val Primary = Color(0xff1e3d80)
 val Blue = Color(0xff447bfe)
 
@@ -22,7 +21,7 @@ fun Color.mix(with: Color, amount: Float): Color {
         (green1 * (1.0 - amount) + green2 * amount).toFloat(),
         (blue1 * (1.0 - amount) + blue2 * amount).toFloat(),
         (alpha1 * (1.0 - amount) + alpha2 * amount).toFloat(),
-       ColorSpaces.Srgb
+        ColorSpaces.Srgb
     )
 }
 
