@@ -687,11 +687,10 @@ constructor(
         return mapping
     }
 
-    fun selectTrackEncoding(peerId: String, trackId: String, encoding: TrackEncoding) {
+    fun setTargetTrackEncoding(trackId: String, encoding: TrackEncoding) {
         coroutineScope.launch {
             transport.send(
                 SelectEncoding(
-                    peerId,
                     trackId,
                     encoding.rid
                 )

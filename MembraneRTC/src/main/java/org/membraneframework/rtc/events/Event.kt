@@ -78,11 +78,18 @@ data class RenegotiateTracks(val type: String, val data: Payload) : SendableEven
         )
 }
 
-data class SelectEncoding(val type: String, val data: Data) : SendableEvent() {
-    data class Data(val peerId: String, val trackId: String, val encoding: String)
-
-    constructor(peerId: String, trackId: String, encoding: String) :
-        this("selectEncoding", Data(peerId, trackId, encoding))
+data class SelectEncoding(val type: String, val data: Payload) : SendableEvent() {
+    constructor(trackId: String, encoding: String) :
+        this(
+            "custom",
+            mapOf(
+                "type" to "setTargetTrackVariant",
+                "data" to mapOf(
+                    "trackId" to trackId,
+                    "variant" to encoding
+                )
+            )
+        )
 }
 
 data class UpdatePeerMetadata(val type: String, val data: Data) : SendableEvent() {

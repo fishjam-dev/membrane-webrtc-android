@@ -215,8 +215,11 @@ class VideoTextureViewRenderer :
             val drawnFrameWidth: Int
             val drawnFrameHeight: Int
 
+            var width = this.width
+            var height = this.height
+
             when (scalingType) {
-                ScalingType.SCALE_ASPECT_FILL ->
+                ScalingType.SCALE_ASPECT_FILL -> {
                     if (frameAspectRatio > layoutAspectRatio) {
                         drawnFrameWidth = (rotatedFrameHeight * layoutAspectRatio).toInt()
                         drawnFrameHeight = rotatedFrameHeight
@@ -224,16 +227,16 @@ class VideoTextureViewRenderer :
                         drawnFrameWidth = rotatedFrameWidth
                         drawnFrameHeight = (rotatedFrameWidth / layoutAspectRatio).toInt()
                     }
+                    // Aspect ratio of the drawn frame and the view is the same.
+                    width = Math.min(width, drawnFrameWidth)
+                    height = Math.min(height, drawnFrameHeight)
+                }
 
                 else -> {
-                    drawnFrameWidth = rotatedFrameWidth
-                    drawnFrameHeight = rotatedFrameHeight
+                    width = rotatedFrameWidth
+                    height = rotatedFrameHeight
                 }
             }
-
-            // Aspect ratio of the drawn frame and the view is the same.
-            val width = Math.min(width, drawnFrameWidth)
-            val height = Math.min(height, drawnFrameHeight)
 
             logD(
                 "updateSurfaceSize() " +

@@ -110,14 +110,17 @@ private constructor(
     }
 
     /**
-     * Selects track encoding that server should send to the client library.
+     * Sets track encoding that server should send to the client library.
      *
-     * @param peerId: an id of a peer that owns the track
+     * The encoding will be sent whenever it is available.
+     * If chosen encoding is temporarily unavailable, some other encoding
+     * will be sent until chosen encoding becomes active again.
+     *
      * @param trackId: an id of a remote track
      * @param encoding: an encoding to receive
      */
-    public fun selectTrackEncoding(peerId: String, trackId: String, encoding: TrackEncoding) {
-        client.selectTrackEncoding(peerId, trackId, encoding)
+    public fun setTargetTrackEncoding(trackId: String, encoding: TrackEncoding) {
+        client.setTargetTrackEncoding(trackId, encoding)
     }
 
     /**
