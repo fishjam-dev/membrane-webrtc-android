@@ -60,7 +60,7 @@ dependencies {
 }
 
 ext {
-    customLogoFile = projectDir.toString() + "/logo-icon.svg"
+    customLogoFile = projectDir.toString() + "/../docs/logo-icon.svg"
     customFooterMessage = "Copyright 2022, Software Mansion."
 }
 
