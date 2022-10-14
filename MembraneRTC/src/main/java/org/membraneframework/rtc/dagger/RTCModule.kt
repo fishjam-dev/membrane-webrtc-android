@@ -10,7 +10,7 @@ import timber.log.Timber
 import javax.inject.Singleton
 
 @Module
-object RTCModule {
+internal object RTCModule {
     @Singleton
     @Provides
     fun eglBase(): EglBase {

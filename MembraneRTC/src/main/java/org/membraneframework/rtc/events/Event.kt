@@ -9,20 +9,20 @@ import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.Payload
 import timber.log.Timber
 
-val gson = Gson()
+internal val gson = Gson()
 
 // convert a data class to a map
-fun <T> T.serializeToMap(): Map<String, Any?> {
+internal fun <T> T.serializeToMap(): Map<String, Any?> {
     return convert()
 }
 
 // convert a map to a data class
-inline fun <reified T> Map<String, Any?>.toDataClass(): T {
+internal inline fun <reified T> Map<String, Any?>.toDataClass(): T {
     return convert()
 }
 
 // convert an object of type I to type O
-inline fun <I, reified O> I.convert(): O {
+internal inline fun <I, reified O> I.convert(): O {
     val json = gson.toJson(this)
     return gson.fromJson(json, object : TypeToken<O>() {}.type)
 }
@@ -104,7 +104,7 @@ data class UpdateTrackMetadata(val type: String, val data: Data) : SendableEvent
     constructor(trackId: String, trackMetadata: Metadata) : this("updateTrackMetadata", Data(trackId, trackMetadata))
 }
 
-public enum class ReceivableEventType() {
+enum class ReceivableEventType() {
     @SerializedName("peerAccepted")
     PeerAccepted,
 
