@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MembraneRTC</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>MembraneRTC</span>
+            </a>
+    </div>
+    <div>
+2.0.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="MembraneRTC::org.membraneframework.rtc/MembraneRTC///PointingToDeclaration//-1503147058">
+  <div class="breadcrumbs"><a href="../../../index.html">MembraneRTC</a><span class="delimiter">/</span><a href="../index.html">org.membraneframework.rtc</a><span class="delimiter">/</span><span class="current">MembraneRTC</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Membrane</span><wbr></wbr><span><span>RTC</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">MembraneRTC</a></div><p class="paragraph">MembraneRTC client.</p><p>
+The client is responsible for relaying MembraneRTC Engine specific messages through given reliable transport layer.
+Once initialized, the client is responsible for exchanging necessary messages via provided <strong>EventTransport</strong> passed via `ConnectOptions` and managing underlying
+`PeerConnection`. The goal of the client is to be as lean as possible, meaning that all activities regarding the session such as moderating
+should be implemented by the user himself on top of the <strong>MembraneRTC</strong>.
+<p>
+The user's ability of interacting with the client is greatly limited to the essential actions such as joining/leaving the session,
+adding/removing local tracks and receiving information about remote peers and their tracks that can be played by the user.
+<p>
+User can request 3 different types of local tracks that will get forwarded to the server by the client:
+<ul>
+<li>`LocalAudioTrack` - an audio track utilizing device's microphone</li>
+<li>`LocalVideoTrack` - a video track that can utilize device's camera or if necessary use video playback from a file (useful for testing with a simulator)</li>
+<li>`LocalScreencast` - a screencast track capturing a device's screen using <string>MediaProjection</strong> mechanism</li>
+</ul>
+<p>
+It is recommended to request necessary audio and video tracks before joining the room but it does not mean it can't be done afterwards (in case of screencast)
+<p>
+Once the user received <strong>onConnected</strong> notification they can call the <strong>join</strong> method to initialize joining the session.
+After receiving `onJoinSuccess` a user will receive notification about various peers joining/leaving the session, new tracks being published and ready for playback
+or going inactive.</div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="2027363520%2FClasslikes%2F-1503147058" anchor-label="Companion" id="2027363520%2FClasslikes%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2027363520%2FClasslikes%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1988190688%2FFunctions%2F-1503147058" anchor-label="createAudioTrack" id="1988190688%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="create-audio-track.html"><span>create</span><wbr></wbr><span>Audio</span><wbr></wbr><span><span>Track</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1988190688%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-audio-track.html"><span class="token function">createAudioTrack</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">metadata<span class="token operator">: </span><a href="../../org.membraneframework.rtc.utils.html#1170992874%2FClasslikes%2F-1503147058">Metadata</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.membraneframework.rtc.media/-local-audio-track/index.html">LocalAudioTrack</a></div><div class="brief "><p class="paragraph">Creates an audio track utilizing device's microphone.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="62291775%2FFunctions%2F-1503147058" anchor-label="createScreencastTrack" id="62291775%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="create-screencast-track.html"><span>create</span><wbr></wbr><span>Screencast</span><wbr></wbr><span><span>Track</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="62291775%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-screencast-track.html"><span class="token function">createScreencastTrack</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mediaProjectionPermission<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a><span class="token punctuation">, </span></span><span class="parameter ">videoParameters<span class="token operator">: </span><a href="../../org.membraneframework.rtc.media/-video-parameters/index.html">VideoParameters</a><span class="token punctuation">, </span></span><span class="parameter ">metadata<span class="token operator">: </span><a href="../../org.membraneframework.rtc.utils.html#1170992874%2FClasslikes%2F-1503147058">Metadata</a><span class="token punctuation">, </span></span><span class="parameter ">onEnd<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.membraneframework.rtc.media/-local-screencast-track/index.html">LocalScreencastTrack</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Creates a screen track recording the entire device's screen.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="581551741%2FFunctions%2F-1503147058" anchor-label="createVideoTrack" id="581551741%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="create-video-track.html"><span>create</span><wbr></wbr><span>Video</span><wbr></wbr><span><span>Track</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="581551741%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-video-track.html"><span class="token function">createVideoTrack</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">videoParameters<span class="token operator">: </span><a href="../../org.membraneframework.rtc.media/-video-parameters/index.html">VideoParameters</a><span class="token punctuation">, </span></span><span class="parameter ">metadata<span class="token operator">: </span><a href="../../org.membraneframework.rtc.utils.html#1170992874%2FClasslikes%2F-1503147058">Metadata</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.membraneframework.rtc.media/-local-video-track/index.html">LocalVideoTrack</a></div><div class="brief "><p class="paragraph">Creates a video track utilizing device's camera.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-616056936%2FFunctions%2F-1503147058" anchor-label="disableTrackEncoding" id="-616056936%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="disable-track-encoding.html"><span>disable</span><wbr></wbr><span>Track</span><wbr></wbr><span><span>Encoding</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-616056936%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="disable-track-encoding.html"><span class="token function">disableTrackEncoding</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">trackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">encoding<span class="token operator">: </span><a href="../-track-encoding/index.html">TrackEncoding</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Disables track encoding so that it will be no longer sent to the server.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="867058277%2FFunctions%2F-1503147058" anchor-label="disconnect" id="867058277%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="disconnect.html"><span><span>disconnect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="867058277%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="disconnect.html"><span class="token function">disconnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Disconnects the client.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="788843813%2FFunctions%2F-1503147058" anchor-label="enableTrackEncoding" id="788843813%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="enable-track-encoding.html"><span>enable</span><wbr></wbr><span>Track</span><wbr></wbr><span><span>Encoding</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="788843813%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="enable-track-encoding.html"><span class="token function">enableTrackEncoding</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">trackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">encoding<span class="token operator">: </span><a href="../-track-encoding/index.html">TrackEncoding</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Enables track encoding so that it will be sent to the server.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1747288937%2FFunctions%2F-1503147058" anchor-label="join" id="-1747288937%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="join.html"><span><span>join</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1747288937%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="join.html"><span class="token function">join</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Starts the join process.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="92452626%2FFunctions%2F-1503147058" anchor-label="removeTrack" id="92452626%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="remove-track.html"><span>remove</span><wbr></wbr><span><span>Track</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="92452626%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="remove-track.html"><span class="token function">removeTrack</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">trackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Removes an instance of local track from the client.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1811951956%2FFunctions%2F-1503147058" anchor-label="setEncodingBandwidth" id="1811951956%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-encoding-bandwidth.html"><span>set</span><wbr></wbr><span>Encoding</span><wbr></wbr><span><span>Bandwidth</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1811951956%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-encoding-bandwidth.html"><span class="token function">setEncodingBandwidth</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">trackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">encoding<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">bandwidthLimit<span class="token operator">: </span><a href="../../org.membraneframework.rtc.media/-track-bandwidth-limit/-bandwidth-limit/index.html">TrackBandwidthLimit.BandwidthLimit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates maximum bandwidth for the given simulcast encoding of the given track.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="171096077%2FFunctions%2F-1503147058" anchor-label="setTargetTrackEncoding" id="171096077%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-target-track-encoding.html"><span>set</span><wbr></wbr><span>Target</span><wbr></wbr><span>Track</span><wbr></wbr><span><span>Encoding</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="171096077%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-target-track-encoding.html"><span class="token function">setTargetTrackEncoding</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">trackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">encoding<span class="token operator">: </span><a href="../-track-encoding/index.html">TrackEncoding</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sets track encoding that server should send to the client library.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1151533125%2FFunctions%2F-1503147058" anchor-label="setTrackBandwidth" id="1151533125%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-track-bandwidth.html"><span>set</span><wbr></wbr><span>Track</span><wbr></wbr><span><span>Bandwidth</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1151533125%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-track-bandwidth.html"><span class="token function">setTrackBandwidth</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">trackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">bandwidthLimit<span class="token operator">: </span><a href="../../org.membraneframework.rtc.media/-track-bandwidth-limit/-bandwidth-limit/index.html">TrackBandwidthLimit.BandwidthLimit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates maximum bandwidth for the track identified by trackId. This value directly translates to quality of the stream and, in case of video, to the amount of RTP packets being sent. In case trackId points at the simulcast track bandwidth is split between all of the variant streams proportionally to their resolution.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-17764791%2FFunctions%2F-1503147058" anchor-label="updatePeerMetadata" id="-17764791%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="update-peer-metadata.html"><span>update</span><wbr></wbr><span>Peer</span><wbr></wbr><span><span>Metadata</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-17764791%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="update-peer-metadata.html"><span class="token function">updatePeerMetadata</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">peerMetadata<span class="token operator">: </span><a href="../../org.membraneframework.rtc.utils.html#1170992874%2FClasslikes%2F-1503147058">Metadata</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the metadata for the current peer.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1041202899%2FFunctions%2F-1503147058" anchor-label="updateTrackMetadata" id="-1041202899%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="update-track-metadata.html"><span>update</span><wbr></wbr><span>Track</span><wbr></wbr><span><span>Metadata</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1041202899%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="update-track-metadata.html"><span class="token function">updateTrackMetadata</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">trackId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">trackMetadata<span class="token operator">: </span><a href="../../org.membraneframework.rtc.utils.html#1170992874%2FClasslikes%2F-1503147058">Metadata</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the metadata for a specific track.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, Software Mansion.</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

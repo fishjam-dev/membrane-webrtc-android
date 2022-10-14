@@ -1,0 +1,1 @@
+sourceset_dependencies='{":MembraneRTC:dokkaHtml/androidTestRelease":[],":MembraneRTC:dokkaHtml/debug":[],":MembraneRTC:dokkaHtml/main":[],":MembraneRTC:dokkaHtml/release":[],":MembraneRTC:dokkaHtml/testFixtures":[],":MembraneRTC:dokkaHtml/testFixturesDebug":[],":MembraneRTC:dokkaHtml/testFixturesRelease":[]}'

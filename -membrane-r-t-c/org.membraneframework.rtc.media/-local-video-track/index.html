@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>LocalVideoTrack</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>MembraneRTC</span>
+            </a>
+    </div>
+    <div>
+2.0.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="MembraneRTC::org.membraneframework.rtc.media/LocalVideoTrack///PointingToDeclaration//-1503147058">
+  <div class="breadcrumbs"><a href="../../../index.html">MembraneRTC</a><span class="delimiter">/</span><a href="../index.html">org.membraneframework.rtc.media</a><span class="delimiter">/</span><span class="current">LocalVideoTrack</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Local</span><wbr></wbr><span>Video</span><wbr></wbr><span><span>Track</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">LocalVideoTrack</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mediaTrack<span class="token operator">: </span><span data-unresolved-link="org.webrtc/VideoTrack///PointingToDeclaration/">VideoTrack</span><span class="token punctuation">, </span></span><span class="parameter ">capturer<span class="token operator">: </span><a href="../-capturer/index.html">Capturer</a><span class="token punctuation">, </span></span><span class="parameter ">eglBase<span class="token operator">: </span><span data-unresolved-link="org.webrtc/EglBase///PointingToDeclaration/">EglBase</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>videoParameters<span class="token operator">: </span><a href="../-video-parameters/index.html">VideoParameters</a></span></span><span class="token punctuation">)</span> : <a href="../-video-track/index.html">VideoTrack</a>, <a href="../-local-track/index.html">LocalTrack</a></div><p class="paragraph">A class representing a local video track.</p><p class="paragraph">Internally it wraps a WebRTC <strong>VideoTrack</strong>.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="1272288942%2FConstructors%2F-1503147058" anchor-label="LocalVideoTrack" id="1272288942%2FConstructors%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-local-video-track.html"><span>Local</span><wbr></wbr><span>Video</span><wbr></wbr><span><span>Track</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1272288942%2FConstructors%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-local-video-track.html"><span class="token function">LocalVideoTrack</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mediaTrack<span class="token operator">: </span><span data-unresolved-link="org.webrtc/VideoTrack///PointingToDeclaration/">VideoTrack</span><span class="token punctuation">, </span></span><span class="parameter ">capturer<span class="token operator">: </span><a href="../-capturer/index.html">Capturer</a><span class="token punctuation">, </span></span><span class="parameter ">eglBase<span class="token operator">: </span><span data-unresolved-link="org.webrtc/EglBase///PointingToDeclaration/">EglBase</span><span class="token punctuation">, </span></span><span class="parameter ">videoParameters<span class="token operator">: </span><a href="../-video-parameters/index.html">VideoParameters</a></span></span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="1609130525%2FClasslikes%2F-1503147058" anchor-label="Companion" id="1609130525%2FClasslikes%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1609130525%2FClasslikes%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-1642431236%2FFunctions%2F-1503147058" anchor-label="addRenderer" id="-1642431236%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-video-track/add-renderer.html"><span>add</span><wbr></wbr><span><span>Renderer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1642431236%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-video-track/add-renderer.html"><span class="token function">addRenderer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">renderer<span class="token operator">: </span><span data-unresolved-link="org.webrtc/VideoSink///PointingToDeclaration/">VideoSink</span></span></span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-857214219%2FFunctions%2F-1503147058" anchor-label="enabled" id="-857214219%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="enabled.html"><span><span>enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-857214219%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="enabled.html"><span class="token function">enabled</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="579019794%2FFunctions%2F-1503147058" anchor-label="flipCamera" id="579019794%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="flip-camera.html"><span>flip</span><wbr></wbr><span><span>Camera</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="579019794%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="flip-camera.html"><span class="token function">flipCamera</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-194670488%2FFunctions%2F-1503147058" anchor-label="id" id="-194670488%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-video-track/id.html"><span><span>id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-194670488%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="../-video-track/id.html"><span class="token function">id</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1316538875%2FFunctions%2F-1503147058" anchor-label="removeRenderer" id="-1316538875%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-video-track/remove-renderer.html"><span>remove</span><wbr></wbr><span><span>Renderer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1316538875%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-video-track/remove-renderer.html"><span class="token function">removeRenderer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">renderer<span class="token operator">: </span><span data-unresolved-link="org.webrtc/VideoSink///PointingToDeclaration/">VideoSink</span></span></span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2118927481%2FFunctions%2F-1503147058" anchor-label="rtcTrack" id="2118927481%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-video-track/rtc-track.html"><span>rtc</span><wbr></wbr><span><span>Track</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2118927481%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="../-video-track/rtc-track.html"><span class="token function">rtcTrack</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.webrtc/MediaStreamTrack///PointingToDeclaration/">MediaStreamTrack</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1347929258%2FFunctions%2F-1503147058" anchor-label="setEnabled" id="1347929258%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-enabled.html"><span>set</span><wbr></wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1347929258%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-enabled.html"><span class="token function">setEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1646564148%2FFunctions%2F-1503147058" anchor-label="start" id="1646564148%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="start.html"><span><span>start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1646564148%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1071434050%2FFunctions%2F-1503147058" anchor-label="stop" id="1071434050%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="stop.html"><span><span>stop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1071434050%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="stop.html"><span class="token function">stop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-648702850%2FProperties%2F-1503147058" anchor-label="eglContext" id="-648702850%2FProperties%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-video-track/egl-context.html"><span>egl</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-648702850%2FProperties%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><a data-name="-648702850%2FProperties%2F-1503147058" anchor-label="eglContext" id="-648702850%2FProperties%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="../-video-track/egl-context.html">eglContext</a><span class="token operator">: </span><span data-unresolved-link="org.webrtc/EglBase.Context///PointingToDeclaration/">EglBase.Context</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1617199887%2FProperties%2F-1503147058" anchor-label="videoParameters" id="-1617199887%2FProperties%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="video-parameters.html"><span>video</span><wbr></wbr><span><span>Parameters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1617199887%2FProperties%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><a data-name="-1617199887%2FProperties%2F-1503147058" anchor-label="videoParameters" id="-1617199887%2FProperties%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="video-parameters.html">videoParameters</a><span class="token operator">: </span><a href="../-video-parameters/index.html">VideoParameters</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, Software Mansion.</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
