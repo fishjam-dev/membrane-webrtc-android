@@ -84,6 +84,16 @@ afterEvaluate {
             }"""
         ])
     }
+
+}
+
+tasks.named("dokkaHtml") {
+    moduleName.set("MembraneRTC")
+    dokkaSourceSets {
+        named("main") {
+            includes.from("module.md")
+        }
+    }
 }
 
 sourceCompatibility = "1.7"
