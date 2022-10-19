@@ -144,6 +144,7 @@ class RoomViewModel(
             val enabled = !it.enabled()
             it.setEnabled(enabled)
             isMicrophoneOn.value = enabled
+            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled))
         }
     }
 
@@ -152,6 +153,7 @@ class RoomViewModel(
             val enabled = !it.enabled()
             it.setEnabled(enabled)
             isCameraOn.value = enabled
+            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled))
         }
     }
 
@@ -164,7 +166,8 @@ class RoomViewModel(
         room.value?.let {
             localAudioTrack = it.createAudioTrack(
                 mapOf(
-                    "user_id" to (localDisplayName ?: "")
+                    "user_id" to (localDisplayName ?: ""),
+                    "active" to true
                 )
             )
 
@@ -177,7 +180,8 @@ class RoomViewModel(
             localVideoTrack = it.createVideoTrack(
                 videoParameters,
                 mapOf(
-                    "user_id" to (localDisplayName ?: "")
+                    "user_id" to (localDisplayName ?: ""),
+                    "active" to true
                 )
             )
 
@@ -197,7 +201,12 @@ class RoomViewModel(
         Timber.i("Successfully join the room")
 
         peersInRoom.forEach {
-            mutableParticipants[it.id] = Participant(it.id, it.metadata["displayName"] ?: "UNKNOWN", null, null)
+            mutableParticipants[it.id] = Participant(
+                it.id,
+                it.metadata["displayName"] as? String ?: "UNKNOWN",
+                null,
+                null
+            )
         }
 
         emitParticipants()
@@ -293,7 +302,7 @@ class RoomViewModel(
     override fun onPeerJoined(peer: Peer) {
         mutableParticipants[peer.id] = Participant(
             id = peer.id,
-            displayName = peer.metadata["displayName"] ?: "UNKNOWN"
+            displayName = peer.metadata["displayName"] as? String ?: "UNKNOWN"
         )
 
         Timber.i("Peer has joined the room $peer")
