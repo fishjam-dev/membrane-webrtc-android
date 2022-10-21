@@ -28,6 +28,9 @@ The user has the following control buttons at hand:
 - front/back camera switch
 - screencast toggle
 
+## Documentation
+API documentation is available [here](https://docs.membrane.stream/membrane-webrtc-android/)
+
 ## Necessary setup
 The only required constant is the media server's URL that can be found at the top of `MainActivity.kt`.
 
