@@ -1,0 +1,23 @@
+
+name: Deploy Docs
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Docs
+        run: ./gradlew dokkaHtml
+
+      - name: Deploy
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: gh-pages
+          FOLDER: MembraneRTC/build/dokka/html
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -9,9 +9,9 @@ import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class SdpException(reason: String) : Exception(reason)
+internal class SdpException(reason: String) : Exception(reason)
 
-class SuspendableSdpObserver : SdpObserver {
+internal class SuspendableSdpObserver : SdpObserver {
     private var createCont: Continuation<Result<SessionDescription>>? = null
     private var setCont: Continuation<Result<Unit>>? = null
 
@@ -79,26 +79,26 @@ class SuspendableSdpObserver : SdpObserver {
     }
 }
 
-suspend fun PeerConnection.createOffer(constraints: MediaConstraints): Result<SessionDescription> {
+internal suspend fun PeerConnection.createOffer(constraints: MediaConstraints): Result<SessionDescription> {
     val observer = SuspendableSdpObserver()
     this.createOffer(observer, constraints)
 
     return observer.awaitCreate()
 }
 
-suspend fun PeerConnection.setLocalDescription(sdp: SessionDescription): Result<Unit> {
+internal suspend fun PeerConnection.setLocalDescription(sdp: SessionDescription): Result<Unit> {
     val observer = SuspendableSdpObserver()
     this.setLocalDescription(observer, sdp)
     return observer.awaitSet()
 }
 
-suspend fun PeerConnection.createAnswer(constraints: MediaConstraints): Result<SessionDescription> {
+internal suspend fun PeerConnection.createAnswer(constraints: MediaConstraints): Result<SessionDescription> {
     val observer = SuspendableSdpObserver()
     this.createAnswer(observer, constraints)
     return observer.awaitCreate()
 }
 
-suspend fun PeerConnection.setRemoteDescription(sdp: SessionDescription): Result<Unit> {
+internal suspend fun PeerConnection.setRemoteDescription(sdp: SessionDescription): Result<Unit> {
     val observer = SuspendableSdpObserver()
     this.setRemoteDescription(observer, sdp)
     return observer.awaitSet()
