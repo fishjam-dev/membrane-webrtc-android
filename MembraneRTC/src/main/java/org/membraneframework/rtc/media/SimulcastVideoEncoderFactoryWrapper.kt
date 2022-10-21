@@ -21,7 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
  */
 
-open class SimulcastVideoEncoderFactoryWrapper(
+internal open class SimulcastVideoEncoderFactoryWrapper(
     sharedContext: EglBase.Context?,
     encoderOptions: EncoderOptions
 ) : VideoEncoderFactory {

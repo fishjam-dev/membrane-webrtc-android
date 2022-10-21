@@ -3,10 +3,11 @@ plugins {
     id "kotlin-android"
     id "kotlin-kapt"
     id 'maven-publish'
+    id 'org.jetbrains.dokka'
 }
 
 group = 'com.github.membraneframework'
-version = '1.0'
+version = '2.0.0'
 
 android {
     namespace = "org.membraneframework.rtc"
@@ -58,6 +59,11 @@ dependencies {
     implementation 'androidx.core:core:1.8.0'
 }
 
+ext {
+    customLogoFile = projectDir.toString() + "/../docs/logo-icon.svg"
+    customFooterMessage = "Copyright 2022, Software Mansion."
+}
+
 afterEvaluate {
     publishing {
         publications {
@@ -68,6 +74,24 @@ afterEvaluate {
                 artifactId = 'membrane-webrtc-android'
                 version = '1.0'
             }
+        }
+    }
+    tasks.named("dokkaHtml") {
+        pluginsMapConfiguration.set([
+            "org.jetbrains.dokka.base.DokkaBase": """{
+                "footerMessage": "$customFooterMessage",
+                "customAssets": ["$customLogoFile"]
+            }"""
+        ])
+    }
+
+}
+
+tasks.named("dokkaHtml") {
+    moduleName.set("MembraneRTC")
+    dokkaSourceSets {
+        named("main") {
+            includes.from("module.md")
         }
     }
 }

@@ -11,7 +11,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 
-class ScreencastServiceConnector(private val context: Context) {
+internal class ScreencastServiceConnector(private val context: Context) {
     private var connected = false
     private var service: ScreencastService? = null
 

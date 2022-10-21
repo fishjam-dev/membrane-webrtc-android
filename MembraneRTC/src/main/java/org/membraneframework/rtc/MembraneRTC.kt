@@ -59,8 +59,8 @@ private constructor(
      * <p>
      * The client assumes that the user has already granted camera permissions.
      *
-     * @param videoParameters: a set of target parameters such as camera resolution, frame rate or simulcast configuration
-     * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
+     * @param videoParameters a set of target parameters such as camera resolution, frame rate or simulcast configuration
+     * @param metadata the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
      * @return an instance of the video track
      */
     public fun createVideoTrack(videoParameters: VideoParameters, metadata: Metadata): LocalVideoTrack {
@@ -72,7 +72,7 @@ private constructor(
      * <p>
      * The client assumes that the user has already granted microphone recording permissions.
      *
-     * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
+     * @param metadata the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
      * @return an instance of the audio track
      */
     public fun createAudioTrack(metadata: Metadata): LocalAudioTrack {
@@ -84,10 +84,10 @@ private constructor(
      * <p>
      * The method requires a media projection permission to be able to start the recording. The client assumes that the intent is valid.
      *
-     * @param mediaProjectionPermission: a valid media projection permission intent that can be used to starting a screen capture
-     * @param videoParameters: a set of target parameters of the screen capture such as resolution, frame rate or simulcast configuration
-     * @param metadata: the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
-     * @param onEnd: callback that will be invoked once the screen capture ends
+     * @param mediaProjectionPermission a valid media projection permission intent that can be used to starting a screen capture
+     * @param videoParameters a set of target parameters of the screen capture such as resolution, frame rate or simulcast configuration
+     * @param metadata the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
+     * @param onEnd callback that will be invoked once the screen capture ends
      * @return an instance of the screencast track
      */
     public fun createScreencastTrack(
@@ -102,7 +102,7 @@ private constructor(
     /**
      * Removes an instance of local track from the client.
      *
-     * @param trackId: an id of a valid local track that has been created using the current client
+     * @param trackId an id of a valid local track that has been created using the current client
      * @return a boolean whether the track has been successfully removed or not
      */
     public fun removeTrack(trackId: String): Boolean {
@@ -116,8 +116,8 @@ private constructor(
      * If chosen encoding is temporarily unavailable, some other encoding
      * will be sent until chosen encoding becomes active again.
      *
-     * @param trackId: an id of a remote track
-     * @param encoding: an encoding to receive
+     * @param trackId an id of a remote track
+     * @param encoding an encoding to receive
      */
     public fun setTargetTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.setTargetTrackEncoding(trackId, encoding)
@@ -126,8 +126,8 @@ private constructor(
     /**
      * Enables track encoding so that it will be sent to the server.
      *
-     * @param trackId: an id of a local track
-     * @param encoding: an encoding that will be enabled
+     * @param trackId an id of a local track
+     * @param encoding an encoding that will be enabled
      */
     public fun enableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.enableTrackEncoding(trackId, encoding)
@@ -136,8 +136,8 @@ private constructor(
     /**
      * Disables track encoding so that it will be no longer sent to the server.
      *
-     * @param trackId: and id of a local track
-     * @param encoding: an encoding that will be disabled
+     * @param trackId and id of a local track
+     * @param encoding an encoding that will be disabled
      */
     public fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.disableTrackEncoding(trackId, encoding)
@@ -145,7 +145,7 @@ private constructor(
 
     /**
      * Updates the metadata for the current peer.
-     * @param peerMetadata - Data about this peer that other peers will receive upon joining.
+     * @param peerMetadata Data about this peer that other peers will receive upon joining.
      *
      * If the metadata is different from what is already tracked in the room, the optional
      * callback `onPeerUpdated` will be triggered for other peers in the room.
@@ -156,8 +156,8 @@ private constructor(
 
     /**
      * Updates the metadata for a specific track.
-     * @param trackId - local track id of audio or video track.
-     * @param trackMetadata - Data about this track that other peers will receive upon joining.
+     * @param trackId local track id of audio or video track.
+     * @param trackMetadata Data about this track that other peers will receive upon joining.
      *
      * If the metadata is different from what is already tracked in the room, the optional
      * callback `onTrackUpdated` will be triggered for other peers in the room.
@@ -170,8 +170,8 @@ private constructor(
      * Updates maximum bandwidth for the track identified by trackId.
      * This value directly translates to quality of the stream and, in case of video, to the amount of RTP packets being sent.
      * In case trackId points at the simulcast track bandwidth is split between all of the variant streams proportionally to their resolution.
-     * @param trackId - track id of a video track
-     * @param bandwidthLimit - bandwidth in kbps
+     * @param trackId track id of a video track
+     * @param bandwidthLimit bandwidth in kbps
      */
     public fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         client.setTrackBandwidth(trackId, bandwidthLimit)
@@ -179,9 +179,9 @@ private constructor(
 
     /**
      * Updates maximum bandwidth for the given simulcast encoding of the given track.
-     * @param trackId - track id of a video track
-     * @param encoding - rid of the encoding
-     * @param bandwidthLimit - bandwidth in kbps
+     * @param trackId track id of a video track
+     * @param encoding rid of the encoding
+     * @param bandwidthLimit bandwidth in kbps
      */
     public fun setEncodingBandwidth(
         trackId: String,
@@ -195,9 +195,9 @@ private constructor(
         /**
          * Creates an instance of <strong>MembraneRTC</strong> client and starts the connecting process.
          *
-         * @param appContext: the context of the current application
-         * @param options: a set of options defining parameters such as event transport or connect metadata
-         * @param listener: a listener that will receive all notifications emitted by the <strong>MembraneRTC</strong>
+         * @param appContext the context of the current application
+         * @param options a set of options defining parameters such as event transport or connect metadata
+         * @param listener a listener that will receive all notifications emitted by the <strong>MembraneRTC</strong>
          * @return an instance of the client in connecting state
          */
         fun connect(appContext: Context, options: ConnectOptions, listener: MembraneRTCListener): MembraneRTC {

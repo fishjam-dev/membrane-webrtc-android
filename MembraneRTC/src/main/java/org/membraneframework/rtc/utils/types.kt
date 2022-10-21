@@ -1,5 +1,5 @@
 package org.membraneframework.rtc.utils
 
-public typealias Payload = Map<String, Any?>
-public typealias Metadata = Map<String, Any>
-public typealias SocketConnectionParams = Map<String, Any>
+typealias Payload = Map<String, Any?>
+typealias Metadata = Map<String, Any>
+typealias SocketConnectionParams = Map<String, Any>
