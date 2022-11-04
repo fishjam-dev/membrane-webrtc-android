@@ -1,0 +1,17 @@
+name: Run lint & tests
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download ktlint
+        run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.47.1/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
+
+      - name: Run linter
+        run: ktlint **/*.kt
+
+      - name: Run tests
+        run: ./gradlew :app:testDebugUnitTest
