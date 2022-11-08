@@ -15,9 +15,7 @@ import org.membraneframework.rtc.events.*
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
-import org.membraneframework.rtc.transport.EventTransport
 import org.membraneframework.rtc.transport.EventTransportError
-import org.membraneframework.rtc.transport.EventTransportListener
 import org.membraneframework.rtc.utils.*
 import org.webrtc.*
 import org.webrtc.AudioTrack
@@ -42,10 +40,10 @@ constructor(
     audioDeviceModule: AudioDeviceModule,
     private val eglBase: EglBase,
     private val context: Context,
-    appContext: Context
-) : EventTransportListener, PeerConnection.Observer {
-    private var transport: EventTransport = connectOptions.transport
-
+    appContext: Context,
+    rtcEngineCommunicationFactory: RTCEngineCommunication.RTCEngineCommunicationFactory
+) : RTCEngineListener, PeerConnection.Observer {
+    private val rtcEngineCommunication = rtcEngineCommunicationFactory.create(connectOptions, this)
     private var localPeer: Peer =
         Peer(id = "", metadata = connectOptions.config, trackIdToMetadata = mapOf())
 
@@ -103,8 +101,7 @@ constructor(
     fun connect() {
         coroutineScope.launch {
             try {
-                transport.connect(this@InternalMembraneRTC)
-
+                rtcEngineCommunication.connect()
                 listener.onConnected()
             } catch (e: Exception) {
                 Timber.i(e, "Failed to connect")
@@ -116,7 +113,7 @@ constructor(
 
     fun disconnect() {
         coroutineScope.launch {
-            transport.disconnect()
+            rtcEngineCommunication.disconnect()
             localTracks.forEach { it.stop() }
             peerConnection?.close()
         }
@@ -124,7 +121,7 @@ constructor(
 
     fun join() {
         coroutineScope.launch {
-            transport.send(Join(localPeer.metadata))
+            rtcEngineCommunication.join(localPeer.metadata)
         }
     }
 
@@ -298,7 +295,7 @@ constructor(
         pc.enforceSendOnlyDirection()
 
         coroutineScope.launch {
-            transport.send(RenegotiateTracks())
+            rtcEngineCommunication.renegotiateTracks()
         }
 
         return screencastTrack
@@ -325,7 +322,7 @@ constructor(
         track.stop()
 
         coroutineScope.launch {
-            transport.send(RenegotiateTracks())
+            rtcEngineCommunication.renegotiateTracks()
         }
 
         return true
@@ -362,235 +359,136 @@ constructor(
 
     fun updatePeerMetadata(peerMetadata: Metadata) {
         coroutineScope.launch {
-            transport.send(UpdatePeerMetadata(peerMetadata))
+            rtcEngineCommunication.updatePeerMetadata(peerMetadata)
             localPeer = localPeer.copy(metadata = peerMetadata)
         }
     }
 
     fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
         coroutineScope.launch {
-            transport.send(UpdateTrackMetadata(trackId, trackMetadata))
+            rtcEngineCommunication.updateTrackMetadata(trackId, trackMetadata)
             localPeer = localPeer.withTrack(trackId, trackMetadata)
         }
     }
 
-    override fun onEvent(event: ReceivableEvent) {
-        when (event) {
-            is PeerAccepted -> {
-                this.localPeer = localPeer.copy(id = event.data.id)
+    override fun onPeerAccepted(peerId: String, peersInRoom: List<Peer>) {
+        this.localPeer = localPeer.copy(id = peerId)
 
-                val peers = event.data.peersInRoom
+        listener.onJoinSuccess(localPeer.id, peersInRoom = peersInRoom)
 
-                listener.onJoinSuccess(localPeer.id, peersInRoom = peers)
+        peersInRoom.forEach {
+            this.remotePeers[it.id] = it
 
-                peers.forEach {
-                    this.remotePeers[it.id] = it
+            for ((trackId, metadata) in it.trackIdToMetadata) {
+                val context = TrackContext(track = null, peer = it, trackId = trackId, metadata = metadata)
 
-                    for ((trackId, metadata) in it.trackIdToMetadata) {
-                        val context = TrackContext(track = null, peer = it, trackId = trackId, metadata = metadata)
+                this.trackContexts[trackId] = context
 
-                        this.trackContexts[trackId] = context
-
-                        this.listener.onTrackAdded(context)
-                    }
-                }
+                this.listener.onTrackAdded(context)
             }
-
-            is PeerDenied -> {
-                // TODO: return meaningful data
-                listener.onJoinError(mapOf<String, String>())
-            }
-
-            is PeerJoined -> {
-                val peer = event.data.peer
-                if (peer.id == this.localPeer.id) {
-                    return
-                }
-
-                remotePeers[peer.id] = peer
-
-                listener.onPeerJoined(peer)
-            }
-
-            is PeerLeft -> {
-                val peer = remotePeers.remove(event.data.peerId) ?: run {
-                    Timber.e("Failed to process PeerLeft event: Peer not found: ${event.data.peerId}")
-                    return
-                }
-
-                val trackIds: List<String> = peer.trackIdToMetadata.keys.toList()
-
-                trackIds.forEach {
-                    trackContexts.remove(it)?.let { ctx ->
-                        listener.onTrackRemoved(ctx)
-                    }
-                }
-
-                listener.onPeerLeft(peer)
-            }
-
-            is PeerUpdated -> {
-                val peer = remotePeers.remove(event.data.peerId) ?: run {
-                    Timber.e("Failed to process PeerUpdated event: Peer not found: ${event.data.peerId}")
-                    return
-                }
-
-                remotePeers[peer.id] = peer.copy(metadata = event.data.metadata)
-            }
-
-            is OfferData -> {
-                coroutineScope.launch {
-                    onOfferData(event)
-                }
-            }
-
-            is SdpAnswer -> {
-                coroutineScope.launch {
-                    onSdpAnswer(event)
-                }
-            }
-
-            is RemoteCandidate -> {
-                coroutineScope.launch {
-                    onRemoteCandidate(event)
-                }
-            }
-
-            is TracksAdded -> {
-                if (localPeer.id == event.data.peerId) return
-
-                val peer = remotePeers.remove(event.data.peerId) ?: run {
-                    Timber.e("Failed to process TracksAdded event: Peer not found: ${event.data.peerId}")
-                    return
-                }
-
-                val updatedPeer = peer.copy(trackIdToMetadata = event.data.trackIdToMetadata)
-
-                remotePeers[updatedPeer.id] = updatedPeer
-
-                for ((trackId, metadata) in updatedPeer.trackIdToMetadata) {
-                    val context = TrackContext(track = null, peer = peer, trackId = trackId, metadata = metadata)
-
-                    this.trackContexts[trackId] = context
-
-                    this.listener.onTrackAdded(context)
-                }
-            }
-
-            is TracksRemoved -> {
-                val peer = remotePeers[event.data.peerId] ?: run {
-                    Timber.e("Failed to process TracksRemoved event: Peer not found: ${event.data.peerId}")
-                    return
-                }
-
-                event.data.trackIds.forEach {
-                    val context = trackContexts.remove(it) ?: return@forEach
-
-                    this.listener.onTrackRemoved(context)
-                }
-
-                val updatedPeer = event.data.trackIds.fold(peer) { acc, trackId ->
-                    acc.withoutTrack(trackId)
-                }
-
-                remotePeers[event.data.peerId] = updatedPeer
-            }
-
-            is TrackUpdated -> {
-                val peer = remotePeers[event.data.peerId] ?: run {
-                    Timber.e("Failed to process TrackUpdated event: Peer not found: ${event.data.peerId}")
-                    return
-                }
-
-                val context = trackContexts[event.data.trackId] ?: run {
-                    Timber.e("Failed to process TrackUpdated event: Track context not found: ${event.data.trackId}")
-                    return
-                }
-
-                val updatedContext = context.copy(metadata = event.data.metadata)
-                trackContexts[event.data.trackId] = updatedContext
-
-                val updatedPeer = peer
-                    .withoutTrack(event.data.trackId)
-                    .withTrack(event.data.trackId, event.data.metadata)
-
-                remotePeers[event.data.peerId] = updatedPeer
-
-                this.listener.onTrackUpdated(updatedContext)
-            }
-
-            else ->
-                Timber.e("Failed to process unknown event: $event")
         }
     }
 
-    override fun onError(error: EventTransportError) {
-        listener.onError(MembraneRTCError.Transport(error.message ?: "unknown transport message"))
+    override fun onPeerDenied() {
+        // TODO: return meaningful data
+        listener.onJoinError(mapOf<String, String>())
     }
 
-    override fun onClose() {
-        listener.onError(MembraneRTCError.Transport("transport has been closed"))
+    override fun onPeerJoined(peer: Peer) {
+        if (peer.id == this.localPeer.id) {
+            return
+        }
+
+        remotePeers[peer.id] = peer
+
+        listener.onPeerJoined(peer)
     }
 
-    private suspend fun onOfferData(offerData: OfferData) {
-        qrcMutex.withLock {
-            this.queuedRemoteCandidates = mutableListOf()
-        }
-        prepareIceServers(offerData.data.integratedTurnServers)
-
-        var needsRestart = true
-        if (peerConnection == null) {
-            setupPeerConnection()
-            needsRestart = false
-        }
-        val pc = peerConnection!!
-
-        if (needsRestart) {
-            pc.restartIce()
+    override fun onPeerLeft(peerId: String) {
+        val peer = remotePeers.remove(peerId) ?: run {
+            Timber.e("Failed to process PeerLeft event: Peer not found: $peerId")
+            return
         }
 
-        addNecessaryTransceivers(offerData)
+        val trackIds: List<String> = peer.trackIdToMetadata.keys.toList()
 
-        pc.transceivers.forEach {
-            if (it.direction == RtpTransceiverDirection.SEND_RECV) {
-                it.direction = RtpTransceiverDirection.SEND_ONLY
+        trackIds.forEach {
+            trackContexts.remove(it)?.let { ctx ->
+                listener.onTrackRemoved(ctx)
             }
         }
 
+        listener.onPeerLeft(peer)
+    }
+
+    override fun onPeerUpdated(peerId: String, peerMetadata: Metadata) {
+        val peer = remotePeers.remove(peerId) ?: run {
+            Timber.e("Failed to process PeerUpdated event: Peer not found: $peerId")
+            return
+        }
+
+        remotePeers[peer.id] = peer.copy(metadata = peerMetadata)
+    }
+
+    override fun onOfferData(integratedTurnServers: List<OfferData.TurnServer>, tracksTypes: Map<String, Int>) {
+        Timber.d("RAZ")
         coroutineScope.launch {
+            Timber.d("DWA")
+            qrcMutex.withLock {
+                this@InternalMembraneRTC.queuedRemoteCandidates = mutableListOf()
+            }
+            prepareIceServers(integratedTurnServers)
+
+            var needsRestart = true
+            if (peerConnection == null) {
+                setupPeerConnection()
+                needsRestart = false
+            }
+            val pc = peerConnection!!
+
+            if (needsRestart) {
+                pc.restartIce()
+            }
+
+            addNecessaryTransceivers(tracksTypes)
+
+            pc.transceivers.forEach {
+                if (it.direction == RtpTransceiverDirection.SEND_RECV) {
+                    it.direction = RtpTransceiverDirection.SEND_ONLY
+                }
+            }
+
             val constraints = MediaConstraints()
 
             try {
-                Timber.i("Creating offer")
+                Timber.d("TRZY")
+                Timber.d("Creating offer")
                 val offer = pc.createOffer(constraints).getOrThrow()
 
-                Timber.i("Setting local description")
+                Timber.d("Setting local description")
                 pc.setLocalDescription(offer).getOrThrow()
 
-                Timber.i("Sending an offer")
-                transport.send(
-                    SdpOffer(
-                        offer.description,
-                        localPeer.trackIdToMetadata,
-                        midToTrackIdMapping()
-                    )
+                Timber.d("Sending an offer")
+                rtcEngineCommunication.sdpOffer(
+                    offer.description,
+                    localPeer.trackIdToMetadata,
+                    midToTrackIdMapping()
                 )
+                Timber.d("SZESC")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to create an sdp offer")
             }
         }
     }
 
-    private suspend fun onSdpAnswer(sdpAnswer: SdpAnswer) {
+    override fun onSdpAnswer(type: String, sdp: String, midToTrackId: Map<String, String>) {
         val pc = peerConnection ?: return
 
         coroutineScope.launch {
             val answer = SessionDescription(
                 SessionDescription.Type.ANSWER,
-                sdpAnswer.data.sdp
+                sdp
             )
-
-            midToTrackId = sdpAnswer.data.midToTrackId
 
             pc.setRemoteDescription(answer).onSuccess {
                 drainCandidates()
@@ -614,6 +512,96 @@ constructor(
         }
     }
 
+    override fun onRemoteCandidate(candidate: String, sdpMLineIndex: Int, sdpMid: String?) {
+        coroutineScope.launch {
+            val pc = peerConnection ?: return@launch
+            val iceCandidate = IceCandidate(
+                sdpMid ?: "",
+                sdpMLineIndex,
+                candidate
+            )
+
+            qrcMutex.withLock {
+                if (this@InternalMembraneRTC.queuedRemoteCandidates == null) {
+                    pc.addIceCandidate(iceCandidate)
+                } else {
+                    this@InternalMembraneRTC.queuedRemoteCandidates!!.add(iceCandidate)
+                }
+            }
+        }
+    }
+
+    override fun onTracksAdded(peerId: String, trackIdToMetadata: Map<String, Metadata>) {
+        if (localPeer.id == peerId) return
+
+        val peer = remotePeers.remove(peerId) ?: run {
+            Timber.e("Failed to process TracksAdded event: Peer not found: $peerId")
+            return
+        }
+
+        val updatedPeer = peer.copy(trackIdToMetadata = trackIdToMetadata)
+
+        remotePeers[updatedPeer.id] = updatedPeer
+
+        for ((trackId, metadata) in updatedPeer.trackIdToMetadata) {
+            val context = TrackContext(track = null, peer = peer, trackId = trackId, metadata = metadata)
+
+            this.trackContexts[trackId] = context
+
+            this.listener.onTrackAdded(context)
+        }
+    }
+
+    override fun onTracksRemoved(peerId: String, trackIds: List<String>) {
+        val peer = remotePeers[peerId] ?: run {
+            Timber.e("Failed to process TracksRemoved event: Peer not found: $peerId")
+            return
+        }
+
+        trackIds.forEach {
+            val context = trackContexts.remove(it) ?: return@forEach
+
+            this.listener.onTrackRemoved(context)
+        }
+
+        val updatedPeer = trackIds.fold(peer) { acc, trackId ->
+            acc.withoutTrack(trackId)
+        }
+
+        remotePeers[peerId] = updatedPeer
+    }
+
+    override fun onTrackUpdated(peerId: String, trackId: String, metadata: Metadata) {
+        val peer = remotePeers[peerId] ?: run {
+            Timber.e("Failed to process TrackUpdated event: Peer not found: $peerId")
+            return
+        }
+
+        val context = trackContexts[trackId] ?: run {
+            Timber.e("Failed to process TrackUpdated event: Track context not found: $trackId")
+            return
+        }
+
+        val updatedContext = context.copy(metadata = metadata)
+        trackContexts[trackId] = updatedContext
+
+        val updatedPeer = peer
+            .withoutTrack(trackId)
+            .withTrack(trackId, metadata)
+
+        remotePeers[peerId] = updatedPeer
+
+        this.listener.onTrackUpdated(updatedContext)
+    }
+
+    override fun onError(error: EventTransportError) {
+        listener.onError(MembraneRTCError.Transport(error.message ?: "unknown transport message"))
+    }
+
+    override fun onClose() {
+        listener.onError(MembraneRTCError.Transport("transport has been closed"))
+    }
+
     private suspend fun drainCandidates() {
         qrcMutex.withLock {
             this.queuedRemoteCandidates?.let {
@@ -625,31 +613,9 @@ constructor(
         }
     }
 
-    private suspend fun onRemoteCandidate(remoteCandidate: RemoteCandidate) {
-        val pc = peerConnection ?: return
-        val candidate = IceCandidate(
-            remoteCandidate.data.sdpMid ?: "",
-            remoteCandidate.data.sdpMLineIndex,
-            remoteCandidate.data.candidate
-        )
-
-        qrcMutex.withLock {
-            if (this.queuedRemoteCandidates == null) {
-                pc.addIceCandidate(candidate)
-            } else {
-                this.queuedRemoteCandidates!!.add(candidate)
-            }
-        }
-    }
-
     private fun onLocalCandidate(localCandidate: IceCandidate) {
         coroutineScope.launch {
-            transport.send(
-                LocalCandidate(
-                    localCandidate.sdp,
-                    localCandidate.sdpMLineIndex
-                )
-            )
+            rtcEngineCommunication.localCandidate(localCandidate.sdp, localCandidate.sdpMLineIndex)
         }
     }
 
@@ -682,11 +648,11 @@ constructor(
         this.config = config
     }
 
-    private fun addNecessaryTransceivers(offerData: OfferData) {
+    private fun addNecessaryTransceivers(tracksTypes: Map<String, Int>) {
         val pc = peerConnection ?: return
 
-        val necessaryAudio = offerData.data.tracksTypes["audio"] ?: 0
-        val necessaryVideo = offerData.data.tracksTypes["video"] ?: 0
+        val necessaryAudio = tracksTypes["audio"] ?: 0
+        val necessaryVideo = tracksTypes["video"] ?: 0
 
         var lackingAudio = necessaryAudio
         var lackingVideo = necessaryVideo
@@ -737,12 +703,7 @@ constructor(
 
     fun setTargetTrackEncoding(trackId: String, encoding: TrackEncoding) {
         coroutineScope.launch {
-            transport.send(
-                SelectEncoding(
-                    trackId,
-                    encoding.rid
-                )
-            )
+            rtcEngineCommunication.setTargetTrackEncoding(trackId, encoding)
         }
     }
 

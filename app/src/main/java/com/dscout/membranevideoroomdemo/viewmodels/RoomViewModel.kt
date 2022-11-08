@@ -66,6 +66,7 @@ class RoomViewModel(
     )
 
     fun connect(roomName: String, displayName: String) {
+        Timber.d("CONNECT!")
         viewModelScope.launch {
             localDisplayName = displayName
             // disconnect from the current view
@@ -163,6 +164,7 @@ class RoomViewModel(
 
     // MembraneRTCListener callbacks
     override fun onConnected() {
+        Timber.d("ON CONNECT!")
         room.value?.let {
             localAudioTrack = it.createAudioTrack(
                 mapOf(
