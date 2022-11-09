@@ -14,16 +14,14 @@ class RTCEngineCommunication
 @AssistedInject
 constructor(
     @Assisted
-    private val connectOptions: ConnectOptions,
+    private val transport: EventTransport,
     @Assisted
     private val engineListener: RTCEngineListener
 ) : EventTransportListener {
-    private var transport: EventTransport = connectOptions.transport
-
     @AssistedFactory
     interface RTCEngineCommunicationFactory {
         fun create(
-            connectOptions: ConnectOptions,
+            transport: EventTransport,
             listener: RTCEngineListener
         ): RTCEngineCommunication
     }
