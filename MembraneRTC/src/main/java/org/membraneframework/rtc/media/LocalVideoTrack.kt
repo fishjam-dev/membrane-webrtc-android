@@ -2,6 +2,7 @@ package org.membraneframework.rtc.media
 
 import android.content.Context
 import org.webrtc.*
+import timber.log.Timber
 import java.util.*
 
 /**
@@ -135,6 +136,7 @@ class CameraCapturer constructor(
     }
 
     override fun onCameraSwitchError(errorDescription: String?) {
-        // FIXME do nothing for now
+        // FIXME flipCamera() should probably return a promise or something
+        Timber.e("Failed to switch camera: $errorDescription")
     }
 }
