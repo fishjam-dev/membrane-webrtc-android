@@ -16,6 +16,7 @@ import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.transport.EventTransportError
 import org.membraneframework.rtc.utils.ClosableCoroutineScope
 import org.membraneframework.rtc.utils.Metadata
+import org.membraneframework.rtc.utils.TimberDebugTree
 import org.webrtc.*
 import org.webrtc.AudioTrack
 import org.webrtc.VideoTrack
@@ -54,6 +55,12 @@ constructor(
 
     private val coroutineScope: CoroutineScope =
         ClosableCoroutineScope(SupervisorJob() + defaultDispatcher)
+
+    init {
+        if (BuildConfig.DEBUG) {
+            Timber.plant(TimberDebugTree())
+        }
+    }
 
     @AssistedFactory
     interface Factory {
@@ -393,7 +400,7 @@ constructor(
                 trackContext.copy(track = RemoteAudioTrack(track))
 
             else ->
-                throw IllegalStateException("onAddTrack invalid type of incoming track")
+                throw IllegalStateException("invalid type of incoming track")
         }
 
         trackContexts[trackId] = newTrackContext
