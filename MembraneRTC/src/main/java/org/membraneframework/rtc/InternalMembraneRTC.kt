@@ -89,6 +89,10 @@ constructor(
             )
             .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext))
             .createPeerConnectionFactory()
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(TimberDebugTree())
+        }
     }
 
     @AssistedFactory
@@ -165,7 +169,7 @@ constructor(
 
     private fun addTrack(track: LocalTrack, streamIds: List<String>) {
         val pc = peerConnection ?: run {
-            Timber.e("addTrack: Peer connection not yet established")
+            Timber.e("Peer connection not yet established")
             return
         }
 
@@ -200,7 +204,7 @@ constructor(
 
     private fun splitBitrate(encodings: List<RtpParameters.Encoding>, maxBitrate: TrackBandwidthLimit.BandwidthLimit) {
         if (encodings.isEmpty()) {
-            Timber.e("splitBitrate: Attempted to limit bandwidth of the track that doesn't have any encodings")
+            Timber.e("Attempted to limit bandwidth of the track that doesn't have any encodings")
             return
         }
         if (maxBitrate.limit == 0) {
@@ -226,11 +230,11 @@ constructor(
 
     fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         val pc = peerConnection ?: run {
-            Timber.e("setTrackBandwidth: Peer connection not yet established")
+            Timber.e("Peer connection not yet established")
             return
         }
         val sender = pc.senders.find { it.track()?.id() == trackId } ?: run {
-            Timber.e("setTrackBandwidth: Invalid trackId: track sender not found")
+            Timber.e("Invalid trackId: track sender not found")
             return
         }
         val params = sender.parameters
@@ -242,17 +246,17 @@ constructor(
 
     fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         val pc = peerConnection ?: run {
-            Timber.e("setEncodingBandwidth: Peer connection not yet established")
+            Timber.e("Peer connection not yet established")
             return
         }
         val sender = pc.senders.find { it.track()?.id() == trackId } ?: run {
-            Timber.e("setEncodingBandwidth: Invalid trackId: track sender not found")
+            Timber.e("Invalid trackId: track sender not found")
             return
         }
 
         val params = sender.parameters
         val encodingParameters = params.encodings.find { it.rid == encoding } ?: run {
-            Timber.e("setEncodingBandwidth: Invalid encoding: encoding not found")
+            Timber.e("Invalid encoding: encoding not found")
             return
         }
 
@@ -268,7 +272,7 @@ constructor(
         onEnd: () -> Unit
     ): LocalScreencastTrack? {
         val pc = peerConnection ?: run {
-            Timber.e("createScreencastTrack: Peer connection not yet established")
+            Timber.e("Peer connection not yet established")
             return null
         }
         val screencastTrack = LocalScreencastTrack.create(
@@ -306,11 +310,11 @@ constructor(
 
     fun removeTrack(trackId: String): Boolean {
         val pc = peerConnection ?: run {
-            Timber.e("removeTrack: Peer connection not yet established")
+            Timber.e("Peer connection not yet established")
             return false
         }
         val track = localTracks.find { it.id() == trackId } ?: run {
-            Timber.e("removeTrack: Can't find track to remove")
+            Timber.e("Can't find track to remove")
             return false
         }
 
@@ -333,7 +337,7 @@ constructor(
 
     private fun setupPeerConnection() {
         if (peerConnection != null) {
-            Timber.e("setupPeerConnection: Peer connection already established!")
+            Timber.e("Peer connection already established!")
             return
         }
 
@@ -655,7 +659,7 @@ constructor(
 
     private fun prepareIceServers(integratedTurnServers: List<OfferData.TurnServer>) {
         if (config != null || iceServers != null) {
-            Timber.e("prepareIceServers: Config or ice servers are already initialized, skipping the preparation")
+            Timber.e("Config or ice servers are already initialized, skipping the preparation")
             return
         }
 
@@ -748,12 +752,12 @@ constructor(
 
     private fun setTrackEncoding(trackId: String, trackEncoding: TrackEncoding, enabled: Boolean) {
         val sender = peerConnection?.senders?.find { it -> it.track()?.id() == trackId } ?: run {
-            Timber.e("setTrackEncoding: Invalid trackId $trackId, no track sender found")
+            Timber.e("Invalid trackId $trackId, no track sender found")
             return
         }
         val params = sender.parameters
         val encoding = params?.encodings?.find { it.rid == trackEncoding.rid } ?: run {
-            Timber.e("setTrackEncoding: Invalid encoding $trackEncoding, no such encoding found in peer connection")
+            Timber.e("Invalid encoding $trackEncoding, no such encoding found in peer connection")
             return
         }
         encoding.active = enabled
@@ -816,11 +820,11 @@ constructor(
         val mid = transceiver.mid
 
         val trackId = midToTrackId[mid] ?: run {
-            Timber.e("onAddTrack: Track with mid=$mid not found")
+            Timber.e("Track with mid=$mid not found")
             return
         }
         val trackContext = trackContexts[trackId] ?: run {
-            Timber.e("onAddTrack: Track context with trackId=$trackId not found")
+            Timber.e("Track context with trackId=$trackId not found")
             return
         }
 
@@ -832,7 +836,7 @@ constructor(
                 trackContext.copy(track = RemoteAudioTrack(track))
 
             else ->
-                throw IllegalStateException("onAddTrack invalid type of incoming track")
+                throw IllegalStateException("invalid type of incoming track")
         }
 
         trackContexts[trackId] = newTrackContext
