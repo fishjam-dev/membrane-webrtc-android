@@ -120,6 +120,9 @@ enum class ReceivableEventType() {
     @SerializedName("peerUpdated")
     PeerUpdated,
 
+    @SerializedName("peerRemoved")
+    PeerRemoved,
+
     @SerializedName("custom")
     Custom,
 
@@ -139,7 +142,10 @@ enum class ReceivableEventType() {
     TrackUpdated,
 
     @SerializedName("sdpAnswer")
-    SdpAnswer
+    SdpAnswer,
+
+    @SerializedName("encodingSwitched")
+    EncodingSwitched
 }
 
 internal data class BaseReceivableEvent(val type: ReceivableEventType)
@@ -167,6 +173,9 @@ sealed class ReceivableEvent {
                     ReceivableEventType.PeerUpdated ->
                         payload.toDataClass<PeerUpdated>()
 
+                    ReceivableEventType.PeerRemoved ->
+                        payload.toDataClass<PeerRemoved>()
+
                     ReceivableEventType.TracksAdded ->
                         payload.toDataClass<TracksAdded>()
 
@@ -188,6 +197,9 @@ sealed class ReceivableEvent {
 
                             ReceivableEventType.SdpAnswer ->
                                 payload.toDataClass<CustomEvent<SdpAnswer>>().data
+
+                            ReceivableEventType.EncodingSwitched ->
+                                payload.toDataClass<CustomEvent<EncodingSwitched>>().data
 
                             else ->
                                 null
@@ -223,6 +235,10 @@ data class PeerUpdated(val type: ReceivableEventType, val data: Data) : Receivab
     data class Data(val peerId: String, val metadata: Metadata)
 }
 
+data class PeerRemoved(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(val peerId: String, val reason: String)
+}
+
 data class OfferData(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class TurnServer(
         val username: String,
@@ -253,6 +269,10 @@ data class SdpAnswer(val type: ReceivableEventType, val data: Data) : Receivable
 
 data class RemoteCandidate(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
     data class Data(val candidate: String, val sdpMLineIndex: Int, val sdpMid: String?)
+}
+
+data class EncodingSwitched(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(val peerId: String, val trackId: String, val encoding: String)
 }
 
 data class BaseCustomEvent(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {

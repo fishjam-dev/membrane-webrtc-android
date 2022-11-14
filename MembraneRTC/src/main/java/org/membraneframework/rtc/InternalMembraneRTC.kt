@@ -442,6 +442,14 @@ constructor(
                 remotePeers[peer.id] = peer.copy(metadata = event.data.metadata)
             }
 
+            is PeerRemoved -> {
+                if (event.data.peerId != localPeer.id) {
+                    Timber.e("Received onRemoved media event, but it does not refer to the local peer")
+                    return
+                }
+                listener.onRemoved(event.data.reason)
+            }
+
             is OfferData -> {
                 coroutineScope.launch {
                     onOfferData(event)
@@ -521,6 +529,10 @@ constructor(
                 remotePeers[event.data.peerId] = updatedPeer
 
                 this.listener.onTrackUpdated(updatedContext)
+            }
+
+            is EncodingSwitched -> {
+                this.listener.onTrackEncodingChanged(event.data.peerId, event.data.trackId, event.data.encoding)
             }
 
             else ->
