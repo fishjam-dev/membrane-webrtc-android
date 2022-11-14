@@ -319,17 +319,9 @@ class RoomViewModel(
         Timber.i("Peer has updated $peer")
     }
 
-    override fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String) {
-        Timber.i("Track encoding changed $trackId -> $encoding")
-    }
-
     override fun onError(error: MembraneRTCError) {
         Timber.e("Encountered an error $error")
         errorMessage.value = "Encountered an error, go back and try again..."
-    }
-
-    override fun onRemoved(reason: String) {
-        Timber.e("Peer was removed from the server: $reason")
     }
 
     fun startScreencast(mediaProjectionPermission: Intent) {

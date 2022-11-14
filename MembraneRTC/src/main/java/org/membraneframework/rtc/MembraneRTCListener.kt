@@ -2,6 +2,7 @@ package org.membraneframework.rtc
 
 import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
+import timber.log.Timber
 
 public interface MembraneRTCListener {
     // / Callback invoked when client has successfully connected via transport layer.
@@ -35,11 +36,15 @@ public interface MembraneRTCListener {
     fun onPeerUpdated(peer: Peer)
 
     // Callback invoked when received track encoding has changed
-    fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String)
+    fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String) {
+        Timber.i(
+            "Track encoding changed $trackId -> $encoding"
+        )
+    }
 
     // /Callback invoked when an errors happens.
     fun onError(error: MembraneRTCError)
 
     // Callback invoked every time a local peer is removed by the server
-    fun onRemoved(reason: String)
+    fun onRemoved(reason: String) { Timber.e("Peer removed") }
 }
