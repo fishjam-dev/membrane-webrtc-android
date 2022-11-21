@@ -17,6 +17,8 @@ internal interface RTCEngineListener {
     fun onTracksAdded(peerId: String, trackIdToMetadata: Map<String, Metadata>)
     fun onTracksRemoved(peerId: String, trackIds: List<String>)
     fun onTrackUpdated(peerId: String, trackId: String, metadata: Metadata)
+    fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String)
+    fun onRemoved(peerId: String, reason: String)
     fun onError(error: EventTransportError)
     fun onClose()
 }

@@ -335,7 +335,14 @@ class RoomViewModel(
         val dimensions = videoParameters.dimensions.flip()
         videoParameters = videoParameters.copy(
             dimensions = dimensions,
-            simulcastConfig = screencastSimulcastConfig.value
+            simulcastConfig = screencastSimulcastConfig.value,
+            maxBitrate = TrackBandwidthLimit.SimulcastBandwidthLimit(
+                mapOf(
+                    "l" to TrackBandwidthLimit.BandwidthLimit(150),
+                    "m" to TrackBandwidthLimit.BandwidthLimit(500),
+                    "h" to TrackBandwidthLimit.BandwidthLimit(1500)
+                )
+            )
         )
 
         localScreencastTrack = room.value?.createScreencastTrack(

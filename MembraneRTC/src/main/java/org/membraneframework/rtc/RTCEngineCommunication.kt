@@ -86,6 +86,7 @@ constructor(
         when (event) {
             is OfferData -> engineListener.onOfferData(event.data.integratedTurnServers, event.data.tracksTypes)
             is PeerAccepted -> engineListener.onPeerAccepted(event.data.id, event.data.peersInRoom)
+            is PeerRemoved -> engineListener.onRemoved(event.data.peerId, event.data.reason)
             is PeerDenied -> engineListener.onPeerDenied()
             is PeerJoined -> engineListener.onPeerJoined(event.data.peer)
             is PeerLeft -> engineListener.onPeerLeft(event.data.peerId)
@@ -99,6 +100,11 @@ constructor(
             is TrackUpdated -> engineListener.onTrackUpdated(event.data.peerId, event.data.trackId, event.data.metadata)
             is TracksAdded -> engineListener.onTracksAdded(event.data.peerId, event.data.trackIdToMetadata)
             is TracksRemoved -> engineListener.onTracksRemoved(event.data.peerId, event.data.trackIds)
+            is EncodingSwitched -> engineListener.onTrackEncodingChanged(
+                event.data.peerId,
+                event.data.trackId,
+                event.data.encoding
+            )
             else -> Timber.e("Failed to process unknown event: $event")
         }
     }

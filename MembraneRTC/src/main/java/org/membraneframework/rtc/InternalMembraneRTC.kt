@@ -358,6 +358,18 @@ constructor(
         this.listener.onTrackUpdated(updatedContext)
     }
 
+    override fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String) {
+        this.listener.onTrackEncodingChanged(peerId, trackId, encoding)
+    }
+
+    override fun onRemoved(peerId: String, reason: String) {
+        if (peerId != localPeer.id) {
+            Timber.e("Received onRemoved media event, but it does not refer to the local peer")
+            return
+        }
+        listener.onRemoved(reason)
+    }
+
     override fun onError(error: EventTransportError) {
         listener.onError(MembraneRTCError.Transport(error.message ?: "unknown transport message"))
     }
