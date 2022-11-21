@@ -5,7 +5,7 @@ import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.transport.EventTransportError
 import org.membraneframework.rtc.utils.Metadata
 
-interface RTCEngineListener {
+internal interface RTCEngineListener {
     fun onPeerAccepted(peerId: String, peersInRoom: List<Peer>)
     fun onPeerDenied()
     fun onPeerJoined(peer: Peer)

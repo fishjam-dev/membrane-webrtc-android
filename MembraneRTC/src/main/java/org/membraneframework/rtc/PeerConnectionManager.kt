@@ -15,7 +15,7 @@ import timber.log.Timber
 import java.util.*
 import kotlin.math.pow
 
-class PeerConnectionManager
+internal class PeerConnectionManager
 @AssistedInject constructor(
     @Assisted private val peerConnectionListener: PeerConnectionListener,
     @Assisted private val peerConnectionFactory: PeerConnectionFactoryWrapper

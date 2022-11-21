@@ -9,7 +9,7 @@ import org.webrtc.*
 import org.webrtc.audio.AudioDeviceModule
 import java.util.*
 
-class PeerConnectionFactoryWrapper
+internal class PeerConnectionFactoryWrapper
 @AssistedInject constructor(
     @Assisted private val connectOptions: ConnectOptions,
     audioDeviceModule: AudioDeviceModule,

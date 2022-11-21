@@ -10,7 +10,7 @@ import org.membraneframework.rtc.transport.EventTransportListener
 import org.membraneframework.rtc.utils.Metadata
 import timber.log.Timber
 
-class RTCEngineCommunication
+internal class RTCEngineCommunication
 @AssistedInject
 constructor(
     @Assisted
