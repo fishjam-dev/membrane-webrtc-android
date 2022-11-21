@@ -7,6 +7,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.media.*
+import org.membraneframework.rtc.utils.*
+import org.membraneframework.rtc.utils.addTransceiver
 import org.membraneframework.rtc.utils.createOffer
 import org.membraneframework.rtc.utils.setLocalDescription
 import org.membraneframework.rtc.utils.setRemoteDescription
@@ -65,12 +67,12 @@ internal class PeerConnectionManager
             applyBitrate(sendEncodings, videoParameters.maxBitrate)
         }
 
-        val transceiverInit = RtpTransceiver.RtpTransceiverInit(
+        pc.addTransceiver(
+            track.rtcTrack(),
             RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
             streamIds,
             sendEncodings
         )
-        pc.addTransceiver(track.rtcTrack(), transceiverInit)
         pc.enforceSendOnlyDirection()
     }
 
@@ -121,7 +123,7 @@ internal class PeerConnectionManager
         }
         val params = sender.parameters
 
-        applyBitrate(params.encodings, bandwidthLimit)
+        applyBitrate(params.getEncodings(), bandwidthLimit)
 
         sender.parameters = params
     }

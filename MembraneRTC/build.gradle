@@ -57,6 +57,10 @@ dependencies {
     implementation 'com.github.dsrees:JavaPhoenixClient:1.0.0'
     api 'com.github.webrtc-sdk:android:104.5112.01'
     implementation 'androidx.core:core:1.8.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutines}"
+    testImplementation "io.mockk:mockk:1.13.2"
+    testImplementation 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
 }
 
 ext {
@@ -93,6 +97,14 @@ tasks.named("dokkaHtml") {
         named("main") {
             includes.from("module.md")
         }
+    }
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
     }
 }
 
