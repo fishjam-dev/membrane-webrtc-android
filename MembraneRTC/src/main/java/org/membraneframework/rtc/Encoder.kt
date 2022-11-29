@@ -17,9 +17,9 @@ enum class EncoderType {
  */
 data class EncoderOptions(
     /**
-     * SOFTWARE / HARDWARE encoder, default: SOFTWARE
+     * SOFTWARE / HARDWARE encoder, default: HARDWARE
      */
-    val encoderType: EncoderType = EncoderType.SOFTWARE,
+    val encoderType: EncoderType = EncoderType.HARDWARE,
     /**
      * whether to enable Intel's VP8 encoder, default: true
      */
