@@ -173,7 +173,7 @@ internal open class SimulcastVideoEncoderFactoryWrapper(
         }
 
         override fun getEncoderInfo(): VideoEncoder.EncoderInfo {
-            val future = executor.submit(Callable { return@Callable encoder.encoderInfo })
+            val future = executor.submit(Callable { return@Callable VideoEncoder.EncoderInfo(2, true) })
             return future.get()
         }
     }

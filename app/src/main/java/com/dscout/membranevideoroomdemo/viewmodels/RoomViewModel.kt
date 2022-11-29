@@ -77,7 +77,7 @@ class RoomViewModel(
                     transport = PhoenixTransport(url, "room:$roomName", Dispatchers.IO, params),
                     config = mapOf("displayName" to displayName),
                     encoderOptions = EncoderOptions(
-                        encoderType = EncoderType.SOFTWARE
+                        encoderType = EncoderType.HARDWARE
                     )
                 ),
                 listener = this@RoomViewModel
