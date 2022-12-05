@@ -144,7 +144,7 @@ class RoomViewModel(
             val enabled = !it.enabled()
             it.setEnabled(enabled)
             isMicrophoneOn.value = enabled
-            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled))
+            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "audio"))
         }
     }
 
@@ -153,7 +153,7 @@ class RoomViewModel(
             val enabled = !it.enabled()
             it.setEnabled(enabled)
             isCameraOn.value = enabled
-            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled))
+            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "camera"))
         }
     }
 
