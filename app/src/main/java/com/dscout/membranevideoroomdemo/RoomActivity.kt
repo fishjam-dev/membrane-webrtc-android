@@ -44,7 +44,7 @@ import timber.log.Timber
 
 class RoomActivity : AppCompatActivity() {
     private val viewModel: RoomViewModel by viewModelByFactory {
-        RoomViewModel(URL, application)
+        RoomViewModel(BuildConfig.VIDEOROOM_URL, application)
     }
 
     private val screencastLauncher =

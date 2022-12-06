@@ -20,9 +20,16 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        buildConfigField "String" , "VIDEOROOM_URL" ,  "\"https://videoroom.membrane.work/socket\""
     }
 
     buildTypes {
+        debug {
+            if(project.hasProperty("VIDEOROOM_URL")) {
+                buildConfigField "String", "VIDEOROOM_URL", "\"$VIDEOROOM_URL\""
+            }
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
