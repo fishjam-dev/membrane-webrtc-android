@@ -17,9 +17,6 @@ internal object RTCModule {
         return EglBase.create()
     }
 
-    @Provides
-    fun eglContext(eglBase: EglBase): EglBase.Context = eglBase.eglBaseContext
-
     @Singleton
     @Provides
     fun audioDeviceModule(appContext: Context): AudioDeviceModule {
