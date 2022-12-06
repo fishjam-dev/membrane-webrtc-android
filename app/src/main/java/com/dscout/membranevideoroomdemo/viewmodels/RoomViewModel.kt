@@ -77,7 +77,7 @@ class RoomViewModel(
                     transport = PhoenixTransport(url, "room:$roomName", Dispatchers.IO, params),
                     config = mapOf("displayName" to displayName),
                     encoderOptions = EncoderOptions(
-                        encoderType = EncoderType.SOFTWARE
+                        encoderType = EncoderType.HARDWARE
                     )
                 ),
                 listener = this@RoomViewModel
@@ -144,7 +144,7 @@ class RoomViewModel(
             val enabled = !it.enabled()
             it.setEnabled(enabled)
             isMicrophoneOn.value = enabled
-            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled))
+            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "audio"))
         }
     }
 
@@ -153,7 +153,7 @@ class RoomViewModel(
             val enabled = !it.enabled()
             it.setEnabled(enabled)
             isCameraOn.value = enabled
-            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled))
+            room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "camera"))
         }
     }
 
@@ -167,21 +167,30 @@ class RoomViewModel(
             localAudioTrack = it.createAudioTrack(
                 mapOf(
                     "user_id" to (localDisplayName ?: ""),
-                    "active" to true
+                    "active" to true,
+                    "type" to "audio"
                 )
             )
 
             var videoParameters = VideoParameters.presetHD169
             videoParameters = videoParameters.copy(
                 dimensions = videoParameters.dimensions,
-                simulcastConfig = videoSimulcastConfig.value
+                simulcastConfig = videoSimulcastConfig.value,
+                maxBitrate = TrackBandwidthLimit.SimulcastBandwidthLimit(
+                    mapOf(
+                        "l" to TrackBandwidthLimit.BandwidthLimit(150),
+                        "m" to TrackBandwidthLimit.BandwidthLimit(500),
+                        "h" to TrackBandwidthLimit.BandwidthLimit(1500)
+                    )
+                )
             )
 
             localVideoTrack = it.createVideoTrack(
                 videoParameters,
                 mapOf(
                     "user_id" to (localDisplayName ?: ""),
-                    "active" to true
+                    "active" to true,
+                    "type" to "camera"
                 )
             )
 
