@@ -14,4 +14,4 @@ jobs:
         run: ktlint **/*.kt
 
       - name: Run tests
-        run: ./gradlew :app:testDebugUnitTest
+        run: ./gradlew :MembraneRTC:testDebugUnitTest
