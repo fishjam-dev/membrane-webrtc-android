@@ -20,9 +20,16 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        buildConfigField "String" , "RTC_ENGINE_URL" ,  "\"https://videoroom.membrane.work/socket\""
     }
 
     buildTypes {
+        debug {
+            if(project.hasProperty("RTC_ENGINE_URL")) {
+                buildConfigField "String", "RTC_ENGINE_URL", "\"$RTC_ENGINE_URL\""
+            }
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

@@ -54,6 +54,7 @@ Add the dependency:
 
 ## Developing
 1. Run `./scripts/init.sh` in the main directory to install ktlint and release-it and set up git hooks
+2. Set `RTC_ENGINE_URL` in `~/.gradle/gradle.properties` to your dev backend.
 2. Run `./gradlew :MembraneRTC:testDebugUnitTest` to run unit tests.
 2. Run `release-it` to release. Follow the prompts, it should add a commit and a git tag and jitpack should pick it up automatically and put the new version in the jitpack repo.
 
