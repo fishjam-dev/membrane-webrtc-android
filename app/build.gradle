@@ -20,13 +20,13 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
-        buildConfigField "String" , "RTC_ENGINE_URL" ,  "\"https://videoroom.membrane.work/socket\""
+        buildConfigField "String" , "VIDEOROOM_URL" ,  "\"https://videoroom.membrane.work/socket\""
     }
 
     buildTypes {
         debug {
-            if(project.hasProperty("RTC_ENGINE_URL")) {
-                buildConfigField "String", "RTC_ENGINE_URL", "\"$RTC_ENGINE_URL\""
+            if(project.hasProperty("VIDEOROOM_URL")) {
+                buildConfigField "String", "VIDEOROOM_URL", "\"$VIDEOROOM_URL\""
             }
         }
 
