@@ -2,7 +2,7 @@
 
 ## Components
 The repository consists of 2 components:
-- `MembraneRTC` - Standalone Membrane WebRTC client fully compatible with `Membrane RTC Engine` bases on a [web version](https://github.com/membraneframework/membrane_rtc_engine)
+- `MembraneRTC` - Standalone Membrane WebRTC client fully compatible with `Membrane RTC Engine` bases on a [web version](https://github.com/jellyfish-dev/membrane_rtc_engine)
     responsible for exchanging media events and receiving media streams which then can be presented to the users
 - `app` - Demo application utilizing `MembraneRTC` client
 
@@ -29,7 +29,7 @@ The user has the following control buttons at hand:
 - screencast toggle
 
 ## Documentation
-API documentation is available [here](https://docs.membrane.stream/membrane-webrtc-android/)
+API documentation is available [here](https://jellyfish-dev.github.io/membrane-webrtc-android/)
 
 ## Necessary setup
 The only required constant is the media server's URL that can be found at the top of `MainActivity.kt`.
