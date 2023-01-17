@@ -258,6 +258,14 @@ class RoomViewModel(
             mutableParticipants[id] = newParticipant
 
             emitParticipants()
+
+            ctx.setOnVadNotificationListener {
+                val p = mutableParticipants[it.peer.id]
+                if (p != null) {
+                    mutableParticipants[it.peer.id] = p.copy(vadStatus = it.vadStatus)
+                    emitParticipants()
+                }
+            }
         }
 
         Timber.i("Track is ready $ctx")

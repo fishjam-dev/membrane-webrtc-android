@@ -36,6 +36,7 @@ public interface MembraneRTCListener {
     fun onPeerUpdated(peer: Peer)
 
     // Callback invoked when received track encoding has changed
+    @Deprecated("Deprecated, use TrackContext::setOnTrackEncodingChangeListener")
     fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String) {
         Timber.i(
             "Track encoding changed $trackId -> $encoding"
@@ -47,4 +48,11 @@ public interface MembraneRTCListener {
 
     // Callback invoked every time a local peer is removed by the server
     fun onRemoved(reason: String) { Timber.e("Peer removed") }
+
+    // Called every time the server estimates client's bandwidth.
+    // estimation - client's available incoming bitrate estimated
+    // by the server. It's measured in bits per second.
+    fun onBandwidthEstimationChanged(estimation: Long) {
+        Timber.i("Bandwidth estimation changed $estimation")
+    }
 }
