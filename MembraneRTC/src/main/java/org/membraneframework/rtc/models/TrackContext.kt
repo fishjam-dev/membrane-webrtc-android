@@ -3,24 +3,44 @@ package org.membraneframework.rtc.models
 import org.membraneframework.rtc.TrackEncoding
 import org.membraneframework.rtc.media.RemoteTrack
 import org.membraneframework.rtc.utils.Metadata
+import kotlin.properties.Delegates
 
-data class TrackContext internal constructor(
-    val track: RemoteTrack?,
-    val peer: Peer,
-    val trackId: String,
-    val metadata: Metadata,
-    val vadStatus: VadStatus,
-    val encoding: TrackEncoding?,
-    val encodingReason: EncodingReason?,
-    private val trackContextInternal: TrackContextInternal
-) {
-    // Callback invoked when received track encoding has changed
-    fun setOnTrackEncodingChangeListener(listener: ((TrackContext) -> Unit)?) {
-        trackContextInternal.setOnTrackEncodingChangeListener(listener)
+fun interface OnTrackEncodingChangeListener {
+    fun onTrackEncodingChange(trackContext: TrackContext)
+}
+
+fun interface OnVadNotificationListener {
+    fun onVadNotification(trackContext: TrackContext)
+}
+
+class TrackContext(track: RemoteTrack?, val peer: Peer, val trackId: String, metadata: Metadata) {
+    private var onTrackEncodingChangeListener: (OnTrackEncodingChangeListener)? = null
+    private var onVadNotificationListener: (OnVadNotificationListener)? = null
+
+    var track: RemoteTrack? = track
+        internal set
+    var metadata: Metadata = metadata
+        internal set
+
+    var vadStatus: VadStatus by Delegates.observable(VadStatus.SILENCE) { _, _, _ ->
+        onVadNotificationListener?.let { onVadNotificationListener?.onVadNotification(this) }
+    }
+        internal set
+
+    var encoding: TrackEncoding? = null
+    var encodingReason: EncodingReason? = null
+
+    internal fun setEncoding(encoding: TrackEncoding, encodingReason: EncodingReason) {
+        this.encoding = encoding
+        this.encodingReason = encodingReason
+        onTrackEncodingChangeListener?.let { onTrackEncodingChangeListener?.onTrackEncodingChange(this) }
     }
 
-    // Callback invoked every time an update about voice activity is received from the server
-    fun setOnVadNotificationListener(listener: ((TrackContext) -> Unit)?) {
-        trackContextInternal.setOnVadNotificationListener(listener)
+    fun setOnTrackEncodingChangeListener(listener: OnTrackEncodingChangeListener?) {
+        onTrackEncodingChangeListener = listener
+    }
+
+    fun setOnVadNotificationListener(listener: OnVadNotificationListener?) {
+        onVadNotificationListener = listener
     }
 }

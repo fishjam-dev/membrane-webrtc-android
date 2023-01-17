@@ -48,7 +48,7 @@ constructor(
     private val remotePeers = HashMap<String, Peer>()
 
     // mapping from remote track's id to its context
-    private val trackContexts = HashMap<String, TrackContextInternal>()
+    private val trackContexts = HashMap<String, TrackContext>()
 
     private val localTracks = mutableListOf<LocalTrack>()
 
@@ -211,11 +211,11 @@ constructor(
             this.remotePeers[it.id] = it
 
             for ((trackId, metadata) in it.trackIdToMetadata) {
-                val context = TrackContextInternal(track = null, peer = it, trackId = trackId, metadata = metadata)
+                val context = TrackContext(track = null, peer = it, trackId = trackId, metadata = metadata)
 
                 this.trackContexts[trackId] = context
 
-                this.listener.onTrackAdded(context.toTrackContext())
+                this.listener.onTrackAdded(context)
             }
         }
     }
@@ -245,7 +245,7 @@ constructor(
 
         trackIds.forEach {
             trackContexts.remove(it)?.let { ctx ->
-                listener.onTrackRemoved(ctx.toTrackContext())
+                listener.onTrackRemoved(ctx)
             }
         }
 
@@ -307,11 +307,11 @@ constructor(
         remotePeers[updatedPeer.id] = updatedPeer
 
         for ((trackId, metadata) in updatedPeer.trackIdToMetadata) {
-            val context = TrackContextInternal(track = null, peer = peer, trackId = trackId, metadata = metadata)
+            val context = TrackContext(track = null, peer = peer, trackId = trackId, metadata = metadata)
 
             this.trackContexts[trackId] = context
 
-            this.listener.onTrackAdded(context.toTrackContext())
+            this.listener.onTrackAdded(context)
         }
     }
 
@@ -324,7 +324,7 @@ constructor(
         trackIds.forEach {
             val context = trackContexts.remove(it) ?: return@forEach
 
-            this.listener.onTrackRemoved(context.toTrackContext())
+            this.listener.onTrackRemoved(context)
         }
 
         val updatedPeer = trackIds.fold(peer) { acc, trackId ->
@@ -353,7 +353,7 @@ constructor(
 
         remotePeers[peerId] = updatedPeer
 
-        this.listener.onTrackUpdated(context.toTrackContext())
+        this.listener.onTrackUpdated(context)
     }
 
     override fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String, encodingReason: String) {
@@ -447,6 +447,6 @@ constructor(
                 throw IllegalStateException("invalid type of incoming track")
         }
 
-        listener.onTrackReady(trackContext.toTrackContext())
+        listener.onTrackReady(trackContext)
     }
 }
