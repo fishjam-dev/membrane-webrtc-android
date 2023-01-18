@@ -3,7 +3,6 @@ package org.membraneframework.rtc.models
 import org.membraneframework.rtc.TrackEncoding
 import org.membraneframework.rtc.media.RemoteTrack
 import org.membraneframework.rtc.utils.Metadata
-import kotlin.properties.Delegates
 
 fun interface OnTrackEncodingChangeListener {
     fun onTrackEncodingChange(trackContext: TrackContext)
@@ -22,10 +21,11 @@ class TrackContext(track: RemoteTrack?, val peer: Peer, val trackId: String, met
     var metadata: Metadata = metadata
         internal set
 
-    var vadStatus: VadStatus by Delegates.observable(VadStatus.SILENCE) { _, _, _ ->
-        onVadNotificationListener?.let { onVadNotificationListener?.onVadNotification(this) }
-    }
-        internal set
+    var vadStatus: VadStatus = VadStatus.SILENCE
+        internal set(value) {
+            field = value
+            onVadNotificationListener?.let { onVadNotificationListener?.onVadNotification(this) }
+        }
 
     var encoding: TrackEncoding? = null
         private set
