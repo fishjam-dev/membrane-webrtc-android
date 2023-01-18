@@ -28,7 +28,9 @@ class TrackContext(track: RemoteTrack?, val peer: Peer, val trackId: String, met
         internal set
 
     var encoding: TrackEncoding? = null
+        private set
     var encodingReason: EncodingReason? = null
+        private set
 
     internal fun setEncoding(encoding: TrackEncoding, encodingReason: EncodingReason) {
         this.encoding = encoding
