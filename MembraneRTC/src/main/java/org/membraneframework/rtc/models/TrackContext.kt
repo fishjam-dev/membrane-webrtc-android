@@ -5,11 +5,11 @@ import org.membraneframework.rtc.media.RemoteTrack
 import org.membraneframework.rtc.utils.Metadata
 
 fun interface OnTrackEncodingChangeListener {
-    fun onTrackEncodingChange(trackContext: TrackContext)
+    fun onEncodingChanged(trackContext: TrackContext)
 }
 
 fun interface OnVadNotificationListener {
-    fun onVadNotification(trackContext: TrackContext)
+    fun onVoiceActivityChanged(trackContext: TrackContext)
 }
 
 /**
@@ -31,7 +31,7 @@ class TrackContext(track: RemoteTrack?, val peer: Peer, val trackId: String, met
     var vadStatus: VadStatus = VadStatus.SILENCE
         internal set(value) {
             field = value
-            onVadNotificationListener?.let { onVadNotificationListener?.onVadNotification(this) }
+            onVadNotificationListener?.let { onVadNotificationListener?.onVoiceActivityChanged(this) }
         }
 
     /**
@@ -49,7 +49,7 @@ class TrackContext(track: RemoteTrack?, val peer: Peer, val trackId: String, met
     internal fun setEncoding(encoding: TrackEncoding, encodingReason: EncodingReason) {
         this.encoding = encoding
         this.encodingReason = encodingReason
-        onTrackEncodingChangeListener?.let { onTrackEncodingChangeListener?.onTrackEncodingChange(this) }
+        onTrackEncodingChangeListener?.let { onTrackEncodingChangeListener?.onEncodingChanged(this) }
     }
 
     /**
