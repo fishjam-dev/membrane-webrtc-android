@@ -4,11 +4,11 @@ import org.membraneframework.rtc.TrackEncoding
 import org.membraneframework.rtc.media.RemoteTrack
 import org.membraneframework.rtc.utils.Metadata
 
-fun interface OnTrackEncodingChangeListener {
+fun interface OnEncodingChangedListener {
     fun onEncodingChanged(trackContext: TrackContext)
 }
 
-fun interface OnVadNotificationListener {
+fun interface OnVoiceActivityChangedListener {
     fun onVoiceActivityChanged(trackContext: TrackContext)
 }
 
@@ -20,8 +20,8 @@ fun interface OnVadNotificationListener {
  * @property metadata Any info that was passed in MembraneWebRTC.createVideoTrack/MembraneWebRTC.createAudioTrack
  */
 class TrackContext(track: RemoteTrack?, val peer: Peer, val trackId: String, metadata: Metadata) {
-    private var onTrackEncodingChangeListener: (OnTrackEncodingChangeListener)? = null
-    private var onVadNotificationListener: (OnVadNotificationListener)? = null
+    private var onTrackEncodingChangeListener: (OnEncodingChangedListener)? = null
+    private var onVadNotificationListener: (OnVoiceActivityChangedListener)? = null
 
     var track: RemoteTrack? = track
         internal set
@@ -61,14 +61,14 @@ class TrackContext(track: RemoteTrack?, val peer: Peer, val trackId: String, met
      * - when receiver doesn't have enough bandwidth
      * Some of those reasons are indicated in TrackContext.encodingReason
      */
-    fun setOnTrackEncodingChangeListener(listener: OnTrackEncodingChangeListener?) {
+    fun setOnEncodingChangedListener(listener: OnEncodingChangedListener?) {
         onTrackEncodingChangeListener = listener
     }
 
     /**
      * Sets listener that is called every time an update about voice activity is received from the server.
      */
-    fun setOnVadNotificationListener(listener: OnVadNotificationListener?) {
+    fun setOnVoiceActivityChangedListener(listener: OnVoiceActivityChangedListener?) {
         onVadNotificationListener = listener
     }
 }

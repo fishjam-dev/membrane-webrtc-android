@@ -259,7 +259,7 @@ class RoomViewModel(
 
             emitParticipants()
 
-            ctx.setOnVadNotificationListener {
+            ctx.setOnVoiceActivityChangedListener {
                 val p = mutableParticipants[it.peer.id]
                 if (p != null) {
                     mutableParticipants[it.peer.id] = p.copy(vadStatus = it.vadStatus)
