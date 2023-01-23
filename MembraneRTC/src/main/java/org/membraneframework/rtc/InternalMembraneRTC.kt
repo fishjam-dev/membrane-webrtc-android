@@ -371,11 +371,15 @@ constructor(
     }
 
     override fun onError(error: EventTransportError) {
-        listener.onError(MembraneRTCError.Transport(error.message ?: "unknown transport message"))
+        if (error is EventTransportError.ConnectionError) {
+            listener.onError(MembraneRTCError.Transport(error.reason))
+        } else {
+            listener.onError(MembraneRTCError.Transport(error.message ?: "unknown transport message"))
+        }
     }
 
     override fun onClose() {
-        listener.onError(MembraneRTCError.Transport("transport has been closed"))
+        Timber.i("Transport has been closed")
     }
 
     fun setTargetTrackEncoding(trackId: String, encoding: TrackEncoding) {
