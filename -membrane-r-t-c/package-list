@@ -1,6 +1,13 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 $dokka.location:org.membraneframework.rtc.events////PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/index.html
+$dokka.location:org.membraneframework.rtc.events/BandwidthEstimation.Data///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-bandwidth-estimation/-data/index.html
+$dokka.location:org.membraneframework.rtc.events/BandwidthEstimation.Data/Data/#kotlin.Double/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-bandwidth-estimation/-data/-data.html
+$dokka.location:org.membraneframework.rtc.events/BandwidthEstimation.Data/estimation/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-bandwidth-estimation/-data/estimation.html
+$dokka.location:org.membraneframework.rtc.events/BandwidthEstimation///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-bandwidth-estimation/index.html
+$dokka.location:org.membraneframework.rtc.events/BandwidthEstimation/BandwidthEstimation/#org.membraneframework.rtc.events.ReceivableEventType#org.membraneframework.rtc.events.BandwidthEstimation.Data/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-bandwidth-estimation/-bandwidth-estimation.html
+$dokka.location:org.membraneframework.rtc.events/BandwidthEstimation/data/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-bandwidth-estimation/data.html
+$dokka.location:org.membraneframework.rtc.events/BandwidthEstimation/type/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-bandwidth-estimation/type.html
 $dokka.location:org.membraneframework.rtc.events/BaseCustomEvent.Data///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-base-custom-event/-data/index.html
 $dokka.location:org.membraneframework.rtc.events/BaseCustomEvent.Data/Data/#org.membraneframework.rtc.events.ReceivableEventType/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-base-custom-event/-data/-data.html
 $dokka.location:org.membraneframework.rtc.events/BaseCustomEvent.Data/type/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-base-custom-event/-data/type.html
@@ -13,9 +20,10 @@ $dokka.location:org.membraneframework.rtc.events/CustomEvent/CustomEvent/#org.me
 $dokka.location:org.membraneframework.rtc.events/CustomEvent/data/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-custom-event/data.html
 $dokka.location:org.membraneframework.rtc.events/CustomEvent/type/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-custom-event/type.html
 $dokka.location:org.membraneframework.rtc.events/EncodingSwitched.Data///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-encoding-switched/-data/index.html
-$dokka.location:org.membraneframework.rtc.events/EncodingSwitched.Data/Data/#kotlin.String#kotlin.String#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-encoding-switched/-data/-data.html
+$dokka.location:org.membraneframework.rtc.events/EncodingSwitched.Data/Data/#kotlin.String#kotlin.String#kotlin.String#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-encoding-switched/-data/-data.html
 $dokka.location:org.membraneframework.rtc.events/EncodingSwitched.Data/encoding/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-encoding-switched/-data/encoding.html
 $dokka.location:org.membraneframework.rtc.events/EncodingSwitched.Data/peerId/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-encoding-switched/-data/peer-id.html
+$dokka.location:org.membraneframework.rtc.events/EncodingSwitched.Data/reason/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-encoding-switched/-data/reason.html
 $dokka.location:org.membraneframework.rtc.events/EncodingSwitched.Data/trackId/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-encoding-switched/-data/track-id.html
 $dokka.location:org.membraneframework.rtc.events/EncodingSwitched///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-encoding-switched/index.html
 $dokka.location:org.membraneframework.rtc.events/EncodingSwitched/EncodingSwitched/#org.membraneframework.rtc.events.ReceivableEventType#org.membraneframework.rtc.events.EncodingSwitched.Data/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-encoding-switched/-encoding-switched.html
@@ -93,6 +101,7 @@ $dokka.location:org.membraneframework.rtc.events/PeerUpdated/type/#/PointingToDe
 $dokka.location:org.membraneframework.rtc.events/ReceivableEvent.Companion///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event/-companion/index.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEvent.Companion/decode/#kotlin.collections.Map[kotlin.String,kotlin.Any?]/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event/-companion/decode.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEvent///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event/index.html
+$dokka.location:org.membraneframework.rtc.events/ReceivableEventType.BandwidthEstimation///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/-bandwidth-estimation/index.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEventType.Candidate///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/-candidate/index.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEventType.Custom///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/-custom/index.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEventType.EncodingSwitched///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/-encoding-switched/index.html
@@ -107,6 +116,7 @@ $dokka.location:org.membraneframework.rtc.events/ReceivableEventType.SdpAnswer//
 $dokka.location:org.membraneframework.rtc.events/ReceivableEventType.TrackUpdated///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/-track-updated/index.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEventType.TracksAdded///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/-tracks-added/index.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEventType.TracksRemoved///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/-tracks-removed/index.html
+$dokka.location:org.membraneframework.rtc.events/ReceivableEventType.VadNotification///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/-vad-notification/index.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEventType///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/index.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEventType/valueOf/#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/value-of.html
 $dokka.location:org.membraneframework.rtc.events/ReceivableEventType/values/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-receivable-event-type/values.html
@@ -186,6 +196,14 @@ $dokka.location:org.membraneframework.rtc.events/UpdateTrackMetadata/UpdateTrack
 $dokka.location:org.membraneframework.rtc.events/UpdateTrackMetadata/UpdateTrackMetadata/#kotlin.String#org.membraneframework.rtc.events.UpdateTrackMetadata.Data/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-update-track-metadata/-update-track-metadata.html
 $dokka.location:org.membraneframework.rtc.events/UpdateTrackMetadata/data/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-update-track-metadata/data.html
 $dokka.location:org.membraneframework.rtc.events/UpdateTrackMetadata/type/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-update-track-metadata/type.html
+$dokka.location:org.membraneframework.rtc.events/VadNotification.Data///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-vad-notification/-data/index.html
+$dokka.location:org.membraneframework.rtc.events/VadNotification.Data/Data/#kotlin.String#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-vad-notification/-data/-data.html
+$dokka.location:org.membraneframework.rtc.events/VadNotification.Data/status/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-vad-notification/-data/status.html
+$dokka.location:org.membraneframework.rtc.events/VadNotification.Data/trackId/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-vad-notification/-data/track-id.html
+$dokka.location:org.membraneframework.rtc.events/VadNotification///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-vad-notification/index.html
+$dokka.location:org.membraneframework.rtc.events/VadNotification/VadNotification/#org.membraneframework.rtc.events.ReceivableEventType#org.membraneframework.rtc.events.VadNotification.Data/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-vad-notification/-vad-notification.html
+$dokka.location:org.membraneframework.rtc.events/VadNotification/data/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-vad-notification/data.html
+$dokka.location:org.membraneframework.rtc.events/VadNotification/type/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.events/-vad-notification/type.html
 $dokka.location:org.membraneframework.rtc.media////PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/index.html
 $dokka.location:org.membraneframework.rtc.media/AudioTrack///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-audio-track/index.html
 $dokka.location:org.membraneframework.rtc.media/AudioTrack/AudioTrack/#org.webrtc.AudioTrack/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-audio-track/-audio-track.html
@@ -301,6 +319,19 @@ $dokka.location:org.membraneframework.rtc.media/VideoTrack/id/#/PointingToDeclar
 $dokka.location:org.membraneframework.rtc.media/VideoTrack/removeRenderer/#org.webrtc.VideoSink/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-video-track/remove-renderer.html
 $dokka.location:org.membraneframework.rtc.media/VideoTrack/rtcTrack/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-video-track/rtc-track.html
 $dokka.location:org.membraneframework.rtc.models////PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/index.html
+$dokka.location:org.membraneframework.rtc.models/EncodingReason.Companion///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-encoding-reason/-companion/index.html
+$dokka.location:org.membraneframework.rtc.models/EncodingReason.Companion/fromString/#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-encoding-reason/-companion/from-string.html
+$dokka.location:org.membraneframework.rtc.models/EncodingReason.ENCODING_INACTIVE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.models/-encoding-reason/-e-n-c-o-d-i-n-g_-i-n-a-c-t-i-v-e/index.html
+$dokka.location:org.membraneframework.rtc.models/EncodingReason.LOW_BANDWIDTH///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.models/-encoding-reason/-l-o-w_-b-a-n-d-w-i-d-t-h/index.html
+$dokka.location:org.membraneframework.rtc.models/EncodingReason.OTHER///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.models/-encoding-reason/-o-t-h-e-r/index.html
+$dokka.location:org.membraneframework.rtc.models/EncodingReason///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-encoding-reason/index.html
+$dokka.location:org.membraneframework.rtc.models/EncodingReason/value/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-encoding-reason/value.html
+$dokka.location:org.membraneframework.rtc.models/EncodingReason/valueOf/#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-encoding-reason/value-of.html
+$dokka.location:org.membraneframework.rtc.models/EncodingReason/values/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-encoding-reason/values.html
+$dokka.location:org.membraneframework.rtc.models/OnEncodingChangedListener///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-on-encoding-changed-listener/index.html
+$dokka.location:org.membraneframework.rtc.models/OnEncodingChangedListener/onEncodingChanged/#org.membraneframework.rtc.models.TrackContext/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-on-encoding-changed-listener/on-encoding-changed.html
+$dokka.location:org.membraneframework.rtc.models/OnVoiceActivityChangedListener///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-on-voice-activity-changed-listener/index.html
+$dokka.location:org.membraneframework.rtc.models/OnVoiceActivityChangedListener/onVoiceActivityChanged/#org.membraneframework.rtc.models.TrackContext/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-on-voice-activity-changed-listener/on-voice-activity-changed.html
 $dokka.location:org.membraneframework.rtc.models/Peer///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-peer/index.html
 $dokka.location:org.membraneframework.rtc.models/Peer/Peer/#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.Any]#kotlin.collections.Map[kotlin.String,kotlin.collections.Map[kotlin.String,kotlin.Any]]/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-peer/-peer.html
 $dokka.location:org.membraneframework.rtc.models/Peer/id/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-peer/id.html
@@ -310,10 +341,23 @@ $dokka.location:org.membraneframework.rtc.models/Peer/withTrack/#kotlin.String#k
 $dokka.location:org.membraneframework.rtc.models/Peer/withoutTrack/#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-peer/without-track.html
 $dokka.location:org.membraneframework.rtc.models/TrackContext///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/index.html
 $dokka.location:org.membraneframework.rtc.models/TrackContext/TrackContext/#org.membraneframework.rtc.media.RemoteTrack?#org.membraneframework.rtc.models.Peer#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.Any]/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/-track-context.html
+$dokka.location:org.membraneframework.rtc.models/TrackContext/encoding/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/encoding.html
+$dokka.location:org.membraneframework.rtc.models/TrackContext/encodingReason/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/encoding-reason.html
 $dokka.location:org.membraneframework.rtc.models/TrackContext/metadata/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/metadata.html
 $dokka.location:org.membraneframework.rtc.models/TrackContext/peer/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/peer.html
+$dokka.location:org.membraneframework.rtc.models/TrackContext/setOnEncodingChangedListener/#org.membraneframework.rtc.models.OnEncodingChangedListener?/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/set-on-encoding-changed-listener.html
+$dokka.location:org.membraneframework.rtc.models/TrackContext/setOnVoiceActivityChangedListener/#org.membraneframework.rtc.models.OnVoiceActivityChangedListener?/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/set-on-voice-activity-changed-listener.html
 $dokka.location:org.membraneframework.rtc.models/TrackContext/track/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/track.html
 $dokka.location:org.membraneframework.rtc.models/TrackContext/trackId/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/track-id.html
+$dokka.location:org.membraneframework.rtc.models/TrackContext/vadStatus/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-track-context/vad-status.html
+$dokka.location:org.membraneframework.rtc.models/VadStatus.Companion///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-vad-status/-companion/index.html
+$dokka.location:org.membraneframework.rtc.models/VadStatus.Companion/fromString/#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-vad-status/-companion/from-string.html
+$dokka.location:org.membraneframework.rtc.models/VadStatus.SILENCE///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.models/-vad-status/-s-i-l-e-n-c-e/index.html
+$dokka.location:org.membraneframework.rtc.models/VadStatus.SPEECH///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc.models/-vad-status/-s-p-e-e-c-h/index.html
+$dokka.location:org.membraneframework.rtc.models/VadStatus///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-vad-status/index.html
+$dokka.location:org.membraneframework.rtc.models/VadStatus/value/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-vad-status/value.html
+$dokka.location:org.membraneframework.rtc.models/VadStatus/valueOf/#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-vad-status/value-of.html
+$dokka.location:org.membraneframework.rtc.models/VadStatus/values/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-vad-status/values.html
 $dokka.location:org.membraneframework.rtc.transport////PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.transport/index.html
 $dokka.location:org.membraneframework.rtc.transport/EventTransport///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.transport/-event-transport/index.html
 $dokka.location:org.membraneframework.rtc.transport/EventTransport/connect/#org.membraneframework.rtc.transport.EventTransportListener/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.transport/-event-transport/connect.html
@@ -419,6 +463,7 @@ $dokka.location:org.membraneframework.rtc/MembraneRTCError.Unknown/reason/#/Poin
 $dokka.location:org.membraneframework.rtc/MembraneRTCError///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-membrane-r-t-c-error/index.html
 $dokka.location:org.membraneframework.rtc/MembraneRTCError/toString/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-membrane-r-t-c-error/to-string.html
 $dokka.location:org.membraneframework.rtc/MembraneRTCListener///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-membrane-r-t-c-listener/index.html
+$dokka.location:org.membraneframework.rtc/MembraneRTCListener/onBandwidthEstimationChanged/#kotlin.Long/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-membrane-r-t-c-listener/on-bandwidth-estimation-changed.html
 $dokka.location:org.membraneframework.rtc/MembraneRTCListener/onConnected/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-membrane-r-t-c-listener/on-connected.html
 $dokka.location:org.membraneframework.rtc/MembraneRTCListener/onError/#org.membraneframework.rtc.MembraneRTCError/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-membrane-r-t-c-listener/on-error.html
 $dokka.location:org.membraneframework.rtc/MembraneRTCListener/onJoinError/#kotlin.Any/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-membrane-r-t-c-listener/on-join-error.html
@@ -436,6 +481,8 @@ $dokka.location:org.membraneframework.rtc/SimulcastConfig///PointingToDeclaratio
 $dokka.location:org.membraneframework.rtc/SimulcastConfig/SimulcastConfig/#kotlin.Boolean#kotlin.collections.List[org.membraneframework.rtc.TrackEncoding]/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-simulcast-config/-simulcast-config.html
 $dokka.location:org.membraneframework.rtc/SimulcastConfig/activeEncodings/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-simulcast-config/active-encodings.html
 $dokka.location:org.membraneframework.rtc/SimulcastConfig/enabled/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-simulcast-config/enabled.html
+$dokka.location:org.membraneframework.rtc/TrackEncoding.Companion///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-track-encoding/-companion/index.html
+$dokka.location:org.membraneframework.rtc/TrackEncoding.Companion/fromString/#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc/-track-encoding/-companion/from-string.html
 $dokka.location:org.membraneframework.rtc/TrackEncoding.H///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc/-track-encoding/-h/index.html
 $dokka.location:org.membraneframework.rtc/TrackEncoding.L///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc/-track-encoding/-l/index.html
 $dokka.location:org.membraneframework.rtc/TrackEncoding.M///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}-membrane-r-t-c/org.membraneframework.rtc/-track-encoding/-m/index.html
