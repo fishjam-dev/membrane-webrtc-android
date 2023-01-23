@@ -8,6 +8,12 @@ package org.membraneframework.rtc
  */
 enum class TrackEncoding(val rid: String) {
     L("l"), M("m"), H("h");
+
+    companion object {
+        fun fromString(s: String): TrackEncoding? {
+            return values().find { it.rid == s }
+        }
+    }
 }
 
 /**

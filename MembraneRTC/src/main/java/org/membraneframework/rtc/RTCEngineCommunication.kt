@@ -9,6 +9,7 @@ import org.membraneframework.rtc.transport.EventTransportError
 import org.membraneframework.rtc.transport.EventTransportListener
 import org.membraneframework.rtc.utils.Metadata
 import timber.log.Timber
+import kotlin.math.roundToLong
 
 internal class RTCEngineCommunication
 @AssistedInject
@@ -103,8 +104,11 @@ constructor(
             is EncodingSwitched -> engineListener.onTrackEncodingChanged(
                 event.data.peerId,
                 event.data.trackId,
-                event.data.encoding
+                event.data.encoding,
+                event.data.reason
             )
+            is VadNotification -> engineListener.onVadNotification(event.data.trackId, event.data.status)
+            is BandwidthEstimation -> engineListener.onBandwidthEstimation(event.data.estimation.roundToLong())
             else -> Timber.e("Failed to process unknown event: $event")
         }
     }

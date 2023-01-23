@@ -7,12 +7,9 @@ import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -40,6 +37,7 @@ import com.dscout.membranevideoroomdemo.viewmodels.RoomViewModel
 import com.dscout.membranevideoroomdemo.viewmodels.viewModelByFactory
 import kotlinx.android.parcel.Parcelize
 import org.membraneframework.rtc.TrackEncoding
+import org.membraneframework.rtc.models.VadStatus
 import timber.log.Timber
 
 class RoomActivity : AppCompatActivity() {
@@ -234,6 +232,7 @@ fun ParticipantCard(
             .height(size.height.dp)
             .width(size.width.dp)
             .background(Blue.darker(0.7f))
+            .border(if (participant.vadStatus == VadStatus.SPEECH) 10.dp else 0.dp, Color.White)
     ) {
         ParticipantVideoView(
             participant = participant,

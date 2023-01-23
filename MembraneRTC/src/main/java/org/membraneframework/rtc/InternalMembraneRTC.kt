@@ -11,8 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.media.*
-import org.membraneframework.rtc.models.Peer
-import org.membraneframework.rtc.models.TrackContext
+import org.membraneframework.rtc.models.*
 import org.membraneframework.rtc.transport.EventTransportError
 import org.membraneframework.rtc.utils.ClosableCoroutineScope
 import org.membraneframework.rtc.utils.Metadata
@@ -346,8 +345,7 @@ constructor(
             return
         }
 
-        val updatedContext = context.copy(metadata = metadata)
-        trackContexts[trackId] = updatedContext
+        context.metadata = metadata
 
         val updatedPeer = peer
             .withoutTrack(trackId)
@@ -355,10 +353,26 @@ constructor(
 
         remotePeers[peerId] = updatedPeer
 
-        this.listener.onTrackUpdated(updatedContext)
+        this.listener.onTrackUpdated(context)
     }
 
-    override fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String) {
+    override fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String, encodingReason: String) {
+        val encodingReasonEnum = EncodingReason.fromString(encodingReason)
+        if (encodingReasonEnum == null) {
+            Timber.e("Invalid encoding reason: $encodingReason")
+            return
+        }
+        val trackContext = trackContexts[trackId]
+        if (trackContext == null) {
+            Timber.e("Invalid trackId: $trackId")
+            return
+        }
+        val encodingEnum = TrackEncoding.fromString(encoding)
+        if (encodingEnum == null) {
+            Timber.e("Invalid encoding: $encoding")
+            return
+        }
+        trackContext.setEncoding(encodingEnum, encodingReasonEnum)
         this.listener.onTrackEncodingChanged(peerId, trackId, encoding)
     }
 
@@ -368,6 +382,24 @@ constructor(
             return
         }
         listener.onRemoved(reason)
+    }
+
+    override fun onVadNotification(trackId: String, status: String) {
+        val trackContext = trackContexts[trackId]
+        if (trackContext == null) {
+            Timber.e("Invalid track id = $trackId")
+            return
+        }
+        val vadStatus = VadStatus.fromString(status)
+        if (vadStatus == null) {
+            Timber.e("Invalid vad status = $status")
+            return
+        }
+        trackContext.vadStatus = vadStatus
+    }
+
+    override fun onBandwidthEstimation(estimation: Long) {
+        listener.onBandwidthEstimationChanged(estimation)
     }
 
     override fun onError(error: EventTransportError) {
@@ -408,19 +440,17 @@ constructor(
             return
         }
 
-        val newTrackContext = when (track) {
+        when (track) {
             is VideoTrack ->
-                trackContext.copy(track = RemoteVideoTrack(track, eglBase))
+                trackContext.track = RemoteVideoTrack(track, eglBase)
 
             is AudioTrack ->
-                trackContext.copy(track = RemoteAudioTrack(track))
+                trackContext.track = RemoteAudioTrack(track)
 
             else ->
                 throw IllegalStateException("invalid type of incoming track")
         }
 
-        trackContexts[trackId] = newTrackContext
-
-        listener.onTrackReady(newTrackContext)
+        listener.onTrackReady(trackContext)
     }
 }

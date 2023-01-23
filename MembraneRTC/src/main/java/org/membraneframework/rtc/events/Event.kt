@@ -145,7 +145,13 @@ enum class ReceivableEventType() {
     SdpAnswer,
 
     @SerializedName("encodingSwitched")
-    EncodingSwitched
+    EncodingSwitched,
+
+    @SerializedName("vadNotification")
+    VadNotification,
+
+    @SerializedName("bandwidthEstimation")
+    BandwidthEstimation
 }
 
 internal data class BaseReceivableEvent(val type: ReceivableEventType)
@@ -200,6 +206,12 @@ sealed class ReceivableEvent {
 
                             ReceivableEventType.EncodingSwitched ->
                                 payload.toDataClass<CustomEvent<EncodingSwitched>>().data
+
+                            ReceivableEventType.VadNotification ->
+                                payload.toDataClass<CustomEvent<VadNotification>>().data
+
+                            ReceivableEventType.BandwidthEstimation ->
+                                payload.toDataClass<CustomEvent<BandwidthEstimation>>().data
 
                             else ->
                                 null
@@ -272,7 +284,15 @@ data class RemoteCandidate(val type: ReceivableEventType, val data: Data) : Rece
 }
 
 data class EncodingSwitched(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val peerId: String, val trackId: String, val encoding: String)
+    data class Data(val peerId: String, val trackId: String, val encoding: String, val reason: String)
+}
+
+data class VadNotification(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(val trackId: String, val status: String)
+}
+
+data class BandwidthEstimation(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(val estimation: Double)
 }
 
 data class BaseCustomEvent(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
