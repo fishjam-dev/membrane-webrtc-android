@@ -36,7 +36,7 @@ public interface MembraneRTCListener {
     fun onPeerUpdated(peer: Peer)
 
     // Callback invoked when received track encoding has changed
-    @Deprecated("Deprecated, use TrackContext::setOnTrackEncodingChangeListener")
+    @Deprecated("Deprecated, use TrackContext::setOnEncodingChangedListener")
     fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String) {
         Timber.i(
             "Track encoding changed $trackId -> $encoding"
