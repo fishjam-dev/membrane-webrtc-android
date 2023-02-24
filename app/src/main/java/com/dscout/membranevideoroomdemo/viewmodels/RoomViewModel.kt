@@ -74,7 +74,13 @@ class RoomViewModel(
             room.value = MembraneRTC.connect(
                 appContext = getApplication(),
                 options = ConnectOptions(
-                    transport = PhoenixTransport(url, "room:$roomName", Dispatchers.IO, params),
+                    transport = PhoenixTransport(
+                        url,
+                        "room:$roomName",
+                        Dispatchers.IO,
+                        params,
+                        mapOf("isSimulcastOn" to true)
+                    ),
                     config = mapOf("displayName" to displayName),
                     encoderOptions = EncoderOptions(
                         encoderType = EncoderType.HARDWARE

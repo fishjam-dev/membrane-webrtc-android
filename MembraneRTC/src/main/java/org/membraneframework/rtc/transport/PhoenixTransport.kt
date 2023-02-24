@@ -7,6 +7,7 @@ import org.membraneframework.rtc.events.ReceivableEvent
 import org.membraneframework.rtc.events.SendableEvent
 import org.membraneframework.rtc.events.serializeToMap
 import org.membraneframework.rtc.utils.ClosableCoroutineScope
+import org.membraneframework.rtc.utils.SocketChannelParams
 import org.membraneframework.rtc.utils.SocketConnectionParams
 import org.phoenixframework.Channel
 import org.phoenixframework.Socket
@@ -16,7 +17,8 @@ public class PhoenixTransport constructor(
     private val url: String,
     private val topic: String,
     private val ioDispatcher: CoroutineDispatcher,
-    private val params: SocketConnectionParams? = emptyMap()
+    private val params: SocketConnectionParams? = emptyMap(),
+    private val socketChannelParams: SocketChannelParams = emptyMap()
 ) : EventTransport {
 
     private lateinit var coroutineScope: CoroutineScope
@@ -67,7 +69,7 @@ public class PhoenixTransport constructor(
             this.listener?.onClose()
         }
 
-        channel = socket!!.channel(topic)
+        channel = socket!!.channel(topic, socketChannelParams)
 
         channel?.join(timeout = 3000L)
             ?.receive("ok") { _ ->
