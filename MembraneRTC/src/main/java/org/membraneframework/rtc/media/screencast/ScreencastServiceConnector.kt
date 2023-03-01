@@ -26,7 +26,7 @@ internal class ScreencastServiceConnector(private val context: Context) {
         }
 
         override fun onServiceDisconnected(p0: ComponentName?) {
-            connected = true
+            connected = false
             service = null
         }
     }
