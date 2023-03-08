@@ -261,8 +261,7 @@ internal class PeerConnectionManager
 
     suspend fun onSdpAnswer(
         sdp: String,
-        midToTrackId: Map<String, String>,
-        localTracks: List<LocalTrack>
+        midToTrackId: Map<String, String>
     ) {
         val pc = peerConnection ?: return
 
@@ -275,21 +274,6 @@ internal class PeerConnectionManager
 
         pc.setRemoteDescription(answer).onSuccess {
             drainCandidates()
-            // temporary workaround, the backend doesn't add ~ in sdp answer
-            localTracks.forEach { localTrack ->
-                if (localTrack.rtcTrack().kind() != "video") return@forEach
-                var config: SimulcastConfig? = null
-                if (localTrack is LocalVideoTrack) {
-                    config = localTrack.videoParameters.simulcastConfig
-                } else if (localTrack is LocalScreencastTrack) {
-                    config = localTrack.videoParameters.simulcastConfig
-                }
-                listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H).forEach {
-                    if (config?.activeEncodings?.contains(it) == false) {
-                        setTrackEncoding(localTrack.id(), it, false)
-                    }
-                }
-            }
         }
     }
 

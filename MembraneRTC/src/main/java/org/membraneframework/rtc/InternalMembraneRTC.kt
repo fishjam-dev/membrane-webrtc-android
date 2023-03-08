@@ -5,10 +5,9 @@ import android.content.Intent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.*
@@ -51,6 +50,7 @@ constructor(
     private val trackContexts = HashMap<String, TrackContext>()
 
     private val localTracks = mutableListOf<LocalTrack>()
+    private val localTracksMutex = Mutex()
 
     private val coroutineScope: CoroutineScope =
         ClosableCoroutineScope(SupervisorJob() + defaultDispatcher)
@@ -86,7 +86,9 @@ constructor(
     fun disconnect() {
         coroutineScope.launch {
             rtcEngineCommunication.disconnect()
-            localTracks.forEach { it.stop() }
+            localTracksMutex.withLock {
+                localTracks.forEach { it.stop() }
+            }
             peerConnectionManager.close()
         }
     }
@@ -136,7 +138,7 @@ constructor(
         mediaProjectionPermission: Intent,
         videoParameters: VideoParameters,
         metadata: Metadata = mapOf(),
-        onEnd: () -> Unit
+        onEnd: (() -> Unit)?
     ): LocalScreencastTrack {
         val screencastTrack = LocalScreencastTrack.create(
             context,
@@ -145,9 +147,9 @@ constructor(
             mediaProjectionPermission,
             videoParameters
         ) { track ->
-            onEnd()
-
-            removeTrack(track.id())
+            if (onEnd != null) {
+                onEnd()
+            }
         }
 
         localTracks.add(screencastTrack)
@@ -170,22 +172,27 @@ constructor(
     }
 
     fun removeTrack(trackId: String): Boolean {
-        val track = localTracks.find { it.id() == trackId } ?: run {
-            Timber.e("removeTrack: Can't find track to remove")
-            return false
+        runBlocking {
+            localTracksMutex.withLock {
+                val track = localTracks.find { it.id() == trackId } ?: run {
+                    Timber.e("removeTrack: Can't find track to remove")
+                    return@runBlocking false
+                }
+
+                peerConnectionManager.removeTrack(track.id())
+
+                localTracks.remove(track)
+                localPeer = localPeer.withoutTrack(trackId)
+                track.stop()
+
+                coroutineScope.launch {
+                    rtcEngineCommunication.renegotiateTracks()
+                }
+
+                return@runBlocking true
+            }
         }
-
-        peerConnectionManager.removeTrack(track.id())
-
-        localTracks.remove(track)
-        localPeer = localPeer.withoutTrack(trackId)
-        track.stop()
-
-        coroutineScope.launch {
-            rtcEngineCommunication.renegotiateTracks()
-        }
-
-        return true
+        return false
     }
 
     fun updatePeerMetadata(peerMetadata: Metadata) {
@@ -264,12 +271,14 @@ constructor(
     override fun onOfferData(integratedTurnServers: List<OfferData.TurnServer>, tracksTypes: Map<String, Int>) {
         coroutineScope.launch {
             try {
-                val offer = peerConnectionManager.getSdpOffer(integratedTurnServers, tracksTypes, localTracks)
-                rtcEngineCommunication.sdpOffer(
-                    offer.description,
-                    localPeer.trackIdToMetadata,
-                    offer.midToTrackIdMapping
-                )
+                localTracksMutex.withLock {
+                    val offer = peerConnectionManager.getSdpOffer(integratedTurnServers, tracksTypes, localTracks)
+                    rtcEngineCommunication.sdpOffer(
+                        offer.description,
+                        localPeer.trackIdToMetadata,
+                        offer.midToTrackIdMapping
+                    )
+                }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to create an sdp offer")
             }
@@ -278,7 +287,25 @@ constructor(
 
     override fun onSdpAnswer(type: String, sdp: String, midToTrackId: Map<String, String>) {
         coroutineScope.launch {
-            peerConnectionManager.onSdpAnswer(sdp, midToTrackId, localTracks)
+            peerConnectionManager.onSdpAnswer(sdp, midToTrackId)
+
+            localTracksMutex.withLock {
+                // temporary workaround, the backend doesn't add ~ in sdp answer
+                localTracks.forEach { localTrack ->
+                    if (localTrack.rtcTrack().kind() != "video") return@forEach
+                    var config: SimulcastConfig? = null
+                    if (localTrack is LocalVideoTrack) {
+                        config = localTrack.videoParameters.simulcastConfig
+                    } else if (localTrack is LocalScreencastTrack) {
+                        config = localTrack.videoParameters.simulcastConfig
+                    }
+                    listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H).forEach {
+                        if (config?.activeEncodings?.contains(it) == false) {
+                            peerConnectionManager.setTrackEncoding(localTrack.id(), it, false)
+                        }
+                    }
+                }
+            }
         }
     }
 

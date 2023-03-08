@@ -4,7 +4,13 @@ import android.app.Notification
 import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.media.screencast.ScreencastServiceConnector
+import org.membraneframework.rtc.utils.ClosableCoroutineScope
 import org.webrtc.*
 import java.util.*
 
@@ -17,6 +23,7 @@ import java.util.*
  */
 class LocalScreencastTrack
 constructor(
+    private val source: VideoSource,
     mediaTrack: org.webrtc.VideoTrack,
     context: Context,
     eglBase: EglBase,
@@ -25,27 +32,45 @@ constructor(
     callback: ProjectionCallback
 ) : VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
     private val screencastConnection = ScreencastServiceConnector(context)
-
-    init {
-        callback.addCallback { stop() }
-    }
+    private val mutex = Mutex()
+    private val coroutineScope: CoroutineScope =
+        ClosableCoroutineScope(SupervisorJob())
+    private var isStopped = false
 
     suspend fun startForegroundService(notificationId: Int?, notification: Notification?) {
-        screencastConnection.connect()
-        screencastConnection.start(notificationId, notification)
+        mutex.withLock {
+            if (!isStopped) {
+                screencastConnection.connect()
+                screencastConnection.start(notificationId, notification)
+            }
+        }
     }
 
     override fun start() {
-        capturer.startCapture(
-            videoParameters.dimensions.width,
-            videoParameters.dimensions.height,
-            videoParameters.maxFps
-        )
+        coroutineScope.launch {
+            mutex.withLock {
+                if (!isStopped) {
+                    capturer.startCapture(
+                        videoParameters.dimensions.width,
+                        videoParameters.dimensions.height,
+                        videoParameters.maxFps
+                    )
+                }
+            }
+        }
     }
 
     override fun stop() {
-        screencastConnection.stop()
-        capturer.stopCapture()
+        coroutineScope.launch {
+            mutex.withLock {
+                isStopped = true
+                screencastConnection.stop()
+                capturer.stopCapture()
+                capturer.dispose()
+                videoTrack.dispose()
+                source.dispose()
+            }
+        }
     }
 
     override fun enabled(): Boolean {
@@ -94,6 +119,7 @@ constructor(
             onStopped: (track: LocalScreencastTrack) -> Unit
         ): LocalScreencastTrack {
             val source = factory.createVideoSource(true)
+
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
             val callback = ProjectionCallback()
@@ -107,6 +133,7 @@ constructor(
             )
 
             val localScreencastTrack = LocalScreencastTrack(
+                source,
                 track,
                 context,
                 eglBase,
