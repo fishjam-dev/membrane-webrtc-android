@@ -84,6 +84,7 @@ constructor(
     }
 
     override fun onEvent(event: ReceivableEvent) {
+        Timber.d("EVENT: " + event)
         when (event) {
             is OfferData -> engineListener.onOfferData(event.data.integratedTurnServers, event.data.tracksTypes)
             is PeerAccepted -> engineListener.onPeerAccepted(event.data.id, event.data.peersInRoom)

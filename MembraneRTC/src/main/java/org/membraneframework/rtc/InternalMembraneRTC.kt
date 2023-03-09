@@ -10,7 +10,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.media.*
-import org.membraneframework.rtc.models.*
+import org.membraneframework.rtc.models.EncodingReason
+import org.membraneframework.rtc.models.Peer
+import org.membraneframework.rtc.models.TrackContext
+import org.membraneframework.rtc.models.VadStatus
 import org.membraneframework.rtc.transport.EventTransportError
 import org.membraneframework.rtc.utils.ClosableCoroutineScope
 import org.membraneframework.rtc.utils.Metadata
@@ -127,11 +130,15 @@ constructor(
     }
 
     fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
-        peerConnectionManager.setTrackBandwidth(trackId, bandwidthLimit)
+        coroutineScope.launch {
+            peerConnectionManager.setTrackBandwidth(trackId, bandwidthLimit)
+        }
     }
 
     fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
-        peerConnectionManager.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
+        coroutineScope.launch {
+            peerConnectionManager.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
+        }
     }
 
     fun createScreencastTrack(
@@ -162,9 +169,8 @@ constructor(
 
         val streamIds = listOf(UUID.randomUUID().toString())
 
-        peerConnectionManager.addTrack(screencastTrack, streamIds)
-
         coroutineScope.launch {
+            peerConnectionManager.addTrack(screencastTrack, streamIds)
             rtcEngineCommunication.renegotiateTracks()
         }
 
@@ -172,7 +178,7 @@ constructor(
     }
 
     fun removeTrack(trackId: String): Boolean {
-        runBlocking {
+        return runBlocking(Dispatchers.Default) {
             localTracksMutex.withLock {
                 val track = localTracks.find { it.id() == trackId } ?: run {
                     Timber.e("removeTrack: Can't find track to remove")
@@ -184,15 +190,10 @@ constructor(
                 localTracks.remove(track)
                 localPeer = localPeer.withoutTrack(trackId)
                 track.stop()
-
-                coroutineScope.launch {
-                    rtcEngineCommunication.renegotiateTracks()
-                }
-
-                return@runBlocking true
             }
+            rtcEngineCommunication.renegotiateTracks()
+            return@runBlocking true
         }
-        return false
     }
 
     fun updatePeerMetadata(peerMetadata: Metadata) {
@@ -271,14 +272,15 @@ constructor(
     override fun onOfferData(integratedTurnServers: List<OfferData.TurnServer>, tracksTypes: Map<String, Int>) {
         coroutineScope.launch {
             try {
-                localTracksMutex.withLock {
-                    val offer = peerConnectionManager.getSdpOffer(integratedTurnServers, tracksTypes, localTracks)
-                    rtcEngineCommunication.sdpOffer(
-                        offer.description,
-                        localPeer.trackIdToMetadata,
-                        offer.midToTrackIdMapping
-                    )
-                }
+                val offer =
+                    localTracksMutex.withLock {
+                        peerConnectionManager.getSdpOffer(integratedTurnServers, tracksTypes, localTracks)
+                    }
+                rtcEngineCommunication.sdpOffer(
+                    offer.description,
+                    localPeer.trackIdToMetadata,
+                    offer.midToTrackIdMapping
+                )
             } catch (e: Exception) {
                 Timber.e(e, "Failed to create an sdp offer")
             }
@@ -448,11 +450,15 @@ constructor(
     }
 
     fun enableTrackEncoding(trackId: String, encoding: TrackEncoding) {
-        peerConnectionManager.setTrackEncoding(trackId, encoding, true)
+        coroutineScope.launch {
+            peerConnectionManager.setTrackEncoding(trackId, encoding, true)
+        }
     }
 
     fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
-        peerConnectionManager.setTrackEncoding(trackId, encoding, false)
+        coroutineScope.launch {
+            peerConnectionManager.setTrackEncoding(trackId, encoding, false)
+        }
     }
 
     override fun onLocalIceCandidate(candidate: IceCandidate) {

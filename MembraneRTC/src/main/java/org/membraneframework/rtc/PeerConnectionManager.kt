@@ -3,15 +3,17 @@ package org.membraneframework.rtc
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.OfferData
-import org.membraneframework.rtc.media.*
+import org.membraneframework.rtc.media.LocalScreencastTrack
+import org.membraneframework.rtc.media.LocalTrack
+import org.membraneframework.rtc.media.LocalVideoTrack
+import org.membraneframework.rtc.media.TrackBandwidthLimit
 import org.membraneframework.rtc.utils.*
-import org.membraneframework.rtc.utils.addTransceiver
-import org.membraneframework.rtc.utils.createOffer
-import org.membraneframework.rtc.utils.setLocalDescription
-import org.membraneframework.rtc.utils.setRemoteDescription
 import org.webrtc.*
 import timber.log.Timber
 import java.util.*
@@ -30,13 +32,18 @@ internal class PeerConnectionManager
             peerConnectionFactory: PeerConnectionFactoryWrapper
         ): PeerConnectionManager
     }
+
     private var peerConnection: PeerConnection? = null
+    private val peerConnectionMutex = Mutex()
 
     private var iceServers: List<PeerConnection.IceServer>? = null
     private var config: PeerConnection.RTCConfiguration? = null
     private var queuedRemoteCandidates: MutableList<IceCandidate>? = null
     private val qrcMutex = Mutex()
     private var midToTrackId: Map<String, String> = HashMap<String, String>()
+
+    private val coroutineScope: CoroutineScope =
+        ClosableCoroutineScope(SupervisorJob())
 
     private fun getSendEncodingsFromConfig(simulcastConfig: SimulcastConfig): List<RtpParameters.Encoding> {
         val sendEncodings = Constants.simulcastEncodings()
@@ -46,12 +53,7 @@ internal class PeerConnectionManager
         return sendEncodings
     }
 
-    fun addTrack(track: LocalTrack, streamIds: List<String>) {
-        val pc = peerConnection ?: run {
-            Timber.e("addTrack: Peer connection not yet established")
-            return
-        }
-
+    suspend fun addTrack(track: LocalTrack, streamIds: List<String>) {
         val videoParameters =
             (track as? LocalVideoTrack)?.videoParameters ?: (track as? LocalScreencastTrack)?.videoParameters
 
@@ -63,17 +65,24 @@ internal class PeerConnectionManager
                 listOf(RtpParameters.Encoding(null, true, null))
             }
 
-        if (videoParameters?.maxBitrate != null) {
-            applyBitrate(sendEncodings, videoParameters.maxBitrate)
-        }
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: run {
+                Timber.e("addTrack: Peer connection not yet established")
+                return
+            }
 
-        pc.addTransceiver(
-            track.rtcTrack(),
-            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
-            streamIds,
-            sendEncodings
-        )
-        pc.enforceSendOnlyDirection()
+            if (videoParameters?.maxBitrate != null) {
+                applyBitrate(sendEncodings, videoParameters.maxBitrate)
+            }
+
+            pc.addTransceiver(
+                track.rtcTrack(),
+                RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
+                streamIds,
+                sendEncodings
+            )
+            pc.enforceSendOnlyDirection()
+        }
     }
 
     private fun applyBitrate(encodings: List<RtpParameters.Encoding>, maxBitrate: TrackBandwidthLimit) {
@@ -112,56 +121,66 @@ internal class PeerConnectionManager
         }
     }
 
-    fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
-        val pc = peerConnection ?: run {
-            Timber.e("setTrackBandwidth: Peer connection not yet established")
-            return
-        }
-        val sender = pc.senders.find { it.track()?.id() == trackId } ?: run {
-            Timber.e("setTrackBandwidth: Invalid trackId: track sender not found")
-            return
-        }
-        val params = sender.parameters
+    suspend fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: run {
+                Timber.e("setTrackBandwidth: Peer connection not yet established")
+                return
+            }
+            val sender = pc.senders.find { it.track()?.id() == trackId } ?: run {
+                Timber.e("setTrackBandwidth: Invalid trackId: track sender not found")
+                return
+            }
+            val params = sender.parameters
 
-        applyBitrate(params.getEncodings(), bandwidthLimit)
+            applyBitrate(params.getEncodings(), bandwidthLimit)
 
-        sender.parameters = params
+            sender.parameters = params
+        }
     }
 
-    fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
-        val pc = peerConnection ?: run {
-            Timber.e("setEncodingBandwidth: Peer connection not yet established")
-            return
-        }
-        val sender = pc.senders.find { it.track()?.id() == trackId } ?: run {
-            Timber.e("setEncodingBandwidth: Invalid trackId: track sender not found")
-            return
-        }
+    suspend fun setEncodingBandwidth(
+        trackId: String,
+        encoding: String,
+        bandwidthLimit: TrackBandwidthLimit.BandwidthLimit
+    ) {
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: run {
+                Timber.e("setEncodingBandwidth: Peer connection not yet established")
+                return
+            }
+            val sender = pc.senders.find { it.track()?.id() == trackId } ?: run {
+                Timber.e("setEncodingBandwidth: Invalid trackId: track sender not found")
+                return
+            }
 
-        val params = sender.parameters
-        val encodingParameters = params.encodings.find { it.rid == encoding } ?: run {
-            Timber.e("setEncodingBandwidth: Invalid encoding: encoding not found")
-            return
+            val params = sender.parameters
+            val encodingParameters = params.encodings.find { it.rid == encoding } ?: run {
+                Timber.e("setEncodingBandwidth: Invalid encoding: encoding not found")
+                return
+            }
+
+            encodingParameters.maxBitrateBps = bandwidthLimit.limit * 1024
+
+            sender.parameters = params
         }
-
-        encodingParameters.maxBitrateBps = bandwidthLimit.limit * 1024
-
-        sender.parameters = params
     }
 
-    fun removeTrack(trackId: String): Boolean {
-        val pc = peerConnection ?: run {
-            Timber.e("removeTrack: Peer connection not yet established")
+    suspend fun removeTrack(trackId: String): Boolean {
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: run {
+                Timber.e("removeTrack: Peer connection not yet established")
+                return false
+            }
+            pc.transceivers.find { it.sender.track()?.id() == trackId }?.sender?.let {
+                pc.removeTrack(it)
+                return true
+            }
             return false
         }
-        pc.transceivers.find { it.sender.track()?.id() == trackId }?.sender?.let {
-            pc.removeTrack(it)
-            return true
-        }
-        return false
     }
 
-    private fun setupPeerConnection(localTracks: List<LocalTrack>) {
+    private suspend fun setupPeerConnection(localTracks: List<LocalTrack>) {
         if (peerConnection != null) {
             Timber.e("setupPeerConnection: Peer connection already established!")
             return
@@ -179,7 +198,9 @@ internal class PeerConnectionManager
         val pc = peerConnectionFactory.createPeerConnection(config, this)
             ?: throw IllegalStateException("Failed to create a peerConnection")
 
-        this.peerConnection = pc
+        peerConnectionMutex.withLock {
+            this@PeerConnectionManager.peerConnection = pc
+        }
 
         val streamIds = listOf(UUID.randomUUID().toString())
 
@@ -187,7 +208,9 @@ internal class PeerConnectionManager
             addTrack(it, streamIds)
         }
 
-        pc.enforceSendOnlyDirection()
+        peerConnectionMutex.withLock {
+            pc.enforceSendOnlyDirection()
+        }
     }
 
     private suspend fun drainCandidates() {
@@ -263,17 +286,19 @@ internal class PeerConnectionManager
         sdp: String,
         midToTrackId: Map<String, String>
     ) {
-        val pc = peerConnection ?: return
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: return
 
-        val answer = SessionDescription(
-            SessionDescription.Type.ANSWER,
-            sdp
-        )
+            val answer = SessionDescription(
+                SessionDescription.Type.ANSWER,
+                sdp
+            )
 
-        this@PeerConnectionManager.midToTrackId = midToTrackId
+            this@PeerConnectionManager.midToTrackId = midToTrackId
 
-        pc.setRemoteDescription(answer).onSuccess {
-            drainCandidates()
+            pc.setRemoteDescription(answer).onSuccess {
+                drainCandidates()
+            }
         }
     }
 
@@ -313,58 +338,66 @@ internal class PeerConnectionManager
             setupPeerConnection(localTracks)
             needsRestart = false
         }
-        val pc = peerConnection!!
+        peerConnectionMutex.withLock {
+            val pc = peerConnection!!
 
-        if (needsRestart) {
-            pc.restartIce()
-        }
-
-        addNecessaryTransceivers(tracksTypes)
-
-        pc.transceivers.forEach {
-            if (it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_RECV) {
-                it.direction = RtpTransceiver.RtpTransceiverDirection.SEND_ONLY
+            if (needsRestart) {
+                pc.restartIce()
             }
+
+            addNecessaryTransceivers(tracksTypes)
+
+            pc.transceivers.forEach {
+                if (it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_RECV) {
+                    it.direction = RtpTransceiver.RtpTransceiverDirection.SEND_ONLY
+                }
+            }
+
+            val constraints = MediaConstraints()
+
+            Timber.i("Creating offer")
+            val offer = pc.createOffer(constraints).getOrThrow()
+
+            Timber.i("Setting local description")
+            pc.setLocalDescription(offer).getOrThrow()
+
+            return SdpOffer(offer.description, midToTrackIdMapping(localTracks))
         }
-
-        val constraints = MediaConstraints()
-
-        Timber.i("Creating offer")
-        val offer = pc.createOffer(constraints).getOrThrow()
-
-        Timber.i("Setting local description")
-        pc.setLocalDescription(offer).getOrThrow()
-
-        return SdpOffer(offer.description, midToTrackIdMapping(localTracks))
     }
 
-    fun setTrackEncoding(trackId: String, trackEncoding: TrackEncoding, enabled: Boolean) {
-        val sender = peerConnection?.senders?.find { it -> it.track()?.id() == trackId } ?: run {
-            Timber.e("setTrackEncoding: Invalid trackId $trackId, no track sender found")
-            return
+    suspend fun setTrackEncoding(trackId: String, trackEncoding: TrackEncoding, enabled: Boolean) {
+        peerConnectionMutex.withLock {
+            val sender = peerConnection?.senders?.find { it -> it.track()?.id() == trackId } ?: run {
+                Timber.e("setTrackEncoding: Invalid trackId $trackId, no track sender found")
+                return
+            }
+            val params = sender.parameters
+            val encoding = params?.encodings?.find { it.rid == trackEncoding.rid } ?: run {
+                Timber.e("setTrackEncoding: Invalid encoding $trackEncoding, no such encoding found in peer connection")
+                return
+            }
+            encoding.active = enabled
+            sender.parameters = params
         }
-        val params = sender.parameters
-        val encoding = params?.encodings?.find { it.rid == trackEncoding.rid } ?: run {
-            Timber.e("setTrackEncoding: Invalid encoding $trackEncoding, no such encoding found in peer connection")
-            return
-        }
-        encoding.active = enabled
-        sender.parameters = params
     }
 
     suspend fun onRemoteCandidate(iceCandidate: IceCandidate) {
-        val pc = peerConnection ?: return
-        qrcMutex.withLock {
-            if (this@PeerConnectionManager.queuedRemoteCandidates == null) {
-                pc.addIceCandidate(iceCandidate)
-            } else {
-                this@PeerConnectionManager.queuedRemoteCandidates!!.add(iceCandidate)
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: return
+            qrcMutex.withLock {
+                if (this@PeerConnectionManager.queuedRemoteCandidates == null) {
+                    pc.addIceCandidate(iceCandidate)
+                } else {
+                    this@PeerConnectionManager.queuedRemoteCandidates!!.add(iceCandidate)
+                }
             }
         }
     }
 
-    fun close() {
-        peerConnection?.close()
+    suspend fun close() {
+        peerConnectionMutex.withLock {
+            peerConnection?.close()
+        }
     }
 
     override fun onSignalingChange(state: PeerConnection.SignalingState?) {
@@ -402,20 +435,24 @@ internal class PeerConnectionManager
     }
 
     override fun onAddTrack(receiver: RtpReceiver?, mediaStreams: Array<out MediaStream>?) {
-        val pc = peerConnection ?: return
+        var trackId: String? = null
+        coroutineScope.launch {
+            peerConnectionMutex.withLock {
+                val pc = peerConnection ?: return@launch
 
-        val transceiver = pc.transceivers.find {
-            it.receiver.id() == receiver?.id()
-        } ?: return
+                val transceiver = pc.transceivers.find {
+                    it.receiver.id() == receiver?.id()
+                } ?: return@launch
 
-        val mid = transceiver.mid
+                val mid = transceiver.mid
 
-        val trackId = midToTrackId[mid] ?: run {
-            Timber.e("onAddTrack: Track with mid=$mid not found")
-            return
+                trackId = midToTrackId[mid] ?: run {
+                    Timber.e("onAddTrack: Track with mid=$mid not found")
+                    return@launch
+                }
+            }
+            peerConnectionListener.onAddTrack(trackId!!, receiver!!.track()!!)
         }
-
-        peerConnectionListener.onAddTrack(trackId, receiver!!.track()!!)
     }
 
     override fun onRemoveTrack(receiver: RtpReceiver?) {
