@@ -17,12 +17,16 @@ constructor(
     eglBase: EglBase,
     val videoParameters: VideoParameters
 ) : VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
+
+    data class CaptureDevice(val deviceName: String, val isFrontFacing: Boolean, val isBackFacing: Boolean)
+
     companion object {
         fun create(
             context: Context,
             factory: PeerConnectionFactory,
             eglBase: EglBase,
-            videoParameters: VideoParameters
+            videoParameters: VideoParameters,
+            cameraName: String? = null
         ): LocalVideoTrack {
             val source = factory.createVideoSource(false)
             val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
@@ -31,10 +35,26 @@ constructor(
                 context = context,
                 source = source,
                 rootEglBase = eglBase,
-                videoParameters = videoParameters
+                videoParameters = videoParameters,
+                cameraName
             )
 
             return LocalVideoTrack(track, capturer, eglBase, videoParameters)
+        }
+
+        fun getCaptureDevices(context: Context): List<CaptureDevice> {
+            val enumerator = if (Camera2Enumerator.isSupported(context)) {
+                Camera2Enumerator(context)
+            } else {
+                Camera1Enumerator(true)
+            }
+            return enumerator.deviceNames.map { name ->
+                CaptureDevice(
+                    name,
+                    enumerator.isFrontFacing(name),
+                    enumerator.isBackFacing(name)
+                )
+            }
         }
     }
 
@@ -57,6 +77,10 @@ constructor(
     fun flipCamera() {
         (capturer as? CameraCapturer)?.flipCamera()
     }
+
+    fun switchCamera(deviceName: String) {
+        (capturer as? CameraCapturer)?.switchCamera(deviceName)
+    }
 }
 
 interface Capturer {
@@ -69,15 +93,15 @@ class CameraCapturer constructor(
     private val context: Context,
     private val source: VideoSource,
     private val rootEglBase: EglBase,
-    private val videoParameters: VideoParameters
+    private val videoParameters: VideoParameters,
+    cameraName: String?
 ) : Capturer, CameraVideoCapturer.CameraSwitchHandler {
     private lateinit var cameraCapturer: CameraVideoCapturer
     private lateinit var size: Size
-    private var frontFacing = true
     private var isCapturing = false
 
     init {
-        createCapturer()
+        createCapturer(cameraName)
     }
 
     override fun capturer(): VideoCapturer {
@@ -99,40 +123,48 @@ class CameraCapturer constructor(
         cameraCapturer.switchCamera(this)
     }
 
-    private fun createCapturer() {
+    fun switchCamera(deviceName: String) {
+        cameraCapturer.switchCamera(this, deviceName)
+    }
+
+    private fun createCapturer(providedDeviceName: String?) {
         val enumerator = if (Camera2Enumerator.isSupported(context)) {
             Camera2Enumerator(context)
         } else {
             Camera1Enumerator(true)
         }
 
-        for (deviceName in enumerator.deviceNames) {
-            if (enumerator.isFrontFacing(deviceName)) {
-                this.cameraCapturer = enumerator.createCapturer(deviceName, null)
+        var deviceName = providedDeviceName
 
-                this.cameraCapturer.initialize(
-                    SurfaceTextureHelper.create("CameraCaptureThread", rootEglBase.eglBaseContext),
-                    context,
-                    source.capturerObserver
-                )
-
-                val sizes = enumerator.getSupportedFormats(deviceName)
-                    ?.map { Size(it.width, it.height) }
-                    ?: emptyList()
-
-                this.size = CameraEnumerationAndroid.getClosestSupportedSize(
-                    sizes,
-                    videoParameters.dimensions.width,
-                    videoParameters.dimensions.height
-                )
-
-                break
+        if (deviceName == null) {
+            for (name in enumerator.deviceNames) {
+                if (enumerator.isFrontFacing(name)) {
+                    deviceName = name
+                    break
+                }
             }
         }
+
+        this.cameraCapturer = enumerator.createCapturer(deviceName, null)
+
+        this.cameraCapturer.initialize(
+            SurfaceTextureHelper.create("CameraCaptureThread", rootEglBase.eglBaseContext),
+            context,
+            source.capturerObserver
+        )
+
+        val sizes = enumerator.getSupportedFormats(deviceName)
+            ?.map { Size(it.width, it.height) }
+            ?: emptyList()
+
+        this.size = CameraEnumerationAndroid.getClosestSupportedSize(
+            sizes,
+            videoParameters.dimensions.width,
+            videoParameters.dimensions.height
+        )
     }
 
     override fun onCameraSwitchDone(isFrontCamera: Boolean) {
-        frontFacing = isFrontCamera
     }
 
     override fun onCameraSwitchError(errorDescription: String?) {

@@ -61,10 +61,16 @@ private constructor(
      *
      * @param videoParameters a set of target parameters such as camera resolution, frame rate or simulcast configuration
      * @param metadata the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
+     * @param captureDeviceName the name of the device to start video capture with, you can get device name by using
+     * `LocalVideoTrack.getCaptureDevices` method
      * @return an instance of the video track
      */
-    public fun createVideoTrack(videoParameters: VideoParameters, metadata: Metadata): LocalVideoTrack {
-        return client.createLocalVideoTrack(videoParameters, metadata)
+    public fun createVideoTrack(
+        videoParameters: VideoParameters,
+        metadata: Metadata,
+        captureDeviceName: String? = null
+    ): LocalVideoTrack {
+        return client.createLocalVideoTrack(videoParameters, metadata, captureDeviceName)
     }
 
     /**
