@@ -17,7 +17,7 @@ import timber.log.Timber
 import java.util.concurrent.CountDownLatch
 import kotlin.math.max
 
-class VideoTextureViewRenderer :
+open class VideoTextureViewRenderer :
     TextureView,
     SurfaceHolder.Callback,
     SurfaceTextureListener,
