@@ -56,12 +56,7 @@ class RoomViewModel(
     )
     val screencastSimulcastConfig = MutableStateFlow(
         SimulcastConfig(
-            enabled = true,
-            activeEncodings = listOf(
-                TrackEncoding.L,
-                TrackEncoding.M,
-                TrackEncoding.H
-            )
+            enabled = false
         )
     )
 
@@ -358,14 +353,7 @@ class RoomViewModel(
         val dimensions = videoParameters.dimensions.flip()
         videoParameters = videoParameters.copy(
             dimensions = dimensions,
-            simulcastConfig = screencastSimulcastConfig.value,
-            maxBitrate = TrackBandwidthLimit.SimulcastBandwidthLimit(
-                mapOf(
-                    "l" to TrackBandwidthLimit.BandwidthLimit(150),
-                    "m" to TrackBandwidthLimit.BandwidthLimit(500),
-                    "h" to TrackBandwidthLimit.BandwidthLimit(1500)
-                )
-            )
+            simulcastConfig = screencastSimulcastConfig.value
         )
 
         localScreencastTrack = room.value?.createScreencastTrack(
@@ -375,9 +363,7 @@ class RoomViewModel(
                 "type" to "screensharing",
                 "user_id" to (localDisplayName ?: "")
             )
-        ) {
-            stopScreencast()
-        }
+        )
 
         localScreencastTrack?.let {
             mutableParticipants[localScreencastId!!] = Participant(
@@ -400,7 +386,6 @@ class RoomViewModel(
 
                 emitParticipants()
             }
-
             localScreencastTrack = null
         }
     }

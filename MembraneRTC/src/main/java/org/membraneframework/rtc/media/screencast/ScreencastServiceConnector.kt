@@ -19,44 +19,46 @@ internal class ScreencastServiceConnector(private val context: Context) {
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            connected = true
-            service = (binder as ScreencastService.ScreencastBinder).service
+            synchronized(this@ScreencastServiceConnector) {
+                connected = true
+                service = (binder as ScreencastService.ScreencastBinder).service
 
-            onConnected()
+                onConnected()
+            }
         }
 
         override fun onServiceDisconnected(p0: ComponentName?) {
-            connected = false
-            service = null
+            synchronized(this@ScreencastServiceConnector) {
+                connected = false
+                service = null
+            }
         }
     }
 
     private fun onConnected() {
-        synchronized(this) {
-            awaitingConnects.forEach {
-                it.resume(Unit)
-            }
-
-            awaitingConnects.clear()
+        awaitingConnects.forEach {
+            it.resume(Unit)
         }
+
+        awaitingConnects.clear()
     }
 
     fun start(notificationId: Int? = null, notification: Notification? = null) {
-        service?.start(notificationId, notification)
+        synchronized(this) {
+            service?.start(notificationId, notification)
+        }
     }
 
     suspend fun connect() {
         if (connected) return
-
-        val intent = Intent(context, ScreencastService::class.java)
-
-        context.bindService(intent, connection, BIND_AUTO_CREATE)
-
         return suspendCancellableCoroutine {
             synchronized(this) {
                 if (connected) {
                     it.resume(Unit)
                 } else {
+                    val intent = Intent(context, ScreencastService::class.java)
+
+                    context.bindService(intent, connection, BIND_AUTO_CREATE)
                     awaitingConnects.add(it)
                 }
             }
@@ -64,10 +66,12 @@ internal class ScreencastServiceConnector(private val context: Context) {
     }
 
     fun stop() {
-        if (connected) {
-            context.unbindService(connection)
+        synchronized(this) {
+            if (connected) {
+                context.unbindService(connection)
+            }
+            connected = false
+            service = null
         }
-        connected = false
-        service = null
     }
 }

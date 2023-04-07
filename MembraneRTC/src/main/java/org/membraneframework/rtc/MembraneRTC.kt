@@ -100,7 +100,7 @@ private constructor(
         mediaProjectionPermission: Intent,
         videoParameters: VideoParameters,
         metadata: Metadata,
-        onEnd: () -> Unit
+        onEnd: (() -> Unit)? = null
     ): LocalScreencastTrack? {
         return client.createScreencastTrack(mediaProjectionPermission, videoParameters, metadata, onEnd)
     }
