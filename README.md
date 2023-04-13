@@ -32,7 +32,7 @@ The user has the following control buttons at hand:
 API documentation is available [here](https://jellyfish-dev.github.io/membrane-webrtc-android/)
 
 ## Necessary setup
-The only required constant is the media server's URL that can be found at the top of `MainActivity.kt`.
+The only required constant is the VIDEOROOM_URL that can be found in the `app/build.gradle`.
 
 ## Installation
 Add jitpack repo to your build.gradle:
