@@ -212,7 +212,7 @@ fun ParticipantCard(
     size: Size,
     onClick: (() -> Unit)? = null
 ) {
-    Log.d("KAROL", "update")
+
     val iconModifier =
         Modifier
             .padding(10.dp)
@@ -232,7 +232,7 @@ fun ParticipantCard(
             .background(Blue.darker(0.7f))
             .border(if (participant.vadStatus == VadStatus.SPEECH) 10.dp else 0.dp, Color.White)
     ) {
-        if (participant.videoTrack == null || (participant.tracksMetadata.isNotEmpty() &&  !(participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as Boolean))){
+        if (participant.videoTrack == null || (participant.tracksMetadata.isNotEmpty() &&  (participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as? Boolean) != true)){
             Box(modifier = Modifier.background(Blue.darker(0.7f)).fillMaxHeight().fillMaxWidth()) {
                 Row(modifier = Modifier.align(Alignment.Center)){
                     Icon(
@@ -268,9 +268,13 @@ fun ParticipantCard(
                 .padding(20.dp)
         )
 
+        if(participant.displayName=="pc2"){
+            Log.d("KAROL", participant.audioTrack.toString())
+            Log.d("KAROL", participant.tracksMetadata.toString())
+            Log.d("KAROL", participant.tracksMetadata[participant.audioTrack?.id()]?.get("active").toString())
+        }
 
-        if (participant.audioTrack == null || (participant.tracksMetadata.isNotEmpty() &&  !(participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as Boolean)))
-        {
+        if (participant.audioTrack == null || (participant.tracksMetadata.isNotEmpty() &&  (participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as? Boolean) != true)){
             Row(
                 modifier = Modifier
                     .align(Alignment.TopStart)

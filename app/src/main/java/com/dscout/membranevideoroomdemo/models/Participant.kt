@@ -12,22 +12,22 @@ data class Participant(
     val videoTrack: VideoTrack? = null,
     val audioTrack: AudioTrack? = null,
     val isScreencast: Boolean = false,
-    val tracksMetadata: HashMap<String, Metadata> = hashMapOf(),
+    val tracksMetadata: Map<String, Metadata> = emptyMap(),
     val vadStatus: VadStatus = VadStatus.SILENCE
 ) {
     fun addOrUpdateTrackMetadata(videoTrack: VideoTrack, metadata: Metadata) {
-        this.tracksMetadata[videoTrack.id()] = metadata
+//        this.tracksMetadata[videoTrack.id()] = metadata
     }
 
     fun addOrUpdateTrackMetadata(audioTrack: AudioTrack, metadata: Metadata) {
-        this.tracksMetadata[audioTrack.id()] = metadata
+//        this.tracksMetadata[audioTrack.id()] = metadata
     }
 
     fun removeTrackMetadata(videoTrack: VideoTrack) {
-        this.tracksMetadata.remove(videoTrack.id())
+//        this.tracksMetadata.remove(videoTrack.id())
     }
 
     fun removeTrackMetadata(audioTrack: AudioTrack) {
-        this.tracksMetadata.remove(audioTrack.id())
+//        this.tracksMetadata.remove(audioTrack.id())
     }
 }
