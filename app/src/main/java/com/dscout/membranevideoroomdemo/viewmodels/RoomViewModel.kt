@@ -2,8 +2,12 @@ package com.dscout.membranevideoroomdemo.viewmodels
 
 import android.app.Application
 import android.content.Intent
+import android.util.Log
+import android.view.ViewGroup
+import androidx.core.app.ActivityCompat.recreate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.dscout.membranevideoroomdemo.RoomActivity
 import com.dscout.membranevideoroomdemo.models.Participant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +33,7 @@ class RoomViewModel(
 
     private var room = MutableStateFlow<MembraneRTC?>(null)
 
-    private val mutableParticipants = HashMap<String, Participant>()
+    private var mutableParticipants = HashMap<String, Participant>()
 
     val primaryParticipant = MutableStateFlow<Participant?>(null)
     val participants = MutableStateFlow<List<Participant>>(emptyList())
@@ -125,18 +129,27 @@ class RoomViewModel(
 
     // TODO: we should preserve some order...
     private fun emitParticipants() {
-        val candidates = mutableParticipants.values.filter {
-            it.videoTrack != null
-        }
+        val candidates = mutableParticipants + mapOf<String, Participant>()
 
-        if (candidates.count() > 0) {
-            val primary = candidates.first()
+        mutableParticipants.clear()
+        participants.value = emptyList()
+
+
+
+        val values = candidates.values.filter { it.videoTrack !== null }
+
+        if (values.isNotEmpty()) {
+            val primary = values.first()
 
             primaryParticipant.value = primary
 
             // filter out participants that have no active video tracks for now
-            participants.value = candidates.drop(1).toList()
+            participants.value = values.drop(1).toList()
         }
+
+        mutableParticipants = candidates as HashMap<String, Participant>
+
+        Log.e("KAROL", participants.value.toString())
     }
 
     // controls
@@ -217,6 +230,7 @@ class RoomViewModel(
                 null,
                 null
             )
+
         }
 
         emitParticipants()
@@ -314,6 +328,13 @@ class RoomViewModel(
     }
 
     override fun onTrackUpdated(ctx: TrackContext) {
+        if (ctx.metadata["type"] == "camera") {
+            mutableParticipants[ctx.peer.id]?.addOrUpdateTrackMetadata(mutableParticipants[ctx.peer.id]?.videoTrack!!, ctx.metadata)
+        } else {
+            mutableParticipants[ctx.peer.id]?.addOrUpdateTrackMetadata(mutableParticipants[ctx.peer.id]?.audioTrack!!, ctx.metadata)
+        }
+
+        emitParticipants();
         Timber.i("Track has been updated $ctx")
     }
 

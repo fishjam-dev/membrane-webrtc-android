@@ -4,6 +4,7 @@ import android.app.Activity
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -85,7 +86,6 @@ class RoomActivity : AppCompatActivity() {
         val participants = viewModel.participants.collectAsState()
         val primaryParticipant = viewModel.primaryParticipant.collectAsState()
         val errorMessage = viewModel.errorMessage.collectAsState()
-        val videoSimulcastConfig = viewModel.videoSimulcastConfig.collectAsState()
         val screencastSimulcastConfig = viewModel.screencastSimulcastConfig.collectAsState()
         val isScreenCastOn = viewModel.isScreenCastOn.collectAsState()
         val scrollState = rememberScrollState()
@@ -121,15 +121,6 @@ class RoomActivity : AppCompatActivity() {
                                     viewModel.toggleVideoTrackEncoding(it)
                                 },
                                 colors = AppButtonColors(),
-                                modifier = Modifier.then(
-                                    if (videoSimulcastConfig.value.activeEncodings.contains(it)) {
-                                        Modifier.alpha(1f)
-                                    } else {
-                                        Modifier.alpha(
-                                            0.5f
-                                        )
-                                    }
-                                ),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(it.name)
@@ -221,28 +212,48 @@ fun ParticipantCard(
     size: Size,
     onClick: (() -> Unit)? = null
 ) {
+    Log.d("KAROL", "update")
+    val iconModifier =
+        Modifier
+            .padding(10.dp)
+            .size(20.dp)
+
     Box(
-        modifier = Modifier.clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() }
-        ) {
-            onClick?.invoke()
-        }
+        modifier = Modifier
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                onClick?.invoke()
+            }
             .clip(RoundedCornerShape(10.dp))
             .height(size.height.dp)
             .width(size.width.dp)
             .background(Blue.darker(0.7f))
             .border(if (participant.vadStatus == VadStatus.SPEECH) 10.dp else 0.dp, Color.White)
     ) {
-        ParticipantVideoView(
-            participant = participant,
-            videoViewLayout = videoViewLayout,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .background(Blue.darker(0.7f))
-        )
+        if (participant.videoTrack == null || (participant.tracksMetadata.isNotEmpty() &&  !(participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as Boolean))){
+            Box(modifier = Modifier.background(Blue.darker(0.7f)).fillMaxHeight().fillMaxWidth()) {
+                Row(modifier = Modifier.align(Alignment.Center)){
+                    Icon(
+                        painter = painterResource(R.drawable.ic_video_off),
+                        contentDescription = "no camera",
+                        modifier = iconModifier,
+                        tint = Color.White
+                    )
+                }
+            }
+        } else {
+            ParticipantVideoView(
+                participant = participant,
+                videoViewLayout = videoViewLayout,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .background(Blue.darker(0.7f))
+            )
+        }
 
         Text(
             color = Color.White,
@@ -256,6 +267,23 @@ fun ParticipantCard(
                 .width(size.width.dp - 20.dp)
                 .padding(20.dp)
         )
+
+
+        if (participant.audioTrack == null || (participant.tracksMetadata.isNotEmpty() &&  !(participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as Boolean)))
+        {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+            ){
+                Icon(
+                    painter = painterResource(R.drawable.ic_mic_off),
+                    contentDescription = "microphone control",
+                    modifier = iconModifier,
+                    tint = Color.White
+                )
+            }
+        }
+
     }
 }
 
