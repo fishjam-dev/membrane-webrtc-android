@@ -362,7 +362,7 @@ class RoomViewModel(
     }
 
     override fun onTrackUpdated(ctx: TrackContext) {
-        val p = mutableParticipants[localPeerId]
+        val p = mutableParticipants[ctx.peer.id]
         if (p != null) {
             // Updates metadata of given track
             if (ctx.metadata["type"] == "camera") {
