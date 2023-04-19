@@ -148,9 +148,10 @@ class RoomViewModel(
             room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "audio"))
         }
 
-        if (mutableParticipants[localPeerId] != null) {
-            mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.updateTrackMetadata(
-                mutableParticipants[localPeerId]?.audioTrack?.id(),
+        val p = mutableParticipants[localPeerId]
+        if (p != null) {
+            mutableParticipants[localPeerId] = p.updateTrackMetadata(
+                p.audioTrack?.id(),
                 mapOf("active" to isMicrophoneOn.value)
             )
         }
@@ -165,9 +166,11 @@ class RoomViewModel(
             isCameraOn.value = enabled
             room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "camera"))
         }
-        if (mutableParticipants[localPeerId] != null) {
-            mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.updateTrackMetadata(
-                mutableParticipants[localPeerId]?.videoTrack?.id(),
+
+        val p = mutableParticipants[localPeerId]
+        if (p != null) {
+            mutableParticipants[localPeerId] = p.updateTrackMetadata(
+                p.videoTrack?.id(),
                 mapOf("active" to isCameraOn.value)
             )
         }
@@ -217,13 +220,13 @@ class RoomViewModel(
             isCameraOn.value = localVideoTrack?.enabled() ?: false
             isMicrophoneOn.value = localAudioTrack?.enabled() ?: false
 
-            mutableParticipants[localPeerId] = Participant(localPeerId, "Me", localVideoTrack, localAudioTrack)
+            val participant = Participant(localPeerId, "Me", localVideoTrack, localAudioTrack)
 
-            mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.updateTrackMetadata(
-                mutableParticipants[localPeerId]?.audioTrack?.id(),
+            mutableParticipants[localPeerId] = participant.updateTrackMetadata(
+                participant.audioTrack?.id(),
                 mapOf("active" to isMicrophoneOn.value)
             ).updateTrackMetadata(
-                mutableParticipants[localPeerId]?.videoTrack?.id(),
+                participant.videoTrack?.id(),
                 mapOf("active" to isCameraOn.value)
             )
 
@@ -359,19 +362,20 @@ class RoomViewModel(
     }
 
     override fun onTrackUpdated(ctx: TrackContext) {
-        // Updates metadata of given track
-        if (mutableParticipants[ctx.peer.id] != null) {
+        val p = mutableParticipants[localPeerId]
+        if (p != null) {
+            // Updates metadata of given track
             if (ctx.metadata["type"] == "camera") {
-                mutableParticipants[ctx.peer.id] = mutableParticipants[ctx.peer.id]!!.updateTrackMetadata(
-                    mutableParticipants[ctx.peer.id]?.videoTrack?.id(),
+                mutableParticipants[ctx.peer.id] = p.updateTrackMetadata(
+                    p.videoTrack?.id(),
+                    ctx.metadata
+                )
+            } else {
+                mutableParticipants[ctx.peer.id] = p.updateTrackMetadata(
+                    p.audioTrack?.id(),
                     ctx.metadata
                 )
             }
-        } else {
-            mutableParticipants[ctx.peer.id] = mutableParticipants[ctx.peer.id]!!.updateTrackMetadata(
-                mutableParticipants[ctx.peer.id]?.audioTrack?.id(),
-                ctx.metadata
-            )
         }
 
         emitParticipants()
