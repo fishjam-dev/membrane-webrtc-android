@@ -150,8 +150,12 @@ class RoomViewModel(
         val p = mutableParticipants[localPeerId]
         if (p != null) {
             mutableParticipants[localPeerId] = p.copy(
-                tracksMetadata = p.tracksMetadata + ((mutableParticipants[localPeerId]?.audioTrack?.id()
-                    ?: "") to mapOf("active" to isMicrophoneOn.value))
+                tracksMetadata = p.tracksMetadata + (
+                    (
+                        mutableParticipants[localPeerId]?.audioTrack?.id()
+                            ?: ""
+                        ) to mapOf("active" to isMicrophoneOn.value)
+                    )
             )
         }
 
@@ -168,8 +172,12 @@ class RoomViewModel(
         val p = mutableParticipants[localPeerId]
         if (p != null) {
             mutableParticipants[localPeerId] = p.copy(
-                tracksMetadata = p.tracksMetadata + ((mutableParticipants[localPeerId]?.videoTrack?.id()
-                    ?: "") to mapOf("active" to isCameraOn.value))
+                tracksMetadata = p.tracksMetadata + (
+                    (
+                        mutableParticipants[localPeerId]?.videoTrack?.id()
+                            ?: ""
+                        ) to mapOf("active" to isCameraOn.value)
+                    )
             )
         }
 

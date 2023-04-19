@@ -203,12 +203,16 @@ fun ParticipantCard(
     fun shouldShowIcon(trackType: String): Boolean {
         return when (trackType) {
             "audio" -> {
-                participant.audioTrack == null || (participant.tracksMetadata.isNotEmpty() &&
-                    (participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as? Boolean) != true)
+                participant.audioTrack == null || (
+                    participant.tracksMetadata.isNotEmpty() &&
+                    (participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as? Boolean) != true
+                    )
             }
             "video" -> {
-                participant.videoTrack == null || (participant.tracksMetadata.isNotEmpty() &&
-                    (participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as? Boolean) != true)
+                participant.videoTrack == null || (
+                    participant.tracksMetadata.isNotEmpty() &&
+                    (participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as? Boolean) != true
+                    )
             }
             else -> {
                 throw IllegalArgumentException("Invalid media type: $trackType")
