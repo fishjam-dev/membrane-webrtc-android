@@ -104,7 +104,7 @@ data class UpdateTrackMetadata(val type: String, val data: Data) : SendableEvent
     constructor(trackId: String, trackMetadata: Metadata) : this("updateTrackMetadata", Data(trackId, trackMetadata))
 }
 
-enum class ReceivableEventType() {
+enum class ReceivableEventType {
     @SerializedName("peerAccepted")
     PeerAccepted,
 

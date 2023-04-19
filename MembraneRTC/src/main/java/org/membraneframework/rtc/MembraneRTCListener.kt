@@ -4,7 +4,7 @@ import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
 import timber.log.Timber
 
-public interface MembraneRTCListener {
+interface MembraneRTCListener {
     // / Callback invoked when client has successfully connected via transport layer.
     fun onConnected()
 

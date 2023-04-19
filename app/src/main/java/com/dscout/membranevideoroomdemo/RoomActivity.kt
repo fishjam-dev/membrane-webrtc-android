@@ -200,7 +200,6 @@ fun ParticipantCard(
     size: Size,
     onClick: (() -> Unit)? = null
 ) {
-
     fun shouldShowIcon(trackType: String): Boolean {
         return when (trackType) {
             "audio" -> {
@@ -215,7 +214,6 @@ fun ParticipantCard(
                 throw IllegalArgumentException("Invalid media type: $trackType")
             }
         }
-
     }
 
     val iconModifier =
@@ -291,7 +289,6 @@ fun ParticipantCard(
                 )
             }
         }
-
     }
 }
 

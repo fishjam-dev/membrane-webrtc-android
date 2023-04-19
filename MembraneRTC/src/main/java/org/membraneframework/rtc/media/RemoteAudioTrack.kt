@@ -1,6 +1,6 @@
 package org.membraneframework.rtc.media
 
-public class RemoteAudioTrack constructor(
+class RemoteAudioTrack constructor(
     mediaTrack: org.webrtc.AudioTrack
 
 ) : AudioTrack(mediaTrack), RemoteTrack {

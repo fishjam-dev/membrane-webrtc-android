@@ -24,7 +24,7 @@ class RoomViewModel(
     var localAudioTrack: LocalAudioTrack? = null
     var localVideoTrack: LocalVideoTrack? = null
     var localScreencastTrack: LocalScreencastTrack? = null
-    private val localPeerId: String = UUID.randomUUID().toString();
+    private val localPeerId: String = UUID.randomUUID().toString()
 
     var localDisplayName: String? = null
 
@@ -220,14 +220,14 @@ class RoomViewModel(
 
             mutableParticipants[localPeerId] = Participant(localPeerId, "Me", localVideoTrack, localAudioTrack)
 
-
             mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.copy(
-                tracksMetadata = mutableParticipants[localPeerId]!!.tracksMetadata + ((mutableParticipants[localPeerId]?.audioTrack?.id()
-                    ?: "") to mapOf("active" to isMicrophoneOn.value))
+                tracksMetadata = mutableParticipants[localPeerId]!!.tracksMetadata +
+                    ((mutableParticipants[localPeerId]?.audioTrack?.id() ?: "") to
+                        mapOf("active" to isMicrophoneOn.value))
             )
             mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.copy(
-                tracksMetadata = mutableParticipants[localPeerId]!!.tracksMetadata + ((mutableParticipants[localPeerId]?.videoTrack?.id()
-                    ?: "") to mapOf("active" to isCameraOn.value))
+                tracksMetadata = mutableParticipants[localPeerId]!!.tracksMetadata +
+                    ((mutableParticipants[localPeerId]?.videoTrack?.id() ?: "") to mapOf("active" to isCameraOn.value))
             )
 
             emitParticipants()
@@ -244,7 +244,6 @@ class RoomViewModel(
                 null,
                 null
             )
-
         }
 
         emitParticipants()
@@ -274,19 +273,20 @@ class RoomViewModel(
                     } else {
                         val p = participant.copy(videoTrack = ctx.track as RemoteVideoTrack)
                         Pair(
-                            ctx.peer.id, p.copy(
+                            ctx.peer.id,
+                            p.copy(
                                 tracksMetadata = p.tracksMetadata + ((globalToLocalTrackId[ctx.trackId]
                                     ?: "") to ctx.metadata)
                             )
                         )
-
                     }
                 }
                 is RemoteAudioTrack -> {
                     globalToLocalTrackId[ctx.trackId] = (ctx.track as RemoteAudioTrack).id()
                     val p = participant.copy(audioTrack = ctx.track as RemoteAudioTrack)
                     Pair(
-                        ctx.peer.id, p.copy(
+                        ctx.peer.id,
+                        p.copy(
                             tracksMetadata = p.tracksMetadata + ((globalToLocalTrackId[ctx.trackId]
                                 ?: "") to ctx.metadata)
                         )
@@ -371,7 +371,7 @@ class RoomViewModel(
                 )
             }
         }
-        emitParticipants();
+        emitParticipants()
         Timber.i("Track has been updated $ctx")
     }
 

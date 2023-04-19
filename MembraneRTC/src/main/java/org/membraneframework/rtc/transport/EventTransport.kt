@@ -25,7 +25,7 @@ sealed class EventTransportError : Exception() {
 /**
  * An interface defining a listener to a <strong>EventTransport</strong>.
  */
-public interface EventTransportListener {
+interface EventTransportListener {
     fun onEvent(event: ReceivableEvent)
     fun onError(error: EventTransportError)
     fun onClose()
@@ -38,7 +38,7 @@ public interface EventTransportListener {
  * An implementation of the transport should parse and forward received events to the listener
  * passed with <strong>connect</strong> method.
  */
-public interface EventTransport {
+interface EventTransport {
     suspend fun connect(listener: EventTransportListener)
     suspend fun disconnect()
     suspend fun send(event: SendableEvent)

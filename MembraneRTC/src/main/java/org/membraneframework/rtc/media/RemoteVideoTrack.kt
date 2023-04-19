@@ -2,7 +2,7 @@ package org.membraneframework.rtc.media
 
 import org.webrtc.EglBase
 
-public class RemoteVideoTrack(
+class RemoteVideoTrack(
     mediaTrack: org.webrtc.VideoTrack,
     eglBase: EglBase
 ) : VideoTrack(mediaTrack, eglBase.eglBaseContext), RemoteTrack {
