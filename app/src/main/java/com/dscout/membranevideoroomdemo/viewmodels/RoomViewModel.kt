@@ -98,9 +98,7 @@ class RoomViewModel(
     }
 
     fun focusVideo(participantId: String) {
-        val candidates = mutableParticipants.values.filter {
-            it.videoTrack != null
-        }
+        val candidates = mutableParticipants.values
 
         candidates.find {
             it.id == participantId
@@ -112,14 +110,19 @@ class RoomViewModel(
                 val globalId = globalToLocalTrackId.filterValues {
                         it1 ->
                     it1 == primaryParticipantTrackId
-                }.keys.first()
-                room.value?.setTargetTrackEncoding(globalId, TrackEncoding.L)
+                }.keys
+                if(globalId.isNotEmpty()){
+                    room.value?.setTargetTrackEncoding(globalId.first(), TrackEncoding.L)
+                }
             }
+            Log.w("KAROL", globalToLocalTrackId.toString())
             primaryParticipant.value = it
             val videoTrackId = it.videoTrack?.id()
             if (localVideoTrack?.id() != it.videoTrack?.id() && localScreencastTrack?.id() != videoTrackId) {
-                val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == it.videoTrack?.id() }.keys.first()
-                room.value?.setTargetTrackEncoding(globalId, TrackEncoding.H)
+                val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == it.videoTrack?.id() }.keys
+                if (globalId.isNotEmpty()) {
+                    room.value?.setTargetTrackEncoding(globalId.first(), TrackEncoding.H)
+                }
             }
 
             participants.value = candidates.filter { candidate ->
