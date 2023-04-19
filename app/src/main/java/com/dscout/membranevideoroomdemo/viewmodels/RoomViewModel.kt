@@ -230,8 +230,10 @@ class RoomViewModel(
 
             mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.copy(
                 tracksMetadata = mutableParticipants[localPeerId]!!.tracksMetadata +
-                    ((mutableParticipants[localPeerId]?.audioTrack?.id() ?: "") to
-                        mapOf("active" to isMicrophoneOn.value))
+                    (
+                        (mutableParticipants[localPeerId]?.audioTrack?.id() ?: "") to
+                            mapOf("active" to isMicrophoneOn.value)
+                        )
             )
             mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.copy(
                 tracksMetadata = mutableParticipants[localPeerId]!!.tracksMetadata +
@@ -283,8 +285,12 @@ class RoomViewModel(
                         Pair(
                             ctx.peer.id,
                             p.copy(
-                                tracksMetadata = p.tracksMetadata + ((globalToLocalTrackId[ctx.trackId]
-                                    ?: "") to ctx.metadata)
+                                tracksMetadata = p.tracksMetadata + (
+                                    (
+                                        globalToLocalTrackId[ctx.trackId]
+                                            ?: ""
+                                        ) to ctx.metadata
+                                    )
                             )
                         )
                     }
@@ -295,8 +301,12 @@ class RoomViewModel(
                     Pair(
                         ctx.peer.id,
                         p.copy(
-                            tracksMetadata = p.tracksMetadata + ((globalToLocalTrackId[ctx.trackId]
-                                ?: "") to ctx.metadata)
+                            tracksMetadata = p.tracksMetadata + (
+                                (
+                                    globalToLocalTrackId[ctx.trackId]
+                                        ?: ""
+                                    ) to ctx.metadata
+                                )
                         )
                     )
                 }
@@ -367,15 +377,23 @@ class RoomViewModel(
         if (ctx.metadata["type"] == "camera") {
             if (p != null) {
                 mutableParticipants[ctx.peer.id] = p.copy(
-                    tracksMetadata = p.tracksMetadata + ((mutableParticipants[ctx.peer.id]?.videoTrack?.id()
-                        ?: "") to ctx.metadata)
+                    tracksMetadata = p.tracksMetadata + (
+                        (
+                            mutableParticipants[ctx.peer.id]?.videoTrack?.id()
+                                ?: ""
+                            ) to ctx.metadata
+                        )
                 )
             }
         } else {
             if (p != null) {
                 mutableParticipants[ctx.peer.id] = p.copy(
-                    tracksMetadata = p.tracksMetadata + ((mutableParticipants[ctx.peer.id]?.audioTrack?.id()
-                        ?: "") to ctx.metadata)
+                    tracksMetadata = p.tracksMetadata + (
+                        (
+                            mutableParticipants[ctx.peer.id]?.audioTrack?.id()
+                                ?: ""
+                            ) to ctx.metadata
+                        )
                 )
             }
         }

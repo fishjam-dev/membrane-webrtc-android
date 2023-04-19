@@ -205,13 +205,13 @@ fun ParticipantCard(
             "audio" -> {
                 participant.audioTrack == null || (
                     participant.tracksMetadata.isNotEmpty() &&
-                    (participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as? Boolean) != true
+                        (participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as? Boolean) != true
                     )
             }
             "video" -> {
                 participant.videoTrack == null || (
                     participant.tracksMetadata.isNotEmpty() &&
-                    (participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as? Boolean) != true
+                        (participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as? Boolean) != true
                     )
             }
             else -> {
