@@ -143,7 +143,8 @@ class RoomActivity : AppCompatActivity() {
                     ) {
                         participants.value.chunked(2).forEach {
                             Row(
-                                horizontalArrangement = Arrangement.Center, modifier = Modifier
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(8.dp)
                             ) {
@@ -155,9 +156,7 @@ class RoomActivity : AppCompatActivity() {
                                         viewModel.focusVideo(it[0].id)
                                     }
                                 )
-                                Box(modifier = Modifier.width(16.dp)) {
-
-                                }
+                                Box(modifier = Modifier.width(16.dp)) { }
                                 if (it.size > 1) {
                                     ParticipantCard(
                                         participant = it[1],
@@ -169,7 +168,6 @@ class RoomActivity : AppCompatActivity() {
                                     )
                                 }
                             }
-
                         }
                     }
                 }

@@ -5,7 +5,6 @@ import org.membraneframework.rtc.media.VideoTrack
 import org.membraneframework.rtc.models.VadStatus
 import org.membraneframework.rtc.utils.Metadata
 
-
 data class Participant(
     val id: String,
     val displayName: String,
