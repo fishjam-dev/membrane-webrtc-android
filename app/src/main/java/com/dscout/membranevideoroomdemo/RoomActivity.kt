@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -84,6 +85,7 @@ class RoomActivity : AppCompatActivity() {
         val participants = viewModel.participants.collectAsState()
         val primaryParticipant = viewModel.primaryParticipant.collectAsState()
         val errorMessage = viewModel.errorMessage.collectAsState()
+        val videoSimulcastConfig = viewModel.videoSimulcastConfig.collectAsState()
         val scrollState = rememberScrollState()
 
         Scaffold(
@@ -117,6 +119,15 @@ class RoomActivity : AppCompatActivity() {
                                     viewModel.toggleVideoTrackEncoding(it)
                                 },
                                 colors = AppButtonColors(),
+                                modifier = Modifier.then(
+                                    if (videoSimulcastConfig.value.activeEncodings.contains(it)) {
+                                        Modifier.alpha(1f)
+                                    } else {
+                                        Modifier.alpha(
+                                            0.5f
+                                        )
+                                    }
+                                ),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(it.name)
@@ -200,18 +211,26 @@ fun ParticipantCard(
     size: Size,
     onClick: (() -> Unit)? = null
 ) {
+    fun isTrackNotActive(trackType: String): Boolean {
+        return when (trackType) {
+            "audio" -> { (participant.tracksMetadata[participant.audioTrack?.id()]?.get("active") as? Boolean) != true }
+            "video" -> { (participant.tracksMetadata[participant.videoTrack?.id()]?.get("active") as? Boolean) != true }
+            else -> {
+                throw IllegalArgumentException("Invalid media type: $trackType")
+            }
+        }
+    }
+
     fun shouldShowIcon(trackType: String): Boolean {
         return when (trackType) {
             "audio" -> {
                 participant.audioTrack == null || (
-                    participant.tracksMetadata.isNotEmpty() &&
-                        (participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as? Boolean) != true
+                    participant.tracksMetadata.isNotEmpty() && isTrackNotActive(trackType)
                     )
             }
             "video" -> {
                 participant.videoTrack == null || (
-                    participant.tracksMetadata.isNotEmpty() &&
-                        (participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as? Boolean) != true
+                    participant.tracksMetadata.isNotEmpty() && isTrackNotActive(trackType)
                     )
             }
             else -> {

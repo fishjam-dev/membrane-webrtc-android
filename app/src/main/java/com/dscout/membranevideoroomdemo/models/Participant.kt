@@ -13,4 +13,13 @@ data class Participant(
     val isScreencast: Boolean = false,
     val tracksMetadata: Map<String, Metadata> = emptyMap(),
     val vadStatus: VadStatus = VadStatus.SILENCE
-)
+) {
+    fun updateTrackMetadata(trackId: String?, metadata: Metadata): Participant {
+        return this.copy(
+            tracksMetadata = this.tracksMetadata + (
+                (trackId ?: "")
+                    to metadata
+                )
+        )
+    }
+}

@@ -147,15 +147,11 @@ class RoomViewModel(
             isMicrophoneOn.value = enabled
             room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "audio"))
         }
-        val p = mutableParticipants[localPeerId]
-        if (p != null) {
-            mutableParticipants[localPeerId] = p.copy(
-                tracksMetadata = p.tracksMetadata + (
-                    (
-                        mutableParticipants[localPeerId]?.audioTrack?.id()
-                            ?: ""
-                        ) to mapOf("active" to isMicrophoneOn.value)
-                    )
+
+        if (mutableParticipants[localPeerId] != null) {
+            mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.updateTrackMetadata(
+                mutableParticipants[localPeerId]?.audioTrack?.id(),
+                mapOf("active" to isMicrophoneOn.value)
             )
         }
 
@@ -169,15 +165,10 @@ class RoomViewModel(
             isCameraOn.value = enabled
             room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "camera"))
         }
-        val p = mutableParticipants[localPeerId]
-        if (p != null) {
-            mutableParticipants[localPeerId] = p.copy(
-                tracksMetadata = p.tracksMetadata + (
-                    (
-                        mutableParticipants[localPeerId]?.videoTrack?.id()
-                            ?: ""
-                        ) to mapOf("active" to isCameraOn.value)
-                    )
+        if (mutableParticipants[localPeerId] != null) {
+            mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.updateTrackMetadata(
+                mutableParticipants[localPeerId]?.videoTrack?.id(),
+                mapOf("active" to isCameraOn.value)
             )
         }
 
@@ -228,16 +219,12 @@ class RoomViewModel(
 
             mutableParticipants[localPeerId] = Participant(localPeerId, "Me", localVideoTrack, localAudioTrack)
 
-            mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.copy(
-                tracksMetadata = mutableParticipants[localPeerId]!!.tracksMetadata +
-                    (
-                        (mutableParticipants[localPeerId]?.audioTrack?.id() ?: "") to
-                            mapOf("active" to isMicrophoneOn.value)
-                        )
-            )
-            mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.copy(
-                tracksMetadata = mutableParticipants[localPeerId]!!.tracksMetadata +
-                    ((mutableParticipants[localPeerId]?.videoTrack?.id() ?: "") to mapOf("active" to isCameraOn.value))
+            mutableParticipants[localPeerId] = mutableParticipants[localPeerId]!!.updateTrackMetadata(
+                mutableParticipants[localPeerId]?.audioTrack?.id(),
+                mapOf("active" to isMicrophoneOn.value)
+            ).updateTrackMetadata(
+                mutableParticipants[localPeerId]?.videoTrack?.id(),
+                mapOf("active" to isCameraOn.value)
             )
 
             emitParticipants()
@@ -372,31 +359,21 @@ class RoomViewModel(
     }
 
     override fun onTrackUpdated(ctx: TrackContext) {
-        val p = mutableParticipants[ctx.peer.id]
         // Updates metadata of given track
-        if (ctx.metadata["type"] == "camera") {
-            if (p != null) {
-                mutableParticipants[ctx.peer.id] = p.copy(
-                    tracksMetadata = p.tracksMetadata + (
-                        (
-                            mutableParticipants[ctx.peer.id]?.videoTrack?.id()
-                                ?: ""
-                            ) to ctx.metadata
-                        )
+        if (mutableParticipants[ctx.peer.id] != null) {
+            if (ctx.metadata["type"] == "camera") {
+                mutableParticipants[ctx.peer.id] = mutableParticipants[ctx.peer.id]!!.updateTrackMetadata(
+                    mutableParticipants[ctx.peer.id]?.videoTrack?.id(),
+                    ctx.metadata
                 )
             }
         } else {
-            if (p != null) {
-                mutableParticipants[ctx.peer.id] = p.copy(
-                    tracksMetadata = p.tracksMetadata + (
-                        (
-                            mutableParticipants[ctx.peer.id]?.audioTrack?.id()
-                                ?: ""
-                            ) to ctx.metadata
-                        )
-                )
-            }
+            mutableParticipants[ctx.peer.id] = mutableParticipants[ctx.peer.id]!!.updateTrackMetadata(
+                mutableParticipants[ctx.peer.id]?.audioTrack?.id(),
+                ctx.metadata
+            )
         }
+
         emitParticipants()
         Timber.i("Track has been updated $ctx")
     }
