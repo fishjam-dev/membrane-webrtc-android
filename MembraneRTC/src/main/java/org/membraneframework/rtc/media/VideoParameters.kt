@@ -18,7 +18,7 @@ data class Dimensions(val width: Int, val height: Int) {
  * <p>
  * Contains a set of useful presets.
  */
-public data class VideoParameters(
+data class VideoParameters(
     val dimensions: Dimensions,
     val maxBitrate: TrackBandwidthLimit,
     val maxFps: Int,

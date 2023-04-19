@@ -86,8 +86,6 @@ class RoomActivity : AppCompatActivity() {
         val primaryParticipant = viewModel.primaryParticipant.collectAsState()
         val errorMessage = viewModel.errorMessage.collectAsState()
         val videoSimulcastConfig = viewModel.videoSimulcastConfig.collectAsState()
-        val screencastSimulcastConfig = viewModel.screencastSimulcastConfig.collectAsState()
-        val isScreenCastOn = viewModel.isScreenCastOn.collectAsState()
         val scrollState = rememberScrollState()
 
         Scaffold(
@@ -137,34 +135,6 @@ class RoomActivity : AppCompatActivity() {
                         }
                     }
 
-                    if (isScreenCastOn.value) {
-                        Row(
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Text(text = "Screencast quality:")
-                            listOf(TrackEncoding.H, TrackEncoding.M, TrackEncoding.L).map {
-                                Button(
-                                    onClick = {
-                                        viewModel.toggleScreencastTrackEncoding(it)
-                                    },
-                                    colors = AppButtonColors(),
-                                    modifier = Modifier.then(
-                                        if (screencastSimulcastConfig.value.activeEncodings.contains(it)) {
-                                            Modifier.alpha(
-                                                1f
-                                            )
-                                        } else {
-                                            Modifier.alpha(0.5f)
-                                        }
-                                    ),
-                                    shape = RoundedCornerShape(12.dp)
-                                ) {
-                                    Text(it.name)
-                                }
-                            }
-                        }
-                    }
-
                     primaryParticipant.value?.let {
                         ParticipantCard(
                             participant = it,
@@ -173,22 +143,42 @@ class RoomActivity : AppCompatActivity() {
                         )
                     }
 
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
+                    Column(
                         modifier = Modifier
-                            .padding(10.dp)
                             .fillMaxWidth()
-                            .horizontalScroll(scrollState)
+                            .height(248.dp)
+                            .padding(10.dp)
+                            .verticalScroll(scrollState),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        participants.value.forEach {
-                            ParticipantCard(
-                                participant = it,
-                                videoViewLayout = VideoViewLayout.FILL,
-                                size = Size(100f, 100f),
-                                onClick = {
-                                    viewModel.focusVideo(it.id)
+                        participants.value.chunked(2).forEach {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                ParticipantCard(
+                                    participant = it[0],
+                                    videoViewLayout = VideoViewLayout.FILL,
+                                    size = Size(100f, 100f),
+                                    onClick = {
+                                        viewModel.focusVideo(it[0].id)
+                                    }
+                                )
+                                Box(modifier = Modifier.width(16.dp)) { }
+                                if (it.size > 1) {
+                                    ParticipantCard(
+                                        participant = it[1],
+                                        videoViewLayout = VideoViewLayout.FILL,
+                                        size = Size(100f, 100f),
+                                        onClick = {
+                                            viewModel.focusVideo(it[1].id)
+                                        }
+                                    )
                                 }
-                            )
+                            }
                         }
                     }
                 }
@@ -221,28 +211,80 @@ fun ParticipantCard(
     size: Size,
     onClick: (() -> Unit)? = null
 ) {
-    Box(
-        modifier = Modifier.clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() }
-        ) {
-            onClick?.invoke()
+    fun isTrackNotActive(trackType: String): Boolean {
+        return when (trackType) {
+            "audio" -> { (participant.tracksMetadata[participant.audioTrack?.id()]?.get("active") as? Boolean) != true }
+            "video" -> { (participant.tracksMetadata[participant.videoTrack?.id()]?.get("active") as? Boolean) != true }
+            else -> {
+                throw IllegalArgumentException("Invalid media type: $trackType")
+            }
         }
+    }
+
+    fun shouldShowIcon(trackType: String): Boolean {
+        return when (trackType) {
+            "audio" -> {
+                participant.audioTrack == null || (
+                    participant.tracksMetadata.isNotEmpty() && isTrackNotActive(trackType)
+                    )
+            }
+            "video" -> {
+                participant.videoTrack == null || (
+                    participant.tracksMetadata.isNotEmpty() && isTrackNotActive(trackType)
+                    )
+            }
+            else -> {
+                throw IllegalArgumentException("Invalid media type: $trackType")
+            }
+        }
+    }
+
+    val iconModifier =
+        Modifier
+            .padding(10.dp)
+            .size(20.dp)
+
+    Box(
+        modifier = Modifier
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                onClick?.invoke()
+            }
             .clip(RoundedCornerShape(10.dp))
             .height(size.height.dp)
             .width(size.width.dp)
-            .background(Blue.darker(0.7f))
             .border(if (participant.vadStatus == VadStatus.SPEECH) 10.dp else 0.dp, Color.White)
+            .background(Blue.darker(0.7f))
     ) {
-        ParticipantVideoView(
-            participant = participant,
-            videoViewLayout = videoViewLayout,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .background(Blue.darker(0.7f))
-        )
+        if (shouldShowIcon("video")) {
+            Box(
+                modifier = Modifier
+                    .background(Blue.darker(0.7f))
+                    .fillMaxHeight()
+                    .fillMaxWidth()
+            ) {
+                Row(modifier = Modifier.align(Alignment.Center)) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_video_off),
+                        contentDescription = "no camera",
+                        modifier = iconModifier,
+                        tint = Color.White
+                    )
+                }
+            }
+        } else {
+            ParticipantVideoView(
+                participant = participant,
+                videoViewLayout = videoViewLayout,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .background(Blue.darker(0.7f))
+            )
+        }
 
         Text(
             color = Color.White,
@@ -256,6 +298,20 @@ fun ParticipantCard(
                 .width(size.width.dp - 20.dp)
                 .padding(20.dp)
         )
+
+        if (shouldShowIcon("audio")) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_mic_off),
+                    contentDescription = "microphone control",
+                    modifier = iconModifier,
+                    tint = Color.White
+                )
+            }
+        }
     }
 }
 
@@ -273,7 +329,9 @@ fun ControlIcons(roomViewModel: RoomViewModel, startScreencast: () -> Unit, onEn
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Blue.darker(0.7f))
     ) {
         IconButton(onClick = { roomViewModel.toggleMicrophone() }) {
             Icon(

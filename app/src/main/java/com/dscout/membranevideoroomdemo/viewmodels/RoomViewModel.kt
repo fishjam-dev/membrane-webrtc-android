@@ -24,6 +24,7 @@ class RoomViewModel(
     var localAudioTrack: LocalAudioTrack? = null
     var localVideoTrack: LocalVideoTrack? = null
     var localScreencastTrack: LocalScreencastTrack? = null
+    private val localPeerId: String = UUID.randomUUID().toString()
 
     var localDisplayName: String? = null
 
@@ -93,9 +94,7 @@ class RoomViewModel(
     }
 
     fun focusVideo(participantId: String) {
-        val candidates = mutableParticipants.values.filter {
-            it.videoTrack != null
-        }
+        val candidates = mutableParticipants.values
 
         candidates.find {
             it.id == participantId
@@ -104,17 +103,20 @@ class RoomViewModel(
             if (localVideoTrack?.id() != primaryParticipantTrackId &&
                 localScreencastTrack?.id() != primaryParticipantTrackId
             ) {
-                val globalId = globalToLocalTrackId.filterValues {
-                        it1 ->
+                val globalId = globalToLocalTrackId.filterValues { it1 ->
                     it1 == primaryParticipantTrackId
-                }.keys.first()
-                room.value?.setTargetTrackEncoding(globalId, TrackEncoding.L)
+                }.keys
+                if (globalId.isNotEmpty()) {
+                    room.value?.setTargetTrackEncoding(globalId.first(), TrackEncoding.L)
+                }
             }
             primaryParticipant.value = it
             val videoTrackId = it.videoTrack?.id()
             if (localVideoTrack?.id() != it.videoTrack?.id() && localScreencastTrack?.id() != videoTrackId) {
-                val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == it.videoTrack?.id() }.keys.first()
-                room.value?.setTargetTrackEncoding(globalId, TrackEncoding.H)
+                val globalId = globalToLocalTrackId.filterValues { it1 -> it1 == it.videoTrack?.id() }.keys
+                if (globalId.isNotEmpty()) {
+                    room.value?.setTargetTrackEncoding(globalId.first(), TrackEncoding.H)
+                }
             }
 
             participants.value = candidates.filter { candidate ->
@@ -125,11 +127,9 @@ class RoomViewModel(
 
     // TODO: we should preserve some order...
     private fun emitParticipants() {
-        val candidates = mutableParticipants.values.filter {
-            it.videoTrack != null
-        }
+        val candidates = mutableParticipants.values
 
-        if (candidates.count() > 0) {
+        if (candidates.isNotEmpty()) {
             val primary = candidates.first()
 
             primaryParticipant.value = primary
@@ -147,6 +147,16 @@ class RoomViewModel(
             isMicrophoneOn.value = enabled
             room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "audio"))
         }
+
+        val p = mutableParticipants[localPeerId]
+        if (p != null) {
+            mutableParticipants[localPeerId] = p.updateTrackMetadata(
+                p.audioTrack?.id(),
+                mapOf("active" to isMicrophoneOn.value)
+            )
+        }
+
+        emitParticipants()
     }
 
     fun toggleCamera() {
@@ -156,6 +166,16 @@ class RoomViewModel(
             isCameraOn.value = enabled
             room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "camera"))
         }
+
+        val p = mutableParticipants[localPeerId]
+        if (p != null) {
+            mutableParticipants[localPeerId] = p.updateTrackMetadata(
+                p.videoTrack?.id(),
+                mapOf("active" to isCameraOn.value)
+            )
+        }
+
+        emitParticipants()
     }
 
     fun flipCamera() {
@@ -200,8 +220,15 @@ class RoomViewModel(
             isCameraOn.value = localVideoTrack?.enabled() ?: false
             isMicrophoneOn.value = localAudioTrack?.enabled() ?: false
 
-            val localPeerId = UUID.randomUUID().toString()
-            mutableParticipants[localPeerId] = Participant(localPeerId, "Me", localVideoTrack, localAudioTrack)
+            val participant = Participant(localPeerId, "Me", localVideoTrack, localAudioTrack)
+
+            mutableParticipants[localPeerId] = participant.updateTrackMetadata(
+                participant.audioTrack?.id(),
+                mapOf("active" to isMicrophoneOn.value)
+            ).updateTrackMetadata(
+                participant.videoTrack?.id(),
+                mapOf("active" to isCameraOn.value)
+            )
 
             emitParticipants()
         }
@@ -244,13 +271,34 @@ class RoomViewModel(
                             )
                         )
                     } else {
-                        Pair(ctx.peer.id, participant.copy(videoTrack = ctx.track as RemoteVideoTrack))
+                        val p = participant.copy(videoTrack = ctx.track as RemoteVideoTrack)
+                        Pair(
+                            ctx.peer.id,
+                            p.copy(
+                                tracksMetadata = p.tracksMetadata + (
+                                    (
+                                        globalToLocalTrackId[ctx.trackId]
+                                            ?: ""
+                                        ) to ctx.metadata
+                                    )
+                            )
+                        )
                     }
                 }
                 is RemoteAudioTrack -> {
                     globalToLocalTrackId[ctx.trackId] = (ctx.track as RemoteAudioTrack).id()
-
-                    Pair(ctx.peer.id, participant.copy(audioTrack = ctx.track as RemoteAudioTrack))
+                    val p = participant.copy(audioTrack = ctx.track as RemoteAudioTrack)
+                    Pair(
+                        ctx.peer.id,
+                        p.copy(
+                            tracksMetadata = p.tracksMetadata + (
+                                (
+                                    globalToLocalTrackId[ctx.trackId]
+                                        ?: ""
+                                    ) to ctx.metadata
+                                )
+                        )
+                    )
                 }
                 else ->
                     throw IllegalArgumentException("invalid type of incoming remote track")
@@ -314,6 +362,23 @@ class RoomViewModel(
     }
 
     override fun onTrackUpdated(ctx: TrackContext) {
+        val p = mutableParticipants[ctx.peer.id]
+        if (p != null) {
+            // Updates metadata of given track
+            if (ctx.metadata["type"] == "camera") {
+                mutableParticipants[ctx.peer.id] = p.updateTrackMetadata(
+                    p.videoTrack?.id(),
+                    ctx.metadata
+                )
+            } else {
+                mutableParticipants[ctx.peer.id] = p.updateTrackMetadata(
+                    p.audioTrack?.id(),
+                    ctx.metadata
+                )
+            }
+        }
+
+        emitParticipants()
         Timber.i("Track has been updated $ctx")
     }
 
@@ -323,6 +388,7 @@ class RoomViewModel(
             displayName = peer.metadata["displayName"] as? String ?: "UNKNOWN"
         )
 
+        emitParticipants()
         Timber.i("Peer has joined the room $peer")
     }
 

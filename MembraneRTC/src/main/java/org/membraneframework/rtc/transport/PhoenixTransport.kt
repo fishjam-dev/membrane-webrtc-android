@@ -13,7 +13,7 @@ import org.phoenixframework.Channel
 import org.phoenixframework.Socket
 import timber.log.Timber
 
-public class PhoenixTransport constructor(
+class PhoenixTransport constructor(
     private val url: String,
     private val topic: String,
     private val ioDispatcher: CoroutineDispatcher,

@@ -31,7 +31,7 @@ import org.membraneframework.rtc.utils.Metadata
  * After receiving `onJoinSuccess` a user will receive notification about various peers joining/leaving the session, new tracks being published and ready for playback
  * or going inactive.
  */
-public class MembraneRTC
+class MembraneRTC
 private constructor(
     private var client: InternalMembraneRTC
 ) {
@@ -41,7 +41,7 @@ private constructor(
      * <p>
      * Should be called only when a listener received <strong>onConnected</strong> message.
      */
-    public fun join() {
+    fun join() {
         client.join()
     }
 
@@ -50,7 +50,7 @@ private constructor(
      * <p>
      * Once the client gets disconnected it should not be reused. New client should be created instead.
      */
-    public fun disconnect() {
+    fun disconnect() {
         client.disconnect()
     }
 
@@ -65,7 +65,7 @@ private constructor(
      * `LocalVideoTrack.getCaptureDevices` method
      * @return an instance of the video track
      */
-    public fun createVideoTrack(
+    fun createVideoTrack(
         videoParameters: VideoParameters,
         metadata: Metadata,
         captureDeviceName: String? = null
@@ -81,7 +81,7 @@ private constructor(
      * @param metadata the metadata that will be sent to the <strong>Membrane RTC Engine</strong> for media negotiation
      * @return an instance of the audio track
      */
-    public fun createAudioTrack(metadata: Metadata): LocalAudioTrack {
+    fun createAudioTrack(metadata: Metadata): LocalAudioTrack {
         return client.createLocalAudioTrack(metadata)
     }
 
@@ -96,7 +96,7 @@ private constructor(
      * @param onEnd callback that will be invoked once the screen capture ends
      * @return an instance of the screencast track
      */
-    public fun createScreencastTrack(
+    fun createScreencastTrack(
         mediaProjectionPermission: Intent,
         videoParameters: VideoParameters,
         metadata: Metadata,
@@ -111,7 +111,7 @@ private constructor(
      * @param trackId an id of a valid local track that has been created using the current client
      * @return a boolean whether the track has been successfully removed or not
      */
-    public fun removeTrack(trackId: String): Boolean {
+    fun removeTrack(trackId: String): Boolean {
         return client.removeTrack(trackId)
     }
 
@@ -125,7 +125,7 @@ private constructor(
      * @param trackId an id of a remote track
      * @param encoding an encoding to receive
      */
-    public fun setTargetTrackEncoding(trackId: String, encoding: TrackEncoding) {
+    fun setTargetTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.setTargetTrackEncoding(trackId, encoding)
     }
 
@@ -135,7 +135,7 @@ private constructor(
      * @param trackId an id of a local track
      * @param encoding an encoding that will be enabled
      */
-    public fun enableTrackEncoding(trackId: String, encoding: TrackEncoding) {
+    fun enableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.enableTrackEncoding(trackId, encoding)
     }
 
@@ -145,7 +145,7 @@ private constructor(
      * @param trackId and id of a local track
      * @param encoding an encoding that will be disabled
      */
-    public fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
+    fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         client.disableTrackEncoding(trackId, encoding)
     }
 
@@ -156,7 +156,7 @@ private constructor(
      * If the metadata is different from what is already tracked in the room, the optional
      * callback `onPeerUpdated` will be triggered for other peers in the room.
      */
-    public fun updatePeerMetadata(peerMetadata: Metadata) {
+    fun updatePeerMetadata(peerMetadata: Metadata) {
         client.updatePeerMetadata(peerMetadata)
     }
 
@@ -168,7 +168,7 @@ private constructor(
      * If the metadata is different from what is already tracked in the room, the optional
      * callback `onTrackUpdated` will be triggered for other peers in the room.
      */
-    public fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
+    fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
         client.updateTrackMetadata(trackId, trackMetadata)
     }
 
@@ -179,7 +179,7 @@ private constructor(
      * @param trackId track id of a video track
      * @param bandwidthLimit bandwidth in kbps
      */
-    public fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
+    fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         client.setTrackBandwidth(trackId, bandwidthLimit)
     }
 
@@ -189,7 +189,7 @@ private constructor(
      * @param encoding rid of the encoding
      * @param bandwidthLimit bandwidth in kbps
      */
-    public fun setEncodingBandwidth(
+    fun setEncodingBandwidth(
         trackId: String,
         encoding: String,
         bandwidthLimit: TrackBandwidthLimit.BandwidthLimit

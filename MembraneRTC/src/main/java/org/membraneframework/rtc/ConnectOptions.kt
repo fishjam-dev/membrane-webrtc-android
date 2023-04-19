@@ -9,7 +9,7 @@ import org.membraneframework.rtc.utils.Metadata
  * @property config The metadata that will be used by the transport to connect
  * @property encoderOptions The encoder options used to encode video
  */
-public data class ConnectOptions(
+data class ConnectOptions(
     val transport: EventTransport,
     val config: Metadata,
     val encoderOptions: EncoderOptions = EncoderOptions()

@@ -8,7 +8,7 @@ import org.membraneframework.rtc.media.VideoTrack
 import org.membraneframework.rtc.ui.VideoTextureViewRenderer
 import org.webrtc.RendererCommon
 
-public enum class VideoViewLayout {
+enum class VideoViewLayout {
     FIT,
     FILL;
 
