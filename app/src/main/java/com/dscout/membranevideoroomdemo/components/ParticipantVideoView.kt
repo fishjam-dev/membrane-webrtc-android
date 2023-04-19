@@ -1,6 +1,5 @@
 package com.dscout.membranevideoroomdemo.components
 
-import android.util.Log
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -27,7 +26,6 @@ fun ParticipantVideoView(participant: Participant, videoViewLayout: VideoViewLay
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
     fun setupTrack(videoTrack: VideoTrack, view: VideoTextureViewRenderer) {
-        //Log.d("KAROL", videoTrack.toString())
         if (activeVideoTrack == videoTrack) return
 
         activeVideoTrack?.removeRenderer(view)
@@ -63,7 +61,6 @@ fun ParticipantVideoView(participant: Participant, videoViewLayout: VideoViewLay
             }
         },
         update = { updatedView ->
-            //Log.d("KAROL", participant.videoTrack.toString())
             setupTrack(participant.videoTrack!!, updatedView)
         },
         modifier = modifier

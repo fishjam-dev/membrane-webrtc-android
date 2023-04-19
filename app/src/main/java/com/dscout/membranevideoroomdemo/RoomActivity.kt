@@ -4,7 +4,6 @@ import android.app.Activity
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +17,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -86,8 +84,6 @@ class RoomActivity : AppCompatActivity() {
         val participants = viewModel.participants.collectAsState()
         val primaryParticipant = viewModel.primaryParticipant.collectAsState()
         val errorMessage = viewModel.errorMessage.collectAsState()
-        val screencastSimulcastConfig = viewModel.screencastSimulcastConfig.collectAsState()
-        val isScreenCastOn = viewModel.isScreenCastOn.collectAsState()
         val scrollState = rememberScrollState()
 
         Scaffold(
@@ -129,7 +125,6 @@ class RoomActivity : AppCompatActivity() {
                     }
 
                     primaryParticipant.value?.let {
-                        Log.e("KAROL", primaryParticipant.toString())
                         ParticipantCard(
                             participant = it,
                             videoViewLayout = VideoViewLayout.FIT,
@@ -147,9 +142,11 @@ class RoomActivity : AppCompatActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         participants.value.chunked(2).forEach {
-                            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)){
+                            Row(
+                                horizontalArrangement = Arrangement.Center, modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
                                 ParticipantCard(
                                     participant = it[0],
                                     videoViewLayout = VideoViewLayout.FILL,
@@ -159,9 +156,9 @@ class RoomActivity : AppCompatActivity() {
                                     }
                                 )
                                 Box(modifier = Modifier.width(16.dp)) {
-                                    
+
                                 }
-                                if(it.size > 1){
+                                if (it.size > 1) {
                                     ParticipantCard(
                                         participant = it[1],
                                         videoViewLayout = VideoViewLayout.FILL,
@@ -206,6 +203,23 @@ fun ParticipantCard(
     onClick: (() -> Unit)? = null
 ) {
 
+    fun shouldShowIcon(trackType: String): Boolean {
+        return when (trackType) {
+            "audio" -> {
+                participant.audioTrack == null || (participant.tracksMetadata.isNotEmpty() &&
+                    (participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as? Boolean) != true)
+            }
+            "video" -> {
+                participant.videoTrack == null || (participant.tracksMetadata.isNotEmpty() &&
+                    (participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as? Boolean) != true)
+            }
+            else -> {
+                throw IllegalArgumentException("Invalid media type: $trackType")
+            }
+        }
+
+    }
+
     val iconModifier =
         Modifier
             .padding(10.dp)
@@ -225,12 +239,14 @@ fun ParticipantCard(
             .border(if (participant.vadStatus == VadStatus.SPEECH) 10.dp else 0.dp, Color.White)
             .background(Blue.darker(0.7f))
     ) {
-        if (participant.videoTrack == null || (participant.tracksMetadata.isNotEmpty() &&  (participant.tracksMetadata[participant.videoTrack.id()]?.get("active") as? Boolean) != true)){
-            Box(modifier = Modifier
-                .background(Blue.darker(0.7f))
-                .fillMaxHeight()
-                .fillMaxWidth()) {
-                Row(modifier = Modifier.align(Alignment.Center)){
+        if (shouldShowIcon("video")) {
+            Box(
+                modifier = Modifier
+                    .background(Blue.darker(0.7f))
+                    .fillMaxHeight()
+                    .fillMaxWidth()
+            ) {
+                Row(modifier = Modifier.align(Alignment.Center)) {
                     Icon(
                         painter = painterResource(R.drawable.ic_video_off),
                         contentDescription = "no camera",
@@ -264,17 +280,11 @@ fun ParticipantCard(
                 .padding(20.dp)
         )
 
-        if(participant.displayName=="pc2"){
-            Log.d("KAROL", participant.audioTrack.toString())
-            Log.d("KAROL", participant.tracksMetadata.toString())
-            Log.d("KAROL", participant.tracksMetadata[participant.audioTrack?.id()]?.get("active").toString())
-        }
-
-        if (participant.audioTrack == null || (participant.tracksMetadata.isNotEmpty() &&  (participant.tracksMetadata[participant.audioTrack.id()]?.get("active") as? Boolean) != true)){
+        if (shouldShowIcon("audio")) {
             Row(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-            ){
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_mic_off),
                     contentDescription = "microphone control",
@@ -301,7 +311,9 @@ fun ControlIcons(roomViewModel: RoomViewModel, startScreencast: () -> Unit, onEn
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().background(Blue.darker(0.7f))
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Blue.darker(0.7f))
     ) {
         IconButton(onClick = { roomViewModel.toggleMicrophone() }) {
             Icon(
