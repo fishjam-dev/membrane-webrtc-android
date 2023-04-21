@@ -16,6 +16,7 @@ import org.webrtc.RendererCommon.ScalingType
 import timber.log.Timber
 import java.util.concurrent.CountDownLatch
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 open class VideoTextureViewRenderer :
     TextureView,
@@ -221,11 +222,11 @@ open class VideoTextureViewRenderer :
             when (scalingType) {
                 ScalingType.SCALE_ASPECT_FILL -> {
                     if (frameAspectRatio > layoutAspectRatio) {
-                        drawnFrameWidth = (rotatedFrameHeight * layoutAspectRatio).toInt()
+                        drawnFrameWidth = (rotatedFrameHeight * layoutAspectRatio).roundToInt()
                         drawnFrameHeight = rotatedFrameHeight
                     } else {
                         drawnFrameWidth = rotatedFrameWidth
-                        drawnFrameHeight = (rotatedFrameWidth / layoutAspectRatio).toInt()
+                        drawnFrameHeight = (rotatedFrameWidth / layoutAspectRatio).roundToInt()
                     }
                     // Aspect ratio of the drawn frame and the view is the same.
                     width = Math.min(width, drawnFrameWidth)
