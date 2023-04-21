@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.utils.Metadata
+import org.webrtc.Logging
 
 /**
  * MembraneRTC client.
@@ -195,6 +196,24 @@ private constructor(
         bandwidthLimit: TrackBandwidthLimit.BandwidthLimit
     ) {
         client.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
+    }
+
+    /**
+     * Changes severity level of debug logs
+     * @param severity name of the logging severity
+     */
+    fun changeWebRTCLoggingSeverity(severity: String) {
+        when (severity) {
+            "verbose" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_VERBOSE)
+            "info" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_INFO)
+            "warning" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_WARNING)
+            "error" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_ERROR)
+            "none" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_NONE)
+
+            else -> {
+                throw IllegalArgumentException("Could not find logging severity that matches $severity")
+            }
+        }
     }
 
     companion object {
