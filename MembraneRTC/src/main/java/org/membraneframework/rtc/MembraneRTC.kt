@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.utils.Metadata
+import org.webrtc.Logging
 
 /**
  * MembraneRTC client.
@@ -195,6 +196,14 @@ private constructor(
         bandwidthLimit: TrackBandwidthLimit.BandwidthLimit
     ) {
         client.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
+    }
+
+    /**
+     * Changes severity level of debug logs
+     * @param severity enum value representing the logging severity
+     */
+    fun changeWebRTCLoggingSeverity(severity: Logging.Severity) {
+        Logging.enableLogToDebugOutput(severity)
     }
 
     companion object {
