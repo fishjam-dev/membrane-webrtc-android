@@ -269,13 +269,13 @@ open class VideoTextureViewRenderer :
         val newWidth: Int
         val newHeight: Int
 
-        if (viewHeight > (viewWidth * aspectRatio).toInt()) {
+        if (viewHeight > ceil(viewWidth * aspectRatio).roundToInt()) {
             // limited by narrow width; restrict height
             newWidth = viewWidth
-            newHeight = (viewWidth * aspectRatio).toInt()
+            newHeight = ceil(viewWidth * aspectRatio).roundToInt()
         } else {
             // limited by short height; restrict width
-            newWidth = (viewHeight / aspectRatio).toInt()
+            newWidth = ceil(viewHeight / aspectRatio).roundToInt()
             newHeight = viewHeight
         }
 
