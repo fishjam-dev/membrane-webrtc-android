@@ -200,7 +200,7 @@ private constructor(
 
     /**
      * Changes severity level of debug logs
-     * @param severity name of the logging severity
+     * @param severity enum value representing the logging severity
      */
     fun changeWebRTCLoggingSeverity(severity: Logging.Severity) {
         Logging.enableLogToDebugOutput(severity)
