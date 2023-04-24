@@ -230,8 +230,8 @@ open class VideoTextureViewRenderer :
                         drawnFrameHeight = rotatedFrameWidth / layoutAspectRatio
                     }
                     // Aspect ratio of the drawn frame and the view is the same.
-                    width = Math.min(width.toFloat(), width)
-                    height = Math.min(height.toFloat(), height)
+                    width = Math.min(width, drawnFrameWidth)
+                    height = Math.min(height, drawnFrameHeight)
                 }
 
                 else -> {
