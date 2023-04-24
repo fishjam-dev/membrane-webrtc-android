@@ -202,18 +202,8 @@ private constructor(
      * Changes severity level of debug logs
      * @param severity name of the logging severity
      */
-    fun changeWebRTCLoggingSeverity(severity: String) {
-        when (severity) {
-            "verbose" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_VERBOSE)
-            "info" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_INFO)
-            "warning" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_WARNING)
-            "error" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_ERROR)
-            "none" -> Logging.enableLogToDebugOutput(Logging.Severity.LS_NONE)
-
-            else -> {
-                throw IllegalArgumentException("Could not find logging severity that matches $severity")
-            }
-        }
+    fun changeWebRTCLoggingSeverity(severity: Logging.Severity) {
+        Logging.enableLogToDebugOutput(severity)
     }
 
     companion object {
