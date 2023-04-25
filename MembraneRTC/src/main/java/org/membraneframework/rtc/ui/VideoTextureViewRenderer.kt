@@ -15,7 +15,9 @@ import org.webrtc.RendererCommon.RendererEvents
 import org.webrtc.RendererCommon.ScalingType
 import timber.log.Timber
 import java.util.concurrent.CountDownLatch
+import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 open class VideoTextureViewRenderer :
     TextureView,
@@ -212,20 +214,20 @@ open class VideoTextureViewRenderer :
         if (enableFixedSize && rotatedFrameWidth != 0 && rotatedFrameHeight != 0 && width != 0 && height != 0) {
             val layoutAspectRatio = width / height.toFloat()
             val frameAspectRatio = rotatedFrameWidth / rotatedFrameHeight.toFloat()
-            val drawnFrameWidth: Int
-            val drawnFrameHeight: Int
+            val drawnFrameWidth: Float
+            val drawnFrameHeight: Float
 
-            var width = this.width
-            var height = this.height
+            var width = this.width.toFloat()
+            var height = this.height.toFloat()
 
             when (scalingType) {
                 ScalingType.SCALE_ASPECT_FILL -> {
                     if (frameAspectRatio > layoutAspectRatio) {
-                        drawnFrameWidth = (rotatedFrameHeight * layoutAspectRatio).toInt()
-                        drawnFrameHeight = rotatedFrameHeight
+                        drawnFrameWidth = rotatedFrameHeight * layoutAspectRatio
+                        drawnFrameHeight = rotatedFrameHeight.toFloat()
                     } else {
-                        drawnFrameWidth = rotatedFrameWidth
-                        drawnFrameHeight = (rotatedFrameWidth / layoutAspectRatio).toInt()
+                        drawnFrameWidth = rotatedFrameWidth.toFloat()
+                        drawnFrameHeight = rotatedFrameWidth / layoutAspectRatio
                     }
                     // Aspect ratio of the drawn frame and the view is the same.
                     width = Math.min(width, drawnFrameWidth)
@@ -233,8 +235,8 @@ open class VideoTextureViewRenderer :
                 }
 
                 else -> {
-                    width = rotatedFrameWidth
-                    height = rotatedFrameHeight
+                    width = rotatedFrameWidth.toFloat()
+                    height = rotatedFrameHeight.toFloat()
                 }
             }
 
@@ -246,10 +248,10 @@ open class VideoTextureViewRenderer :
                     "old surface size: $surfaceWidth x $surfaceHeight"
             )
 
-            if (width != surfaceWidth || height != surfaceHeight) {
-                surfaceWidth = width
-                surfaceHeight = height
-                adjustAspectRatio(surfaceWidth, surfaceHeight)
+            if (ceil(width).roundToInt() != surfaceWidth || ceil(height).roundToInt() != surfaceHeight) {
+                surfaceWidth = ceil(width).roundToInt()
+                surfaceHeight = ceil(height).roundToInt()
+                adjustAspectRatio(width, height)
             }
         } else {
             surfaceHeight = 0
@@ -260,20 +262,20 @@ open class VideoTextureViewRenderer :
     /**
      * Sets the TextureView transform to preserve the aspect ratio of the video.
      */
-    private fun adjustAspectRatio(videoWidth: Int, videoHeight: Int) {
+    private fun adjustAspectRatio(videoWidth: Float, videoHeight: Float) {
         val viewWidth = width
         val viewHeight = height
-        val aspectRatio = videoHeight.toDouble() / videoWidth
+        val aspectRatio = videoHeight / videoWidth
         val newWidth: Int
         val newHeight: Int
 
-        if (viewHeight > (viewWidth * aspectRatio).toInt()) {
+        if (viewHeight > viewWidth * aspectRatio) {
             // limited by narrow width; restrict height
             newWidth = viewWidth
-            newHeight = (viewWidth * aspectRatio).toInt()
+            newHeight = ceil(viewWidth * aspectRatio).roundToInt()
         } else {
             // limited by short height; restrict width
-            newWidth = (viewHeight / aspectRatio).toInt()
+            newWidth = ceil(viewHeight / aspectRatio).roundToInt()
             newHeight = viewHeight
         }
 
