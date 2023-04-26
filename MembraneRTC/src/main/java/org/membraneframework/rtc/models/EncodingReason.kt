@@ -8,8 +8,8 @@ package org.membraneframework.rtc.models
  */
 enum class EncodingReason(val value: String) {
     OTHER("other"),
-    ENCODING_INACTIVE("encodingInactive"),
-    LOW_BANDWIDTH("lowBandwidth");
+    ENCODING_INACTIVE("encoding_inactive"),
+    LOW_BANDWIDTH("low_bandwidth");
 
     companion object {
         fun fromString(s: String): EncodingReason? {
