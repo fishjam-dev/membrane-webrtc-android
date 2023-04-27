@@ -12,6 +12,7 @@ import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.EncodingReason
 import org.membraneframework.rtc.models.Peer
+import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.models.VadStatus
 import org.membraneframework.rtc.transport.EventTransportError
@@ -490,5 +491,9 @@ constructor(
         }
 
         listener.onTrackReady(trackContext)
+    }
+
+    fun getStats(): Map<String, RTCStats> {
+        return peerConnectionManager.getStats()
     }
 }

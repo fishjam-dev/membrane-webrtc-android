@@ -13,9 +13,14 @@ import org.membraneframework.rtc.media.LocalScreencastTrack
 import org.membraneframework.rtc.media.LocalTrack
 import org.membraneframework.rtc.media.LocalVideoTrack
 import org.membraneframework.rtc.media.TrackBandwidthLimit
+import org.membraneframework.rtc.models.QualityLimitationDurations
+import org.membraneframework.rtc.models.RTCInboundStats
+import org.membraneframework.rtc.models.RTCOutboundStats
+import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.utils.*
 import org.webrtc.*
 import timber.log.Timber
+import java.math.BigInteger
 import java.util.*
 import kotlin.math.pow
 
@@ -35,6 +40,7 @@ internal class PeerConnectionManager
 
     private var peerConnection: PeerConnection? = null
     private val peerConnectionMutex = Mutex()
+    private val peerConnectionStats = mutableMapOf<String, RTCStats>()
 
     private var iceServers: List<PeerConnection.IceServer>? = null
     private var config: PeerConnection.RTCConfiguration? = null
@@ -465,6 +471,55 @@ internal class PeerConnectionManager
 
     override fun onRenegotiationNeeded() {
         Timber.d("Renegotiation needed")
+    }
+
+    fun getStats(): Map<String, RTCStats> {
+        peerConnection?.getStats { rtcStatsReport -> extractRelevantStats(rtcStatsReport) }
+        return peerConnectionStats.toMap()
+    }
+
+    private fun extractRelevantStats(rp: RTCStatsReport) {
+        rp.statsMap.values.forEach {
+            if (it.type == "outbound-rtp") {
+                val durations = it.members["qualityLimitationDurations"] as? Map<*, *>
+                val qualityLimitation = QualityLimitationDurations(
+                    durations?.get("bandwidth") as? Double ?: 0.0,
+                    durations?.get("cpu") as? Double ?: 0.0,
+                    durations?.get("none") as? Double ?: 0.0,
+                    durations?.get("other") as? Double ?: 0.0
+                )
+
+                val tmp = RTCOutboundStats(
+                    it.members["kind"] as? String,
+                    it.members["rid"] as? String,
+                    it.members["bytesSent"] as? BigInteger,
+                    it.members["targetBitrate"] as? Double,
+                    it.members["packetsSent"] as? Long,
+                    it.members["framesEncoded"] as? Long,
+                    it.members["framesPerSecond"] as? Double,
+                    it.members["frameWidth"] as? Long,
+                    it.members["frameHeight"] as? Long,
+                    qualityLimitation
+                )
+
+                peerConnectionStats[it.id as String] = tmp
+            } else if (it.type == "inbound-rtp") {
+                val tmp = RTCInboundStats(
+                    it.members["kind"] as? String,
+                    it.members["jitter"] as? Double,
+                    it.members["packetsLost"] as? Int,
+                    it.members["packetsReceived"] as? Long,
+                    it.members["bytesReceived"] as? BigInteger,
+                    it.members["framesReceived"] as? Int,
+                    it.members["frameWidth"] as? Long,
+                    it.members["frameHeight"] as? Long,
+                    it.members["framesPerSecond"] as? Double,
+                    it.members["framesDropped"] as? Long
+                )
+
+                peerConnectionStats[it.id as String] = tmp
+            }
+        }
     }
 }
 
