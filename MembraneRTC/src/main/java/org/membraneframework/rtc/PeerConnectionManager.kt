@@ -16,6 +16,7 @@ import org.membraneframework.rtc.media.TrackBandwidthLimit
 import org.membraneframework.rtc.models.QualityLimitationDurations
 import org.membraneframework.rtc.models.RTCInboundStats
 import org.membraneframework.rtc.models.RTCOutboundStats
+import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.utils.*
 import org.webrtc.*
 import timber.log.Timber
@@ -39,7 +40,7 @@ internal class PeerConnectionManager
 
     private var peerConnection: PeerConnection? = null
     private val peerConnectionMutex = Mutex()
-    private val peerConnectionStats = mutableMapOf<String, Any>()
+    private val peerConnectionStats = mutableMapOf<String, RTCStats>()
 
     private var iceServers: List<PeerConnection.IceServer>? = null
     private var config: PeerConnection.RTCConfiguration? = null
@@ -472,7 +473,7 @@ internal class PeerConnectionManager
         Timber.d("Renegotiation needed")
     }
 
-    fun getStats(): Map<String, Any> {
+    fun getStats(): Map<String, RTCStats> {
         peerConnection?.getStats { rtcStatsReport -> extractRelevantStats(rtcStatsReport) }
         return peerConnectionStats.toMap()
     }

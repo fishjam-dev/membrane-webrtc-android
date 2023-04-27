@@ -9,6 +9,8 @@ data class QualityLimitationDurations(
     val other: Double
 )
 
+open class RTCStats
+
 data class RTCOutboundStats(
     val kind: String? = "",
     val rid: String? = "",
@@ -19,7 +21,7 @@ data class RTCOutboundStats(
     val framesPerSecond: Double? = 0.0,
     val frameWidthHeightRatio: Double? = 0.0,
     val qualityLimitationDurations: QualityLimitationDurations?
-)
+) : RTCStats()
 
 data class RTCInboundStats(
     val kind: String? = "",
@@ -31,4 +33,4 @@ data class RTCInboundStats(
     val frameWidthHeightRatio: Double? = 0.0,
     val framesPerSecond: Double? = 0.0,
     val framesDropped: Long? = 0
-)
+) : RTCStats()

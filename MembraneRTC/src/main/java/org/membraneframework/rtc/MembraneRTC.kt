@@ -5,6 +5,7 @@ import android.content.Intent
 import kotlinx.coroutines.Dispatchers
 import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
 import org.membraneframework.rtc.media.*
+import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.utils.Metadata
 import org.webrtc.Logging
 
@@ -210,7 +211,7 @@ private constructor(
      * Returns current connection stats
      * @return a map containing statistics
      */
-    fun getStats(): Map<String, Any> {
+    fun getStats(): Map<String, RTCStats> {
         return client.getStats()
     }
 
