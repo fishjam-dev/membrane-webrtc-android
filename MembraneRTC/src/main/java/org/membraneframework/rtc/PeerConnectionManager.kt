@@ -469,9 +469,7 @@ internal class PeerConnectionManager
     }
 
     fun getStats(): Map<String, Any> {
-        if (peerConnection != null) {
-            peerConnection!!.getStats { rtcStatsReport -> extractRelevantStats(rtcStatsReport) }
-        }
+        peerConnection?.getStats { rtcStatsReport -> extractRelevantStats(rtcStatsReport) }
         return peerConnectionStats.toMap()
     }
 
