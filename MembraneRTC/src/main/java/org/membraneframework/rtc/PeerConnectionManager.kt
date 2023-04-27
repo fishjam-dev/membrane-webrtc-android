@@ -480,12 +480,6 @@ internal class PeerConnectionManager
 
     private fun extractRelevantStats(rp: RTCStatsReport) {
         rp.statsMap.values.forEach {
-            var width = 0.0
-            var height = 0.0
-            if (it.members.containsKey("frameHeight") && it.members.containsKey("frameWidth")) {
-                width = (it.members["frameWidth"] as Long).toDouble()
-                height = (it.members["frameHeight"] as Long).toDouble()
-            }
             if (it.type == "outbound-rtp") {
                 val durations = it.members["qualityLimitationDurations"] as? Map<*, *>
                 val qualityLimitation = QualityLimitationDurations(
@@ -503,7 +497,8 @@ internal class PeerConnectionManager
                     it.members["packetsSent"] as? Long,
                     it.members["framesEncoded"] as? Long,
                     it.members["framesPerSecond"] as? Double,
-                    width / height,
+                    it.members["frameWidth"] as? Long,
+                    it.members["frameHeight"] as? Long,
                     qualityLimitation
                 )
 
@@ -516,7 +511,8 @@ internal class PeerConnectionManager
                     it.members["packetsReceived"] as? Long,
                     it.members["bytesReceived"] as? BigInteger,
                     it.members["framesReceived"] as? Int,
-                    width / height,
+                    it.members["frameWidth"] as? Long,
+                    it.members["frameHeight"] as? Long,
                     it.members["framesPerSecond"] as? Double,
                     it.members["framesDropped"] as? Long
                 )
