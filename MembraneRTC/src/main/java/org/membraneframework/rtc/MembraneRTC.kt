@@ -206,6 +206,14 @@ private constructor(
         Logging.enableLogToDebugOutput(severity)
     }
 
+    /**
+     * Returns current connection stats
+     * @return a map containing statistics
+     */
+    fun getStats(): Map<String, Any> {
+        return client.getStats()
+    }
+
     companion object {
         /**
          * Creates an instance of <strong>MembraneRTC</strong> client and starts the connecting process.

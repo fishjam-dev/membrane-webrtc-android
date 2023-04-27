@@ -491,4 +491,8 @@ constructor(
 
         listener.onTrackReady(trackContext)
     }
+
+    fun getStats(): Map<String, Any> {
+        return peerConnectionManager.getStats()
+    }
 }

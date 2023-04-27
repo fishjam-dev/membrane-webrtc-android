@@ -35,6 +35,7 @@ internal class PeerConnectionManager
 
     private var peerConnection: PeerConnection? = null
     private val peerConnectionMutex = Mutex()
+    private val peerConnectionStats = mutableMapOf<String, Any>()
 
     private var iceServers: List<PeerConnection.IceServer>? = null
     private var config: PeerConnection.RTCConfiguration? = null
@@ -465,6 +466,36 @@ internal class PeerConnectionManager
 
     override fun onRenegotiationNeeded() {
         Timber.d("Renegotiation needed")
+    }
+
+    fun getStats(): Map<String, Any> {
+        if (peerConnection != null) {
+            peerConnection!!.getStats { rtcStatsReport -> extractRelevantStats(rtcStatsReport) }
+        }
+        return peerConnectionStats.toMap()
+    }
+
+    private fun extractRelevantStats(rp: RTCStatsReport) {
+        rp.statsMap.values.forEach {
+            if (it.type == "outbound-rtp") {
+                val tmp = mutableMapOf<String, Any>()
+                it.members["kind"]?.let { it1 -> tmp.put("kind", it1) }
+                it.members["rid"]?.let { it1 -> tmp.put("rid", it1) }
+                it.members["bytesSent"]?.let { it1 -> tmp.put("bytesSent", it1) }
+                it.members["targetBitrate"]?.let { it1 -> tmp.put("targetBitrate", it1) }
+                it.members["packetsSent"]?.let { it1 -> tmp.put("packetsSent", it1) }
+                it.members["framesEncoded"]?.let { it1 -> tmp.put("framesEncoded", it1) }
+                it.members["framesPerSecond"]?.let { it1 -> tmp.put("framesPerSecond", it1) }
+                if (it.members.containsKey("frameHeight") && it.members.containsKey("frameWidth")) {
+                    val w = (it.members["frameWidth"] as Long).toDouble()
+                    val h = (it.members["frameHeight"] as Long).toDouble()
+                    tmp.put("frameWidthHeightRatio", w / h)
+                }
+                it.members["qualityLimitationDurations"]?.let { it1 -> tmp.put("qualityLimitationDurations", it1) }
+
+                peerConnectionStats[it.id as String] = tmp
+            }
+        }
     }
 }
 
