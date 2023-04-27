@@ -13,9 +13,13 @@ import org.membraneframework.rtc.media.LocalScreencastTrack
 import org.membraneframework.rtc.media.LocalTrack
 import org.membraneframework.rtc.media.LocalVideoTrack
 import org.membraneframework.rtc.media.TrackBandwidthLimit
+import org.membraneframework.rtc.models.QualityLimitationDurations
+import org.membraneframework.rtc.models.RTCInboundStats
+import org.membraneframework.rtc.models.RTCOutboundStats
 import org.membraneframework.rtc.utils.*
 import org.webrtc.*
 import timber.log.Timber
+import java.math.BigInteger
 import java.util.*
 import kotlin.math.pow
 
@@ -475,21 +479,46 @@ internal class PeerConnectionManager
 
     private fun extractRelevantStats(rp: RTCStatsReport) {
         rp.statsMap.values.forEach {
+            var width = 0.0
+            var height = 0.0
+            if (it.members.containsKey("frameHeight") && it.members.containsKey("frameWidth")) {
+                width = (it.members["frameWidth"] as Long).toDouble()
+                height = (it.members["frameHeight"] as Long).toDouble()
+            }
             if (it.type == "outbound-rtp") {
-                val tmp = mutableMapOf<String, Any>()
-                it.members["kind"]?.let { it1 -> tmp.put("kind", it1) }
-                it.members["rid"]?.let { it1 -> tmp.put("rid", it1) }
-                it.members["bytesSent"]?.let { it1 -> tmp.put("bytesSent", it1) }
-                it.members["targetBitrate"]?.let { it1 -> tmp.put("targetBitrate", it1) }
-                it.members["packetsSent"]?.let { it1 -> tmp.put("packetsSent", it1) }
-                it.members["framesEncoded"]?.let { it1 -> tmp.put("framesEncoded", it1) }
-                it.members["framesPerSecond"]?.let { it1 -> tmp.put("framesPerSecond", it1) }
-                if (it.members.containsKey("frameHeight") && it.members.containsKey("frameWidth")) {
-                    val w = (it.members["frameWidth"] as Long).toDouble()
-                    val h = (it.members["frameHeight"] as Long).toDouble()
-                    tmp.put("frameWidthHeightRatio", w / h)
-                }
-                it.members["qualityLimitationDurations"]?.let { it1 -> tmp.put("qualityLimitationDurations", it1) }
+                val durations = it.members["qualityLimitationDurations"] as? Map<*, *>
+                val qualityLimitation = QualityLimitationDurations(
+                    durations?.get("bandwidth") as? Double ?: 0.0,
+                    durations?.get("cpu") as? Double ?: 0.0,
+                    durations?.get("none") as? Double ?: 0.0,
+                    durations?.get("other") as? Double ?: 0.0
+                )
+
+                val tmp = RTCOutboundStats(
+                    it.members["kind"] as? String,
+                    it.members["rid"] as? String,
+                    it.members["bytesSent"] as? BigInteger,
+                    it.members["targetBitrate"] as? Double,
+                    it.members["packetsSent"] as? Long,
+                    it.members["framesEncoded"] as? Long,
+                    it.members["framesPerSecond"] as? Double,
+                    width / height,
+                    qualityLimitation
+                )
+
+                peerConnectionStats[it.id as String] = tmp
+            } else if (it.type == "inbound-rtp") {
+                val tmp = RTCInboundStats(
+                    it.members["kind"] as? String,
+                    it.members["jitter"] as? Double,
+                    it.members["packetsLost"] as? Int,
+                    it.members["packetsReceived"] as? Long,
+                    it.members["bytesReceived"] as? BigInteger,
+                    it.members["framesReceived"] as? Int,
+                    width / height,
+                    it.members["framesPerSecond"] as? Double,
+                    it.members["framesDropped"] as? Long
+                )
 
                 peerConnectionStats[it.id as String] = tmp
             }
