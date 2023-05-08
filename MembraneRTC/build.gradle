@@ -55,7 +55,7 @@ dependencies {
     implementation deps.timber
     implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'com.github.dsrees:JavaPhoenixClient:1.0.0'
-    api 'com.github.webrtc-sdk:android:104.5112.08'
+    api 'io.github.webrtc-sdk:android:104.5112.09'
     implementation 'androidx.core:core:1.8.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutines}"
