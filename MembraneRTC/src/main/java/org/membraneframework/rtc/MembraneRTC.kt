@@ -7,6 +7,7 @@ import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.utils.Metadata
+import org.membraneframework.rtc.utils.SerializedMediaEvent
 import org.webrtc.Logging
 
 /**
@@ -37,14 +38,15 @@ class MembraneRTC
 private constructor(
     private var client: InternalMembraneRTC
 ) {
-
     /**
-     * Starts the join process.
+     * Tries to join the RTC Engine. If user is accepted then onJoinSuccess will be called.
+     * In other case {@link Callbacks.onJoinError} is invoked.
      * <p>
-     * Should be called only when a listener received <strong>onConnected</strong> message.
+     * @param peerMetadata - Any information that other peers will receive in onPeerJoined
+     * after accepting this peer
      */
-    fun join() {
-        client.join()
+    fun join(peerMetadata: Metadata) {
+        client.join(peerMetadata)
     }
 
     /**
@@ -54,6 +56,17 @@ private constructor(
      */
     fun disconnect() {
         client.disconnect()
+    }
+
+    /**
+     * Feeds media event received from RTC Engine to MembraneWebRTC.
+     * This function should be called whenever some media event from RTC Engine
+     * was received and can result in MembraneWebRTC generating some other
+     * media events.
+     * @param mediaEvent - String data received over custom signalling layer.
+     */
+    fun receiveMediaEvent(mediaEvent: SerializedMediaEvent) {
+        client.receiveMediaEvent(mediaEvent)
     }
 
     /**
@@ -217,14 +230,14 @@ private constructor(
 
     companion object {
         /**
-         * Creates an instance of <strong>MembraneRTC</strong> client and starts the connecting process.
+         * Creates an instance of <strong>MembraneRTC</strong> client.
          *
          * @param appContext the context of the current application
-         * @param options a set of options defining parameters such as event transport or connect metadata
+         * @param options a set of options defining parameters such as encoder parameters
          * @param listener a listener that will receive all notifications emitted by the <strong>MembraneRTC</strong>
          * @return an instance of the client in connecting state
          */
-        fun connect(appContext: Context, options: ConnectOptions, listener: MembraneRTCListener): MembraneRTC {
+        fun create(appContext: Context, options: CreateOptions, listener: MembraneRTCListener): MembraneRTC {
             val ctx = appContext.applicationContext
 
             val component = DaggerMembraneRTCComponent
@@ -234,8 +247,6 @@ private constructor(
             val client = component
                 .membraneRTCFactory()
                 .create(options, listener, Dispatchers.Default)
-
-            client.connect()
 
             return MembraneRTC(client)
         }

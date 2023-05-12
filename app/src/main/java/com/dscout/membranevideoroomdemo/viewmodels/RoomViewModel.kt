@@ -13,13 +13,16 @@ import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.transport.PhoenixTransport
+import org.membraneframework.rtc.transport.PhoenixTransportError
+import org.membraneframework.rtc.transport.PhoenixTransportListener
+import org.membraneframework.rtc.utils.SerializedMediaEvent
 import timber.log.Timber
 import java.util.*
 
 class RoomViewModel(
     val url: String,
     application: Application
-) : AndroidViewModel(application), MembraneRTCListener {
+) : AndroidViewModel(application), MembraneRTCListener, PhoenixTransportListener {
     // media tracks
     var localAudioTrack: LocalAudioTrack? = null
     var localVideoTrack: LocalVideoTrack? = null
@@ -45,6 +48,8 @@ class RoomViewModel(
     private val globalToLocalTrackId = HashMap<String, String>()
     private val params = mapOf<String, Any>("token" to "mocktoken")
 
+    private lateinit var transport: PhoenixTransport
+
     val videoSimulcastConfig = MutableStateFlow(
         SimulcastConfig(
             enabled = true,
@@ -67,30 +72,45 @@ class RoomViewModel(
             // disconnect from the current view
             room.value?.disconnect()
 
-            room.value = MembraneRTC.connect(
+            val transport = PhoenixTransport(
+                url,
+                "room:$roomName",
+                Dispatchers.IO,
+                params,
+                mapOf("isSimulcastOn" to true)
+            )
+
+            try {
+                transport.connect(this@RoomViewModel)
+            } catch (e: Exception) {
+                Timber.i(e, "Failed to connect")
+
+                errorMessage.value = "Encountered an error, go back and try again..."
+                return@launch
+            }
+
+            this@RoomViewModel.transport = transport
+
+            room.value = MembraneRTC.create(
                 appContext = getApplication(),
-                options = ConnectOptions(
-                    transport = PhoenixTransport(
-                        url,
-                        "room:$roomName",
-                        Dispatchers.IO,
-                        params,
-                        mapOf("isSimulcastOn" to true)
-                    ),
-                    config = mapOf("displayName" to displayName),
+                options = CreateOptions(
                     encoderOptions = EncoderOptions(
                         encoderType = EncoderType.HARDWARE
                     )
                 ),
                 listener = this@RoomViewModel
             )
+
+            setupTracksAndJoinRoom()
         }
     }
 
     fun disconnect() {
-        room.value?.disconnect()
-
-        room.value = null
+        viewModelScope.launch {
+            room.value?.disconnect()
+            room.value = null
+            transport.disconnect()
+        }
     }
 
     fun focusVideo(participantId: String) {
@@ -182,8 +202,13 @@ class RoomViewModel(
         localVideoTrack?.flipCamera()
     }
 
-    // MembraneRTCListener callbacks
-    override fun onConnected() {
+    override fun onSendMediaEvent(event: SerializedMediaEvent) {
+        viewModelScope.launch {
+            this@RoomViewModel.transport.send(event)
+        }
+    }
+
+    private fun setupTracksAndJoinRoom() {
         room.value?.let {
             localAudioTrack = it.createAudioTrack(
                 mapOf(
@@ -215,7 +240,7 @@ class RoomViewModel(
                 )
             )
 
-            it.join()
+            it.join(mapOf("displayName" to (localDisplayName ?: "")))
 
             isCameraOn.value = localVideoTrack?.enabled() ?: false
             isMicrophoneOn.value = localAudioTrack?.enabled() ?: false
@@ -234,6 +259,7 @@ class RoomViewModel(
         }
     }
 
+    // MembraneRTCListener callbacks
     override fun onJoinSuccess(peerID: String, peersInRoom: List<Peer>) {
         Timber.i("Successfully join the room")
 
@@ -403,11 +429,6 @@ class RoomViewModel(
         Timber.i("Peer has updated $peer")
     }
 
-    override fun onError(error: MembraneRTCError) {
-        Timber.e("Encountered an error $error")
-        errorMessage.value = "Encountered an error, go back and try again..."
-    }
-
     fun startScreencast(mediaProjectionPermission: Intent) {
         if (localScreencastTrack != null) return
 
@@ -479,5 +500,17 @@ class RoomViewModel(
 
     fun toggleScreencastTrackEncoding(encoding: TrackEncoding) {
         localScreencastTrack?.id()?.let { toggleTrackEncoding(screencastSimulcastConfig, it, encoding) }
+    }
+
+    override fun onEvent(event: SerializedMediaEvent) {
+        room.value?.receiveMediaEvent(event)
+    }
+
+    override fun onError(error: PhoenixTransportError) {
+        Timber.e("Encountered an error $error")
+        errorMessage.value = "Encountered an error, go back and try again..."
+    }
+
+    override fun onClose() {
     }
 }
