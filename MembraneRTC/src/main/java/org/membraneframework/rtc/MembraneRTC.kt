@@ -233,11 +233,15 @@ private constructor(
          * Creates an instance of <strong>MembraneRTC</strong> client.
          *
          * @param appContext the context of the current application
-         * @param options a set of options defining parameters such as encoder parameters
          * @param listener a listener that will receive all notifications emitted by the <strong>MembraneRTC</strong>
+         * @param options a set of options defining parameters such as encoder parameters
          * @return an instance of the client in connecting state
          */
-        fun create(appContext: Context, options: CreateOptions, listener: MembraneRTCListener): MembraneRTC {
+        fun create(
+            appContext: Context,
+            listener: MembraneRTCListener,
+            options: CreateOptions = CreateOptions()
+        ): MembraneRTC {
             val ctx = appContext.applicationContext
 
             val component = DaggerMembraneRTCComponent
