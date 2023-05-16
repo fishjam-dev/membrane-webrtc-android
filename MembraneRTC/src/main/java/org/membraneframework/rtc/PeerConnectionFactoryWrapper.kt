@@ -7,11 +7,10 @@ import dagger.assisted.AssistedInject
 import org.membraneframework.rtc.media.SimulcastVideoEncoderFactoryWrapper
 import org.webrtc.*
 import org.webrtc.audio.AudioDeviceModule
-import java.util.*
 
 internal class PeerConnectionFactoryWrapper
 @AssistedInject constructor(
-    @Assisted private val connectOptions: ConnectOptions,
+    @Assisted private val createOptions: CreateOptions,
     audioDeviceModule: AudioDeviceModule,
     eglBase: EglBase,
     appContext: Context
@@ -19,7 +18,7 @@ internal class PeerConnectionFactoryWrapper
     @AssistedFactory
     interface PeerConnectionFactoryWrapperFactory {
         fun create(
-            connectOptions: ConnectOptions
+            createOptions: CreateOptions
         ): PeerConnectionFactoryWrapper
     }
 
@@ -34,7 +33,7 @@ internal class PeerConnectionFactoryWrapper
             PeerConnectionFactory.builder().setAudioDeviceModule(audioDeviceModule).setVideoEncoderFactory(
                 SimulcastVideoEncoderFactoryWrapper(
                     eglBase.eglBaseContext,
-                    connectOptions.encoderOptions
+                    createOptions.encoderOptions
                 )
             ).setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext)).createPeerConnectionFactory()
     }

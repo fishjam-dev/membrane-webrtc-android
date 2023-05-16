@@ -2,11 +2,12 @@ package org.membraneframework.rtc
 
 import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.TrackContext
+import org.membraneframework.rtc.utils.SerializedMediaEvent
 import timber.log.Timber
 
 interface MembraneRTCListener {
-    // / Callback invoked when client has successfully connected via transport layer.
-    fun onConnected()
+    // Called each time MembraneWebRTC need to send some data to the server.
+    fun onSendMediaEvent(event: SerializedMediaEvent)
 
     // /Callback invoked when the client has been approved to participate in media exchange.
     fun onJoinSuccess(peerID: String, peersInRoom: List<Peer>)
@@ -42,9 +43,6 @@ interface MembraneRTCListener {
             "Track encoding changed $trackId -> $encoding"
         )
     }
-
-    // /Callback invoked when an errors happens.
-    fun onError(error: MembraneRTCError)
 
     // Callback invoked every time a local peer is removed by the server
     fun onRemoved(reason: String) { Timber.e("Peer removed") }

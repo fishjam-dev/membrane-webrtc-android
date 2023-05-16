@@ -1,17 +1,39 @@
 package org.membraneframework.rtc.transport
 
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
-import org.membraneframework.rtc.events.ReceivableEvent
-import org.membraneframework.rtc.events.SendableEvent
-import org.membraneframework.rtc.events.serializeToMap
 import org.membraneframework.rtc.utils.ClosableCoroutineScope
+import org.membraneframework.rtc.utils.SerializedMediaEvent
 import org.membraneframework.rtc.utils.SocketChannelParams
 import org.membraneframework.rtc.utils.SocketConnectionParams
 import org.phoenixframework.Channel
 import org.phoenixframework.Socket
 import timber.log.Timber
+
+sealed class PhoenixTransportError : Exception() {
+    data class Unauthorized(val reason: String) : PhoenixTransportError()
+    data class ConnectionError(val reason: String) : PhoenixTransportError()
+    data class Unexpected(val reason: String) : PhoenixTransportError()
+
+    override fun toString(): String {
+        return when (this) {
+            is Unauthorized ->
+                "User is unauthorized to use the transport: ${this.reason}"
+            is ConnectionError ->
+                "Failed to connect with the remote side: ${this.reason}"
+            is Unexpected ->
+                "Encountered unexpected error: ${this.reason}"
+        }
+    }
+}
+
+/**
+ * An interface defining a listener to a <strong>PhoenixTransport</strong>.
+ */
+interface PhoenixTransportListener {
+    fun onEvent(event: SerializedMediaEvent)
+    fun onError(error: PhoenixTransportError)
+    fun onClose()
+}
 
 class PhoenixTransport constructor(
     private val url: String,
@@ -19,18 +41,15 @@ class PhoenixTransport constructor(
     private val ioDispatcher: CoroutineDispatcher,
     private val params: SocketConnectionParams? = emptyMap(),
     private val socketChannelParams: SocketChannelParams = emptyMap()
-) : EventTransport {
-
+) {
     private lateinit var coroutineScope: CoroutineScope
     private var socket: Socket? = null
     private var channel: Channel? = null
-    private var listener: EventTransportListener? = null
-
-    private val gson = GsonBuilder().create()
+    private var listener: PhoenixTransportListener? = null
 
     private var joinContinuation: CancellableContinuation<Unit>? = null
 
-    override suspend fun connect(listener: EventTransportListener) {
+    suspend fun connect(listener: PhoenixTransportListener) {
         Timber.i("Starting connection...")
         this.listener = listener
 
@@ -47,11 +66,11 @@ class PhoenixTransport constructor(
             }
 
             val errorRef = socket!!.onError { error, _ ->
-                continuation.cancel(EventTransportError.ConnectionError(error.toString()))
+                continuation.cancel(PhoenixTransportError.ConnectionError(error.toString()))
             }
 
             val closeRef = socket!!.onClose {
-                continuation.cancel(EventTransportError.ConnectionError("closed"))
+                continuation.cancel(PhoenixTransportError.ConnectionError("closed"))
             }
 
             socketRefs += openRef
@@ -62,7 +81,7 @@ class PhoenixTransport constructor(
         socket!!.off(socketRefs.toList())
 
         socket!!.onError { error, _ ->
-            this.listener?.onError(EventTransportError.ConnectionError(error.toString()))
+            this.listener?.onError(PhoenixTransportError.ConnectionError(error.toString()))
         }
 
         socket!!.onClose {
@@ -77,25 +96,13 @@ class PhoenixTransport constructor(
             }
             ?.receive("error") { _ ->
                 joinContinuation?.resumeWith(
-                    Result.failure(EventTransportError.Unauthorized("couldn't join phoenix channel"))
+                    Result.failure(PhoenixTransportError.Unauthorized("couldn't join phoenix channel"))
                 )
             }
 
         channel?.on("mediaEvent") { message ->
-            try {
-                val data = message.payload["data"] as String
-                val type = object : TypeToken<Map<String, Any?>>() {}.type
-
-                val rawMessage: Map<String, Any?> = gson.fromJson(data, type)
-
-                ReceivableEvent.decode(rawMessage)?.let {
-                    listener.onEvent(it)
-                } ?: run {
-                    Timber.d("Failed to decode event $rawMessage")
-                }
-            } catch (e: Exception) {
-                Timber.e(e)
-            }
+            val data = message.payload["data"] as String
+            listener.onEvent(data)
         }
 
         return suspendCancellableCoroutine {
@@ -103,7 +110,7 @@ class PhoenixTransport constructor(
         }
     }
 
-    override suspend fun disconnect() {
+    suspend fun disconnect() {
         if (channel != null) {
             channel
                 ?.leave()
@@ -115,13 +122,12 @@ class PhoenixTransport constructor(
         }
     }
 
-    override suspend fun send(event: SendableEvent) {
+    suspend fun send(event: SerializedMediaEvent) {
         coroutineScope.async {
             val payload = mapOf(
-                "data" to gson.toJson(event.serializeToMap())
+                "data" to event
             )
-
-            channel ?.push("mediaEvent", payload)
+            channel?.push("mediaEvent", payload)
         }
     }
 }

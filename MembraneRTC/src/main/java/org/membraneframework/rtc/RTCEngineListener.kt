@@ -2,10 +2,11 @@ package org.membraneframework.rtc
 
 import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.models.Peer
-import org.membraneframework.rtc.transport.EventTransportError
 import org.membraneframework.rtc.utils.Metadata
+import org.membraneframework.rtc.utils.SerializedMediaEvent
 
 internal interface RTCEngineListener {
+    fun onSendMediaEvent(event: SerializedMediaEvent)
     fun onPeerAccepted(peerId: String, peersInRoom: List<Peer>)
     fun onPeerDenied()
     fun onPeerJoined(peer: Peer)
@@ -21,6 +22,4 @@ internal interface RTCEngineListener {
     fun onRemoved(peerId: String, reason: String)
     fun onVadNotification(trackId: String, status: String)
     fun onBandwidthEstimation(estimation: Long)
-    fun onError(error: EventTransportError)
-    fun onClose()
 }
