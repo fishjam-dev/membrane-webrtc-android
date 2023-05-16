@@ -15,9 +15,9 @@ import org.membraneframework.rtc.models.Peer
 import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.models.VadStatus
-import org.membraneframework.rtc.transport.EventTransportError
 import org.membraneframework.rtc.utils.ClosableCoroutineScope
 import org.membraneframework.rtc.utils.Metadata
+import org.membraneframework.rtc.utils.SerializedMediaEvent
 import org.membraneframework.rtc.utils.TimberDebugTree
 import org.webrtc.*
 import org.webrtc.AudioTrack
@@ -29,7 +29,7 @@ internal class InternalMembraneRTC
 @AssistedInject
 constructor(
     @Assisted
-    private val connectOptions: ConnectOptions,
+    private val createOptions: CreateOptions,
     @Assisted
     private val listener: MembraneRTCListener,
     @Assisted
@@ -40,12 +40,12 @@ constructor(
     peerConnectionManagerFactory: PeerConnectionManager.PeerConnectionManagerFactory,
     peerConnectionFactoryWrapperFactory: PeerConnectionFactoryWrapper.PeerConnectionFactoryWrapperFactory
 ) : RTCEngineListener, PeerConnectionListener {
-    private val rtcEngineCommunication = rtcEngineCommunicationFactory.create(connectOptions.transport, this)
-    private val peerConnectionFactoryWrapper = peerConnectionFactoryWrapperFactory.create(connectOptions)
+    private val rtcEngineCommunication = rtcEngineCommunicationFactory.create(this)
+    private val peerConnectionFactoryWrapper = peerConnectionFactoryWrapperFactory.create(createOptions)
     private val peerConnectionManager = peerConnectionManagerFactory.create(this, peerConnectionFactoryWrapper)
 
     private var localPeer: Peer =
-        Peer(id = "", metadata = connectOptions.config, trackIdToMetadata = mapOf())
+        Peer(id = "", metadata = mapOf(), trackIdToMetadata = mapOf())
 
     // mapping from peer's id to the peer himself
     private val remotePeers = HashMap<String, Peer>()
@@ -68,28 +68,14 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            connectOptions: ConnectOptions,
+            createOptions: CreateOptions,
             listener: MembraneRTCListener,
             defaultDispatcher: CoroutineDispatcher
         ): InternalMembraneRTC
     }
 
-    fun connect() {
-        coroutineScope.launch {
-            try {
-                rtcEngineCommunication.connect()
-                listener.onConnected()
-            } catch (e: Exception) {
-                Timber.i(e, "Failed to connect")
-
-                listener.onError(MembraneRTCError.Transport("Failed to connect"))
-            }
-        }
-    }
-
     fun disconnect() {
         coroutineScope.launch {
-            rtcEngineCommunication.disconnect()
             localTracksMutex.withLock {
                 localTracks.forEach { it.stop() }
             }
@@ -97,9 +83,14 @@ constructor(
         }
     }
 
-    fun join() {
+    fun receiveMediaEvent(event: SerializedMediaEvent) {
+        rtcEngineCommunication.onEvent(event)
+    }
+
+    fun join(peerMetadata: Metadata) {
         coroutineScope.launch {
-            rtcEngineCommunication.join(localPeer.metadata)
+            localPeer = localPeer.copy(metadata = peerMetadata)
+            rtcEngineCommunication.join(peerMetadata)
         }
     }
 
@@ -214,6 +205,10 @@ constructor(
             rtcEngineCommunication.updateTrackMetadata(trackId, trackMetadata)
             localPeer = localPeer.withTrack(trackId, trackMetadata)
         }
+    }
+
+    override fun onSendMediaEvent(event: SerializedMediaEvent) {
+        listener.onSendMediaEvent(event)
     }
 
     override fun onPeerAccepted(peerId: String, peersInRoom: List<Peer>) {
@@ -435,18 +430,6 @@ constructor(
 
     override fun onBandwidthEstimation(estimation: Long) {
         listener.onBandwidthEstimationChanged(estimation)
-    }
-
-    override fun onError(error: EventTransportError) {
-        if (error is EventTransportError.ConnectionError) {
-            listener.onError(MembraneRTCError.Transport(error.reason))
-        } else {
-            listener.onError(MembraneRTCError.Transport(error.message ?: "unknown transport message"))
-        }
-    }
-
-    override fun onClose() {
-        Timber.i("Transport has been closed")
     }
 
     fun setTargetTrackEncoding(trackId: String, encoding: TrackEncoding) {
