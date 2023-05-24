@@ -103,7 +103,7 @@ private constructor(
         videoParameters: VideoParameters,
         metadata: Metadata,
         onEnd: (() -> Unit)? = null
-    ): LocalScreencastTrack? {
+    ): LocalScreencastTrack {
         return client.createScreencastTrack(mediaProjectionPermission, videoParameters, metadata, onEnd)
     }
 

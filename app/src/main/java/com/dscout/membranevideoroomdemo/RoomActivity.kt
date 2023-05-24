@@ -38,7 +38,6 @@ import com.dscout.membranevideoroomdemo.viewmodels.viewModelByFactory
 import kotlinx.android.parcel.Parcelize
 import org.membraneframework.rtc.TrackEncoding
 import org.membraneframework.rtc.models.VadStatus
-import timber.log.Timber
 
 class RoomActivity : AppCompatActivity() {
     private val viewModel: RoomViewModel by viewModelByFactory {
@@ -56,12 +55,6 @@ class RoomActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val forest = Timber.forest()
-        forest.none {
-            true
-        }
-        Timber.plant(Timber.DebugTree())
 
         val (room, displayName) = intent.getParcelableExtra<BundleArgs>(ARGS)
             ?: throw NullPointerException("Failed to decode intent's parcelable")
