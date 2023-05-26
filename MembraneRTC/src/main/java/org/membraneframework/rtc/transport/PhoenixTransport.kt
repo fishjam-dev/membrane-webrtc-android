@@ -82,21 +82,19 @@ class PhoenixTransport constructor(
             }
 
         channel?.on("mediaEvent") { message ->
-            coroutineScope.async {
-                try {
-                    val data = message.payload["data"] as String
-                    val type = object : TypeToken<Map<String, Any?>>() {}.type
+            try {
+                val data = message.payload["data"] as String
+                val type = object : TypeToken<Map<String, Any?>>() {}.type
 
-                    val rawMessage: Map<String, Any?> = gson.fromJson(data, type)
+                val rawMessage: Map<String, Any?> = gson.fromJson(data, type)
 
-                    ReceivableEvent.decode(rawMessage)?.let {
-                        listener.onEvent(it)
-                    } ?: run {
-                        Timber.d("Failed to decode event $rawMessage")
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e)
+                ReceivableEvent.decode(rawMessage)?.let {
+                    listener.onEvent(it)
+                } ?: run {
+                    Timber.d("Failed to decode event $rawMessage")
                 }
+            } catch (e: Exception) {
+                Timber.e(e)
             }
         }
 
