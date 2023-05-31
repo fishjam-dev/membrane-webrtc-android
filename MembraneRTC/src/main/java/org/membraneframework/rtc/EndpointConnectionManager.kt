@@ -379,7 +379,10 @@ internal class EndpointConnectionManager
             }
             val params = sender.parameters
             val encoding = params?.encodings?.find { it.rid == trackEncoding.rid } ?: run {
-                Timber.e("setTrackEncoding: Invalid encoding $trackEncoding, no such encoding found in endpoint connection")
+                Timber.e(
+                    "setTrackEncoding: Invalid encoding $trackEncoding," +
+                        "no such encoding found in endpoint connection"
+                )
                 return
             }
             encoding.active = enabled
