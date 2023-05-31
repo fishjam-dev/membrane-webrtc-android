@@ -18,30 +18,30 @@ import org.membraneframework.rtc.utils.setLocalDescription
 import org.webrtc.*
 import org.webrtc.RtpParameters.Encoding
 
-class PeerConnectionManagerTest {
-    private lateinit var manager: PeerConnectionManager
-    private lateinit var peerConnectionMock: PeerConnection
+class EndpointConnectionManagerTest {
+    private lateinit var manager: EndpointConnectionManager
+    private lateinit var endpointConnectionMock: EndpointConnection
 
     @Before
     fun createMocks() {
-        val peerConnectionListenerMock = mockk<PeerConnectionListener>(relaxed = true)
-        val peerConnectionFactoryMock = mockk<PeerConnectionFactoryWrapper>(relaxed = true)
+        val endpointConnectionListenerMock = mockk<EndpointConnectionListener>(relaxed = true)
+        val endpointConnectionFactoryMock = mockk<EndpointConnectionFactoryWrapper>(relaxed = true)
 
         mockkStatic("org.membraneframework.rtc.utils.SuspendableSdpObserverKt")
-        mockkStatic("org.membraneframework.rtc.utils.PeerConnectionUtilsKt")
+        mockkStatic("org.membraneframework.rtc.utils.EndpointConnectionUtilsKt")
 
-        peerConnectionMock = mockk(relaxed = true)
+        endpointConnectionMock = mockk(relaxed = true)
 
         coEvery {
-            peerConnectionMock.createOffer(any<MediaConstraints>())
+            endpointConnectionMock.createOffer(any<MediaConstraints>())
         } returns Result.success(SessionDescription(SessionDescription.Type.OFFER, "test_description"))
         coEvery {
-            peerConnectionMock.setLocalDescription(any<SessionDescription>())
+            endpointConnectionMock.setLocalDescription(any<SessionDescription>())
         } returns Result.success(Unit)
 
-        every { peerConnectionFactoryMock.createPeerConnection(any(), any()) } returns peerConnectionMock
+        every { endpointConnectionFactoryMock.createEndpointConnection(any(), any()) } returns endpointConnectionMock
 
-        manager = PeerConnectionManager(peerConnectionListenerMock, peerConnectionFactoryMock)
+        manager = EndpointConnectionManager(endpointConnectionListenerMock, endpointConnectionFactoryMock)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -60,7 +60,7 @@ class PeerConnectionManagerTest {
         manager.getSdpOffer(emptyList(), emptyMap(), listOf(audioTrack))
 
         verify(exactly = 1) {
-            peerConnectionMock.addTransceiver(
+            endpointConnectionMock.addTransceiver(
                 audioTrack.mediaTrack,
                 eq(RtpTransceiver.RtpTransceiverDirection.SEND_ONLY),
                 match { it.size == 1 },
@@ -89,7 +89,7 @@ class PeerConnectionManagerTest {
         manager.getSdpOffer(emptyList(), emptyMap(), listOf(videoTrack))
 
         verify(exactly = 1) {
-            peerConnectionMock.addTransceiver(
+            endpointConnectionMock.addTransceiver(
                 videoTrack.rtcTrack(),
                 eq(RtpTransceiver.RtpTransceiverDirection.SEND_ONLY),
                 match { it.size == 1 },
@@ -125,7 +125,7 @@ class PeerConnectionManagerTest {
         manager.getSdpOffer(emptyList(), emptyMap(), listOf(videoTrack))
 
         verify(exactly = 1) {
-            peerConnectionMock.addTransceiver(
+            endpointConnectionMock.addTransceiver(
                 videoTrack.rtcTrack(),
                 eq(RtpTransceiver.RtpTransceiverDirection.SEND_ONLY),
                 any(),
@@ -155,7 +155,7 @@ class PeerConnectionManagerTest {
         val m = Encoding("m", true, 2.0)
         val l = Encoding("l", true, 4.0)
 
-        every { peerConnectionMock.senders } returns listOf(
+        every { endpointConnectionMock.senders } returns listOf(
             mockk(relaxed = true) {
                 every { parameters } returns mockk(relaxed = true) {
                     every { track()?.id() } returns "dummy_track"
