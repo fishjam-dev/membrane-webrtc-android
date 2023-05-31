@@ -42,7 +42,7 @@ private constructor(
      * Tries to connect the RTC Engine. If user is accepted then onJoinSuccess will be called.
      * In other case {@link Callbacks.onJoinError} is invoked.
      * <p>
-     * @param endpointMetadata - Any information that other endpoints will receive in onEndpointJoined
+     * @param endpointMetadata - Any information that other endpoints will receive in onEndpointAdded
      * after accepting this endpoint
      */
     fun connect(endpointMetadata: Metadata) {

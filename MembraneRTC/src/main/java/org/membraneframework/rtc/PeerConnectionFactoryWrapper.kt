@@ -8,7 +8,7 @@ import org.membraneframework.rtc.media.SimulcastVideoEncoderFactoryWrapper
 import org.webrtc.*
 import org.webrtc.audio.AudioDeviceModule
 
-internal class EndpointConnectionFactoryWrapper
+internal class PeerConnectionFactoryWrapper
 @AssistedInject constructor(
     @Assisted private val createOptions: CreateOptions,
     audioDeviceModule: AudioDeviceModule,
@@ -16,20 +16,20 @@ internal class EndpointConnectionFactoryWrapper
     appContext: Context
 ) {
     @AssistedFactory
-    interface EndpointConnectionFactoryWrapperFactory {
+    interface PeerConnectionFactoryWrapperFactory {
         fun create(
             createOptions: CreateOptions
-        ): EndpointConnectionFactoryWrapper
+        ): PeerConnectionFactoryWrapper
     }
 
-    val endpointConnectionFactory: PeerConnectionFactory
+    val peerConnectionFactory: PeerConnectionFactory
 
     init {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(appContext).createInitializationOptions()
         )
 
-        endpointConnectionFactory =
+        peerConnectionFactory =
             PeerConnectionFactory.builder().setAudioDeviceModule(audioDeviceModule).setVideoEncoderFactory(
                 SimulcastVideoEncoderFactoryWrapper(
                     eglBase.eglBaseContext,
@@ -38,10 +38,10 @@ internal class EndpointConnectionFactoryWrapper
             ).setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext)).createPeerConnectionFactory()
     }
 
-    fun createEndpointConnection(
+    fun createPeerConnection(
         rtcConfig: PeerConnection.RTCConfiguration,
         observer: PeerConnection.Observer
     ): PeerConnection? {
-        return endpointConnectionFactory.createPeerConnection(rtcConfig, observer)
+        return peerConnectionFactory.createPeerConnection(rtcConfig, observer)
     }
 }

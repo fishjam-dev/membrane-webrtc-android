@@ -19,13 +19,13 @@ import org.webrtc.*
 import org.webrtc.RtpParameters.Encoding
 
 class EndpointConnectionManagerTest {
-    private lateinit var manager: EndpointConnectionManager
+    private lateinit var manager: PeerConnectionManager
     private lateinit var endpointConnectionMock: PeerConnection
 
     @Before
     fun createMocks() {
-        val endpointConnectionListenerMock = mockk<EndpointConnectionListener>(relaxed = true)
-        val endpointConnectionFactoryMock = mockk<EndpointConnectionFactoryWrapper>(relaxed = true)
+        val endpointConnectionListenerMock = mockk<PeerConnectionListener>(relaxed = true)
+        val endpointConnectionFactoryMock = mockk<PeerConnectionFactoryWrapper>(relaxed = true)
 
         mockkStatic("org.membraneframework.rtc.utils.SuspendableSdpObserverKt")
         mockkStatic("org.membraneframework.rtc.utils.EndpointConnectionUtilsKt")
@@ -39,9 +39,9 @@ class EndpointConnectionManagerTest {
             endpointConnectionMock.setLocalDescription(any<SessionDescription>())
         } returns Result.success(Unit)
 
-        every { endpointConnectionFactoryMock.createEndpointConnection(any(), any()) } returns endpointConnectionMock
+        every { endpointConnectionFactoryMock.createPeerConnection(any(), any()) } returns endpointConnectionMock
 
-        manager = EndpointConnectionManager(endpointConnectionListenerMock, endpointConnectionFactoryMock)
+        manager = PeerConnectionManager(endpointConnectionListenerMock, endpointConnectionFactoryMock)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -407,7 +407,7 @@ class RoomViewModel(
         Timber.i("Track has been updated $ctx")
     }
 
-    override fun onEndpointJoined(endpoint: Endpoint) {
+    override fun onEndpointAdded(endpoint: Endpoint) {
         mutableParticipants[endpoint.id] = Participant(
             id = endpoint.id,
             displayName = endpoint.metadata["displayName"] as? String ?: "UNKNOWN"

@@ -37,14 +37,14 @@ constructor(
     private val eglBase: EglBase,
     private val context: Context,
     rtcEngineCommunicationFactory: RTCEngineCommunication.RTCEngineCommunicationFactory,
-    endpointConnectionManagerFactory: EndpointConnectionManager.EndpointConnectionManagerFactory,
-    endpointConnectionFactoryWrapperFactory: EndpointConnectionFactoryWrapper.EndpointConnectionFactoryWrapperFactory
-) : RTCEngineListener, EndpointConnectionListener {
+    peerConnectionManagerFactory: PeerConnectionManager.PeerConnectionManagerFactory,
+    peerConnectionFactoryWrapperFactory: PeerConnectionFactoryWrapper.PeerConnectionFactoryWrapperFactory
+) : RTCEngineListener, PeerConnectionListener {
     private val rtcEngineCommunication = rtcEngineCommunicationFactory.create(this)
-    private val endpointConnectionFactoryWrapper = endpointConnectionFactoryWrapperFactory.create(createOptions)
-    private val endpointConnectionManager = endpointConnectionManagerFactory.create(
+    private val peerConnectionFactoryWrapper = peerConnectionFactoryWrapperFactory.create(createOptions)
+    private val endpointConnectionManager = peerConnectionManagerFactory.create(
         this,
-        endpointConnectionFactoryWrapper
+        peerConnectionFactoryWrapper
     )
 
     private var localEndpoint: Endpoint =
@@ -104,7 +104,7 @@ constructor(
     ): LocalVideoTrack {
         val videoTrack = LocalVideoTrack.create(
             context,
-            endpointConnectionFactoryWrapper.endpointConnectionFactory,
+            peerConnectionFactoryWrapper.peerConnectionFactory,
             eglBase,
             videoParameters,
             captureDeviceName
@@ -121,7 +121,7 @@ constructor(
     fun createLocalAudioTrack(metadata: Metadata = mapOf()): LocalAudioTrack {
         val audioTrack = LocalAudioTrack.create(
             context,
-            endpointConnectionFactoryWrapper.endpointConnectionFactory
+            peerConnectionFactoryWrapper.peerConnectionFactory
         ).also {
             it.start()
         }
@@ -152,7 +152,7 @@ constructor(
     ): LocalScreencastTrack {
         val screencastTrack = LocalScreencastTrack.create(
             context,
-            endpointConnectionFactoryWrapper.endpointConnectionFactory,
+            peerConnectionFactoryWrapper.peerConnectionFactory,
             eglBase,
             mediaProjectionPermission,
             videoParameters
@@ -224,7 +224,7 @@ constructor(
 
         remoteEndpoints[endpoint.id] = endpoint
 
-        listener.onEndpointJoined(endpoint)
+        listener.onEndpointAdded(endpoint)
     }
 
     override fun onEndpointRemoved(endpointId: String) {

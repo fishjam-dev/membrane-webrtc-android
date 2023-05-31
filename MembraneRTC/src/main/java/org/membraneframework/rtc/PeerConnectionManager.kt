@@ -24,23 +24,23 @@ import java.math.BigInteger
 import java.util.*
 import kotlin.math.pow
 
-internal class EndpointConnectionManager
+internal class PeerConnectionManager
 @AssistedInject constructor(
-    @Assisted private val endpointConnectionListener: EndpointConnectionListener,
-    @Assisted private val endpointConnectionFactory: EndpointConnectionFactoryWrapper
+    @Assisted private val peerConnectionListener: PeerConnectionListener,
+    @Assisted private val peerConnectionFactory: PeerConnectionFactoryWrapper
 ) : PeerConnection.Observer {
 
     @AssistedFactory
-    interface EndpointConnectionManagerFactory {
+    interface PeerConnectionManagerFactory {
         fun create(
-            listener: EndpointConnectionListener,
-            endpointConnectionFactory: EndpointConnectionFactoryWrapper
-        ): EndpointConnectionManager
+            listener: PeerConnectionListener,
+            peerConnectionFactory: PeerConnectionFactoryWrapper
+        ): PeerConnectionManager
     }
 
-    private var endpointConnection: PeerConnection? = null
-    private val endpointConnectionMutex = Mutex()
-    private val endpointConnectionStats = mutableMapOf<String, RTCStats>()
+    private var peerConnection: PeerConnection? = null
+    private val peerConnectionMutex = Mutex()
+    private val peerConnectionStats = mutableMapOf<String, RTCStats>()
 
     private var iceServers: List<PeerConnection.IceServer>? = null
     private var config: PeerConnection.RTCConfiguration? = null
@@ -71,9 +71,9 @@ internal class EndpointConnectionManager
                 listOf(RtpParameters.Encoding(null, true, null))
             }
 
-        endpointConnectionMutex.withLock {
-            val pc = endpointConnection ?: run {
-                Timber.e("addTrack: Endpoint connection not yet established")
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: run {
+                Timber.e("addTrack: Peer connection not yet established")
                 return
             }
 
@@ -128,9 +128,9 @@ internal class EndpointConnectionManager
     }
 
     suspend fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
-        endpointConnectionMutex.withLock {
-            val pc = endpointConnection ?: run {
-                Timber.e("setTrackBandwidth: Endpoint connection not yet established")
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: run {
+                Timber.e("setTrackBandwidth: Peer connection not yet established")
                 return
             }
             val sender = pc.senders.find { it.track()?.id() == trackId } ?: run {
@@ -150,9 +150,9 @@ internal class EndpointConnectionManager
         encoding: String,
         bandwidthLimit: TrackBandwidthLimit.BandwidthLimit
     ) {
-        endpointConnectionMutex.withLock {
-            val pc = endpointConnection ?: run {
-                Timber.e("setEncodingBandwidth: Endpoint connection not yet established")
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: run {
+                Timber.e("setEncodingBandwidth: Peer connection not yet established")
                 return
             }
             val sender = pc.senders.find { it.track()?.id() == trackId } ?: run {
@@ -173,9 +173,9 @@ internal class EndpointConnectionManager
     }
 
     suspend fun removeTrack(trackId: String): Boolean {
-        endpointConnectionMutex.withLock {
-            val pc = endpointConnection ?: run {
-                Timber.e("removeTrack: Endpoint connection not yet established")
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: run {
+                Timber.e("removeTrack: Peer connection not yet established")
                 return false
             }
             pc.transceivers.find { it.sender.track()?.id() == trackId }?.sender?.let {
@@ -186,9 +186,9 @@ internal class EndpointConnectionManager
         }
     }
 
-    private suspend fun setupEndpointConnection(localTracks: List<LocalTrack>) {
-        if (endpointConnection != null) {
-            Timber.e("setupEndpointConnection: Endpoint connection already established!")
+    private suspend fun setupPeerConnection(localTracks: List<LocalTrack>) {
+        if (peerConnection != null) {
+            Timber.e("setupPeerConnection: Peer connection already established!")
             return
         }
 
@@ -201,11 +201,11 @@ internal class EndpointConnectionManager
         config.disableIpv6 = true
         config.tcpCandidatePolicy = PeerConnection.TcpCandidatePolicy.DISABLED
 
-        val pc = endpointConnectionFactory.createEndpointConnection(config, this)
-            ?: throw IllegalStateException("Failed to create a endpointConnection")
+        val pc = peerConnectionFactory.createPeerConnection(config, this)
+            ?: throw IllegalStateException("Failed to create a peerConnection")
 
-        endpointConnectionMutex.withLock {
-            this@EndpointConnectionManager.endpointConnection = pc
+        peerConnectionMutex.withLock {
+            this@PeerConnectionManager.peerConnection = pc
         }
 
         val streamIds = listOf(UUID.randomUUID().toString())
@@ -214,7 +214,7 @@ internal class EndpointConnectionManager
             addTrack(it, streamIds)
         }
 
-        endpointConnectionMutex.withLock {
+        peerConnectionMutex.withLock {
             pc.enforceSendOnlyDirection()
         }
     }
@@ -223,7 +223,7 @@ internal class EndpointConnectionManager
         qrcMutex.withLock {
             this.queuedRemoteCandidates?.let {
                 for (candidate in it) {
-                    this.endpointConnection?.addIceCandidate(candidate)
+                    this.peerConnection?.addIceCandidate(candidate)
                 }
                 this.queuedRemoteCandidates = null
             }
@@ -256,7 +256,7 @@ internal class EndpointConnectionManager
     }
 
     private fun addNecessaryTransceivers(tracksTypes: Map<String, Int>) {
-        val pc = endpointConnection ?: return
+        val pc = peerConnection ?: return
 
         val necessaryAudio = tracksTypes["audio"] ?: 0
         val necessaryVideo = tracksTypes["video"] ?: 0
@@ -275,7 +275,7 @@ internal class EndpointConnectionManager
             }
         }
 
-        Timber.d("endpointConnection adding $lackingAudio audio and $lackingVideo video lacking transceivers")
+        Timber.d("peerConnection adding $lackingAudio audio and $lackingVideo video lacking transceivers")
 
         repeat(lackingAudio) {
             pc.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO).direction =
@@ -292,15 +292,15 @@ internal class EndpointConnectionManager
         sdp: String,
         midToTrackId: Map<String, String>
     ) {
-        endpointConnectionMutex.withLock {
-            val pc = endpointConnection ?: return
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: return
 
             val answer = SessionDescription(
                 SessionDescription.Type.ANSWER,
                 sdp
             )
 
-            this@EndpointConnectionManager.midToTrackId = midToTrackId
+            this@PeerConnectionManager.midToTrackId = midToTrackId
 
             pc.setRemoteDescription(answer).onSuccess {
                 drainCandidates()
@@ -309,7 +309,7 @@ internal class EndpointConnectionManager
     }
 
     private fun midToTrackIdMapping(localTracks: List<LocalTrack>): Map<String, String> {
-        val pc = endpointConnection ?: return emptyMap()
+        val pc = peerConnection ?: return emptyMap()
 
         val mapping = mutableMapOf<String, String>()
 
@@ -335,17 +335,17 @@ internal class EndpointConnectionManager
         localTracks: List<LocalTrack>
     ): SdpOffer {
         qrcMutex.withLock {
-            this@EndpointConnectionManager.queuedRemoteCandidates = mutableListOf()
+            this@PeerConnectionManager.queuedRemoteCandidates = mutableListOf()
         }
         prepareIceServers(integratedTurnServers)
 
         var needsRestart = true
-        if (endpointConnection == null) {
-            setupEndpointConnection(localTracks)
+        if (peerConnection == null) {
+            setupPeerConnection(localTracks)
             needsRestart = false
         }
-        endpointConnectionMutex.withLock {
-            val pc = endpointConnection!!
+        peerConnectionMutex.withLock {
+            val pc = peerConnection!!
 
             if (needsRestart) {
                 pc.restartIce()
@@ -372,8 +372,8 @@ internal class EndpointConnectionManager
     }
 
     suspend fun setTrackEncoding(trackId: String, trackEncoding: TrackEncoding, enabled: Boolean) {
-        endpointConnectionMutex.withLock {
-            val sender = endpointConnection?.senders?.find { it -> it.track()?.id() == trackId } ?: run {
+        peerConnectionMutex.withLock {
+            val sender = peerConnection?.senders?.find { it -> it.track()?.id() == trackId } ?: run {
                 Timber.e("setTrackEncoding: Invalid trackId $trackId, no track sender found")
                 return
             }
@@ -381,7 +381,7 @@ internal class EndpointConnectionManager
             val encoding = params?.encodings?.find { it.rid == trackEncoding.rid } ?: run {
                 Timber.e(
                     "setTrackEncoding: Invalid encoding $trackEncoding," +
-                        "no such encoding found in endpoint connection"
+                        "no such encoding found in peer connection"
                 )
                 return
             }
@@ -391,21 +391,21 @@ internal class EndpointConnectionManager
     }
 
     suspend fun onRemoteCandidate(iceCandidate: IceCandidate) {
-        endpointConnectionMutex.withLock {
-            val pc = endpointConnection ?: return
+        peerConnectionMutex.withLock {
+            val pc = peerConnection ?: return
             qrcMutex.withLock {
-                if (this@EndpointConnectionManager.queuedRemoteCandidates == null) {
+                if (this@PeerConnectionManager.queuedRemoteCandidates == null) {
                     pc.addIceCandidate(iceCandidate)
                 } else {
-                    this@EndpointConnectionManager.queuedRemoteCandidates!!.add(iceCandidate)
+                    this@PeerConnectionManager.queuedRemoteCandidates!!.add(iceCandidate)
                 }
             }
         }
     }
 
     suspend fun close() {
-        endpointConnectionMutex.withLock {
-            endpointConnection?.close()
+        peerConnectionMutex.withLock {
+            peerConnection?.close()
         }
     }
 
@@ -427,7 +427,7 @@ internal class EndpointConnectionManager
 
     override fun onIceCandidate(candidate: IceCandidate?) {
         if (candidate != null) {
-            endpointConnectionListener.onLocalIceCandidate(candidate)
+            peerConnectionListener.onLocalIceCandidate(candidate)
         }
     }
 
@@ -446,8 +446,8 @@ internal class EndpointConnectionManager
     override fun onAddTrack(receiver: RtpReceiver?, mediaStreams: Array<out MediaStream>?) {
         var trackId: String? = null
         coroutineScope.launch {
-            endpointConnectionMutex.withLock {
-                val pc = endpointConnection ?: return@launch
+            peerConnectionMutex.withLock {
+                val pc = peerConnection ?: return@launch
 
                 val transceiver = pc.transceivers.find {
                     it.receiver.id() == receiver?.id()
@@ -460,7 +460,7 @@ internal class EndpointConnectionManager
                     return@launch
                 }
             }
-            endpointConnectionListener.onAddTrack(trackId!!, receiver!!.track()!!)
+            peerConnectionListener.onAddTrack(trackId!!, receiver!!.track()!!)
         }
     }
 
@@ -477,8 +477,8 @@ internal class EndpointConnectionManager
     }
 
     fun getStats(): Map<String, RTCStats> {
-        endpointConnection?.getStats { rtcStatsReport -> extractRelevantStats(rtcStatsReport) }
-        return endpointConnectionStats.toMap()
+        peerConnection?.getStats { rtcStatsReport -> extractRelevantStats(rtcStatsReport) }
+        return peerConnectionStats.toMap()
     }
 
     private fun extractRelevantStats(rp: RTCStatsReport) {
@@ -505,7 +505,7 @@ internal class EndpointConnectionManager
                     qualityLimitation
                 )
 
-                endpointConnectionStats[it.id as String] = tmp
+                peerConnectionStats[it.id as String] = tmp
             } else if (it.type == "inbound-rtp") {
                 val tmp = RTCInboundStats(
                     it.members["kind"] as? String,
@@ -520,7 +520,7 @@ internal class EndpointConnectionManager
                     it.members["framesDropped"] as? Long
                 )
 
-                endpointConnectionStats[it.id as String] = tmp
+                peerConnectionStats[it.id as String] = tmp
             }
         }
     }

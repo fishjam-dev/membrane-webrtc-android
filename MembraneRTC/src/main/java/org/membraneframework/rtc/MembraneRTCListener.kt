@@ -28,7 +28,7 @@ interface MembraneRTCListener {
     fun onTrackUpdated(ctx: TrackContext)
 
     // /Callback invoked when a new endpoint joins the room.
-    fun onEndpointJoined(endpoint: Endpoint)
+    fun onEndpointAdded(endpoint: Endpoint)
 
     // /Callback invoked when a endpoint leaves the room.
     fun onEndpointLeft(endpoint: Endpoint)
