@@ -9,6 +9,7 @@ import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.SerializedMediaEvent
 import org.webrtc.Logging
+import timber.log.Timber
 
 /**
  * MembraneRTC client.
@@ -66,6 +67,7 @@ private constructor(
      * @param mediaEvent - String data received over custom signalling layer.
      */
     fun receiveMediaEvent(mediaEvent: SerializedMediaEvent) {
+        Timber.e("KOLANKO")
         client.receiveMediaEvent(mediaEvent)
     }
 

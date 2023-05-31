@@ -87,6 +87,8 @@ constructor(
     }
 
     fun receiveMediaEvent(event: SerializedMediaEvent) {
+        Timber.e(event)
+        Timber.e("XDXDXD")
         rtcEngineCommunication.onEvent(event)
     }
 
@@ -114,7 +116,7 @@ constructor(
 
         localTracks.add(videoTrack)
         localEndpoint = localEndpoint.withTrack(videoTrack.id(), metadata)
-
+        Timber.e("DODANY LOCAL VIDEO")
         return videoTrack
     }
 
@@ -211,6 +213,10 @@ constructor(
             rtcEngineCommunication.updateTrackMetadata(trackId, trackMetadata)
             localEndpoint = localEndpoint.withTrack(trackId, trackMetadata)
         }
+    }
+
+    override fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>) {
+        listener.onConnected(endpointID, otherEndpoints)
     }
 
     override fun onSendMediaEvent(event: SerializedMediaEvent) {

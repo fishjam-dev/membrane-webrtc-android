@@ -148,6 +148,7 @@ class RoomViewModel(
     // TODO: we should preserve some order...
     private fun emitParticipants() {
         val candidates = mutableParticipants.values
+        Timber.e(candidates.toString())
 
         if (candidates.isNotEmpty()) {
             val primary = candidates.first()
@@ -230,6 +231,7 @@ class RoomViewModel(
                     )
                 )
             )
+            Timber.e("DODANY LOCxxAL VIDEO")
 
             localVideoTrack = it.createVideoTrack(
                 videoParameters,
@@ -260,10 +262,10 @@ class RoomViewModel(
     }
 
     // MembraneRTCListener callbacks
-    override fun onJoinSuccess(endpointID: String, endpointsInRoom: List<Endpoint>) {
+    override fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>) {
         Timber.i("Successfully join the room")
 
-        endpointsInRoom.forEach {
+        otherEndpoints.forEach {
             mutableParticipants[it.id] = Participant(
                 it.id,
                 it.metadata["displayName"] as? String ?: "UNKNOWN",

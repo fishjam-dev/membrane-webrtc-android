@@ -10,7 +10,7 @@ interface MembraneRTCListener {
     fun onSendMediaEvent(event: SerializedMediaEvent)
 
     // /Callback invoked when the client has been approved to participate in media exchange.
-    fun onJoinSuccess(endpointID: String, endpointsInRoom: List<Endpoint>)
+    fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>)
 
     // /Callback invoked when client has been denied access to enter the room.
     fun onJoinError(metadata: Any)

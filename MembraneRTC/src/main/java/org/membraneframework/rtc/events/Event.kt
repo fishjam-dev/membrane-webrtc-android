@@ -105,6 +105,9 @@ data class UpdateTrackMetadata(val type: String, val data: Data) : SendableEvent
 }
 
 enum class ReceivableEventType {
+    @SerializedName("connected")
+    Connected,
+
     @SerializedName("endpointAdded")
     EndpointAdded,
 
@@ -155,6 +158,9 @@ sealed class ReceivableEvent {
                 val eventBase: BaseReceivableEvent = payload.toDataClass()
 
                 return when (eventBase.type) {
+                    ReceivableEventType.Connected ->
+                        payload.toDataClass<Connected>()
+
                     ReceivableEventType.EndpointAdded ->
                         payload.toDataClass<EndpointAdded>()
 
@@ -209,6 +215,10 @@ sealed class ReceivableEvent {
             }
         }
     }
+}
+
+data class Connected(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(val endpointID: String, val otherEndpoints: List<Endpoint>)
 }
 
 data class EndpointAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
