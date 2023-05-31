@@ -11,7 +11,7 @@ import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.EncodingReason
-import org.membraneframework.rtc.models.Peer
+import org.membraneframework.rtc.models.Endpoint
 import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.models.VadStatus
@@ -37,18 +37,21 @@ constructor(
     private val eglBase: EglBase,
     private val context: Context,
     rtcEngineCommunicationFactory: RTCEngineCommunication.RTCEngineCommunicationFactory,
-    peerConnectionManagerFactory: PeerConnectionManager.PeerConnectionManagerFactory,
-    peerConnectionFactoryWrapperFactory: PeerConnectionFactoryWrapper.PeerConnectionFactoryWrapperFactory
-) : RTCEngineListener, PeerConnectionListener {
+    endpointConnectionManagerFactory: EndpointConnectionManager.EndpointConnectionManagerFactory,
+    endpointConnectionFactoryWrapperFactory: EndpointConnectionFactoryWrapper.EndpointConnectionFactoryWrapperFactory
+) : RTCEngineListener, EndpointConnectionListener {
     private val rtcEngineCommunication = rtcEngineCommunicationFactory.create(this)
-    private val peerConnectionFactoryWrapper = peerConnectionFactoryWrapperFactory.create(createOptions)
-    private val peerConnectionManager = peerConnectionManagerFactory.create(this, peerConnectionFactoryWrapper)
+    private val endpointConnectionFactoryWrapper = endpointConnectionFactoryWrapperFactory.create(createOptions)
+    private val endpointConnectionManager = endpointConnectionManagerFactory.create(
+        this,
+        endpointConnectionFactoryWrapper
+    )
 
-    private var localPeer: Peer =
-        Peer(id = "", metadata = mapOf(), trackIdToMetadata = mapOf())
+    private var localEndpoint: Endpoint =
+        Endpoint(id = "", metadata = mapOf(), trackIdToMetadata = mapOf())
 
-    // mapping from peer's id to the peer himself
-    private val remotePeers = HashMap<String, Peer>()
+    // mapping from endpoint's id to the endpoint himself
+    private val remoteEndpoints = HashMap<String, Endpoint>()
 
     // mapping from remote track's id to its context
     private val trackContexts = HashMap<String, TrackContext>()
@@ -79,7 +82,7 @@ constructor(
             localTracksMutex.withLock {
                 localTracks.forEach { it.stop() }
             }
-            peerConnectionManager.close()
+            endpointConnectionManager.close()
         }
     }
 
@@ -87,10 +90,10 @@ constructor(
         rtcEngineCommunication.onEvent(event)
     }
 
-    fun join(peerMetadata: Metadata) {
+    fun join(endpointMetadata: Metadata) {
         coroutineScope.launch {
-            localPeer = localPeer.copy(metadata = peerMetadata)
-            rtcEngineCommunication.join(peerMetadata)
+            localEndpoint = localEndpoint.copy(metadata = endpointMetadata)
+            rtcEngineCommunication.join(endpointMetadata)
         }
     }
 
@@ -101,7 +104,7 @@ constructor(
     ): LocalVideoTrack {
         val videoTrack = LocalVideoTrack.create(
             context,
-            peerConnectionFactoryWrapper.peerConnectionFactory,
+            endpointConnectionFactoryWrapper.endpointConnectionFactory,
             eglBase,
             videoParameters,
             captureDeviceName
@@ -110,31 +113,34 @@ constructor(
         }
 
         localTracks.add(videoTrack)
-        localPeer = localPeer.withTrack(videoTrack.id(), metadata)
+        localEndpoint = localEndpoint.withTrack(videoTrack.id(), metadata)
 
         return videoTrack
     }
 
     fun createLocalAudioTrack(metadata: Metadata = mapOf()): LocalAudioTrack {
-        val audioTrack = LocalAudioTrack.create(context, peerConnectionFactoryWrapper.peerConnectionFactory).also {
+        val audioTrack = LocalAudioTrack.create(
+            context,
+            endpointConnectionFactoryWrapper.endpointConnectionFactory
+        ).also {
             it.start()
         }
 
         localTracks.add(audioTrack)
-        localPeer = localPeer.withTrack(audioTrack.id(), metadata)
+        localEndpoint = localEndpoint.withTrack(audioTrack.id(), metadata)
 
         return audioTrack
     }
 
     fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         coroutineScope.launch {
-            peerConnectionManager.setTrackBandwidth(trackId, bandwidthLimit)
+            endpointConnectionManager.setTrackBandwidth(trackId, bandwidthLimit)
         }
     }
 
     fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         coroutineScope.launch {
-            peerConnectionManager.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
+            endpointConnectionManager.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
         }
     }
 
@@ -146,7 +152,7 @@ constructor(
     ): LocalScreencastTrack {
         val screencastTrack = LocalScreencastTrack.create(
             context,
-            peerConnectionFactoryWrapper.peerConnectionFactory,
+            endpointConnectionFactoryWrapper.endpointConnectionFactory,
             eglBase,
             mediaProjectionPermission,
             videoParameters
@@ -157,7 +163,7 @@ constructor(
         }
 
         localTracks.add(screencastTrack)
-        localPeer = localPeer.withTrack(screencastTrack.id(), metadata)
+        localEndpoint = localEndpoint.withTrack(screencastTrack.id(), metadata)
 
         coroutineScope.launch {
             screencastTrack.startForegroundService(null, null)
@@ -167,7 +173,7 @@ constructor(
         val streamIds = listOf(UUID.randomUUID().toString())
 
         coroutineScope.launch {
-            peerConnectionManager.addTrack(screencastTrack, streamIds)
+            endpointConnectionManager.addTrack(screencastTrack, streamIds)
             rtcEngineCommunication.renegotiateTracks()
         }
 
@@ -182,10 +188,10 @@ constructor(
                     return@runBlocking false
                 }
 
-                peerConnectionManager.removeTrack(track.id())
+                endpointConnectionManager.removeTrack(track.id())
 
                 localTracks.remove(track)
-                localPeer = localPeer.withoutTrack(trackId)
+                localEndpoint = localEndpoint.withoutTrack(trackId)
                 track.stop()
             }
             rtcEngineCommunication.renegotiateTracks()
@@ -193,17 +199,17 @@ constructor(
         }
     }
 
-    fun updatePeerMetadata(peerMetadata: Metadata) {
+    fun updateEndpointMetadata(endpointMetadata: Metadata) {
         coroutineScope.launch {
-            rtcEngineCommunication.updatePeerMetadata(peerMetadata)
-            localPeer = localPeer.copy(metadata = peerMetadata)
+            rtcEngineCommunication.updateEndpointMetadata(endpointMetadata)
+            localEndpoint = localEndpoint.copy(metadata = endpointMetadata)
         }
     }
 
     fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
         coroutineScope.launch {
             rtcEngineCommunication.updateTrackMetadata(trackId, trackMetadata)
-            localPeer = localPeer.withTrack(trackId, trackMetadata)
+            localEndpoint = localEndpoint.withTrack(trackId, trackMetadata)
         }
     }
 
@@ -211,46 +217,23 @@ constructor(
         listener.onSendMediaEvent(event)
     }
 
-    override fun onPeerAccepted(peerId: String, peersInRoom: List<Peer>) {
-        this.localPeer = localPeer.copy(id = peerId)
-
-        listener.onJoinSuccess(localPeer.id, peersInRoom = peersInRoom)
-
-        peersInRoom.forEach {
-            this.remotePeers[it.id] = it
-
-            for ((trackId, metadata) in it.trackIdToMetadata) {
-                val context = TrackContext(track = null, peer = it, trackId = trackId, metadata = metadata)
-
-                this.trackContexts[trackId] = context
-
-                this.listener.onTrackAdded(context)
-            }
-        }
-    }
-
-    override fun onPeerDenied() {
-        // TODO: return meaningful data
-        listener.onJoinError(mapOf<String, String>())
-    }
-
-    override fun onPeerJoined(peer: Peer) {
-        if (peer.id == this.localPeer.id) {
+    override fun onEndpointAdded(endpoint: Endpoint) {
+        if (endpoint.id == this.localEndpoint.id) {
             return
         }
 
-        remotePeers[peer.id] = peer
+        remoteEndpoints[endpoint.id] = endpoint
 
-        listener.onPeerJoined(peer)
+        listener.onEndpointJoined(endpoint)
     }
 
-    override fun onPeerLeft(peerId: String) {
-        val peer = remotePeers.remove(peerId) ?: run {
-            Timber.e("Failed to process PeerLeft event: Peer not found: $peerId")
+    override fun onEndpointRemoved(endpointId: String) {
+        val endpoint = remoteEndpoints.remove(endpointId) ?: run {
+            Timber.e("Failed to process EndpointLeft event: Endpoint not found: $endpointId")
             return
         }
 
-        val trackIds: List<String> = peer.trackIdToMetadata.keys.toList()
+        val trackIds: List<String> = endpoint.trackIdToMetadata.keys.toList()
 
         trackIds.forEach {
             trackContexts.remove(it)?.let { ctx ->
@@ -258,16 +241,16 @@ constructor(
             }
         }
 
-        listener.onPeerLeft(peer)
+        listener.onEndpointLeft(endpoint)
     }
 
-    override fun onPeerUpdated(peerId: String, peerMetadata: Metadata) {
-        val peer = remotePeers.remove(peerId) ?: run {
-            Timber.e("Failed to process PeerUpdated event: Peer not found: $peerId")
+    override fun onEndpointUpdated(endpointId: String, endpointMetadata: Metadata) {
+        val endpoint = remoteEndpoints.remove(endpointId) ?: run {
+            Timber.e("Failed to process EndpointUpdated event: Endpoint not found: $endpointId")
             return
         }
 
-        remotePeers[peer.id] = peer.copy(metadata = peerMetadata)
+        remoteEndpoints[endpoint.id] = endpoint.copy(metadata = endpointMetadata)
     }
 
     override fun onOfferData(integratedTurnServers: List<OfferData.TurnServer>, tracksTypes: Map<String, Int>) {
@@ -275,11 +258,11 @@ constructor(
             try {
                 val offer =
                     localTracksMutex.withLock {
-                        peerConnectionManager.getSdpOffer(integratedTurnServers, tracksTypes, localTracks)
+                        endpointConnectionManager.getSdpOffer(integratedTurnServers, tracksTypes, localTracks)
                     }
                 rtcEngineCommunication.sdpOffer(
                     offer.description,
-                    localPeer.trackIdToMetadata,
+                    localEndpoint.trackIdToMetadata,
                     offer.midToTrackIdMapping
                 )
             } catch (e: Exception) {
@@ -290,7 +273,7 @@ constructor(
 
     override fun onSdpAnswer(type: String, sdp: String, midToTrackId: Map<String, String>) {
         coroutineScope.launch {
-            peerConnectionManager.onSdpAnswer(sdp, midToTrackId)
+            endpointConnectionManager.onSdpAnswer(sdp, midToTrackId)
 
             localTracksMutex.withLock {
                 // temporary workaround, the backend doesn't add ~ in sdp answer
@@ -304,7 +287,7 @@ constructor(
                     }
                     listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H).forEach {
                         if (config?.activeEncodings?.contains(it) == false) {
-                            peerConnectionManager.setTrackEncoding(localTrack.id(), it, false)
+                            endpointConnectionManager.setTrackEncoding(localTrack.id(), it, false)
                         }
                     }
                 }
@@ -320,24 +303,24 @@ constructor(
                 candidate
             )
 
-            peerConnectionManager.onRemoteCandidate(iceCandidate)
+            endpointConnectionManager.onRemoteCandidate(iceCandidate)
         }
     }
 
-    override fun onTracksAdded(peerId: String, trackIdToMetadata: Map<String, Metadata>) {
-        if (localPeer.id == peerId) return
+    override fun onTracksAdded(endpointId: String, trackIdToMetadata: Map<String, Metadata>) {
+        if (localEndpoint.id == endpointId) return
 
-        val peer = remotePeers.remove(peerId) ?: run {
-            Timber.e("Failed to process TracksAdded event: Peer not found: $peerId")
+        val endpoint = remoteEndpoints.remove(endpointId) ?: run {
+            Timber.e("Failed to process TracksAdded event: Endpoint not found: $endpointId")
             return
         }
 
-        val updatedPeer = peer.copy(trackIdToMetadata = trackIdToMetadata)
+        val updatedEndpoint = endpoint.copy(trackIdToMetadata = trackIdToMetadata)
 
-        remotePeers[updatedPeer.id] = updatedPeer
+        remoteEndpoints[updatedEndpoint.id] = updatedEndpoint
 
-        for ((trackId, metadata) in updatedPeer.trackIdToMetadata) {
-            val context = TrackContext(track = null, peer = peer, trackId = trackId, metadata = metadata)
+        for ((trackId, metadata) in updatedEndpoint.trackIdToMetadata) {
+            val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata)
 
             this.trackContexts[trackId] = context
 
@@ -345,9 +328,9 @@ constructor(
         }
     }
 
-    override fun onTracksRemoved(peerId: String, trackIds: List<String>) {
-        val peer = remotePeers[peerId] ?: run {
-            Timber.e("Failed to process TracksRemoved event: Peer not found: $peerId")
+    override fun onTracksRemoved(endpointId: String, trackIds: List<String>) {
+        val endpoint = remoteEndpoints[endpointId] ?: run {
+            Timber.e("Failed to process TracksRemoved event: Endpoint not found: $endpointId")
             return
         }
 
@@ -357,16 +340,16 @@ constructor(
             this.listener.onTrackRemoved(context)
         }
 
-        val updatedPeer = trackIds.fold(peer) { acc, trackId ->
+        val updatedEndpoint = trackIds.fold(endpoint) { acc, trackId ->
             acc.withoutTrack(trackId)
         }
 
-        remotePeers[peerId] = updatedPeer
+        remoteEndpoints[endpointId] = updatedEndpoint
     }
 
-    override fun onTrackUpdated(peerId: String, trackId: String, metadata: Metadata) {
-        val peer = remotePeers[peerId] ?: run {
-            Timber.e("Failed to process TrackUpdated event: Peer not found: $peerId")
+    override fun onTrackUpdated(endpointId: String, trackId: String, metadata: Metadata) {
+        val endpoint = remoteEndpoints[endpointId] ?: run {
+            Timber.e("Failed to process TrackUpdated event: Endpoint not found: $endpointId")
             return
         }
 
@@ -377,16 +360,16 @@ constructor(
 
         context.metadata = metadata
 
-        val updatedPeer = peer
+        val updatedEndpoint = endpoint
             .withoutTrack(trackId)
             .withTrack(trackId, metadata)
 
-        remotePeers[peerId] = updatedPeer
+        remoteEndpoints[endpointId] = updatedEndpoint
 
         this.listener.onTrackUpdated(context)
     }
 
-    override fun onTrackEncodingChanged(peerId: String, trackId: String, encoding: String, encodingReason: String) {
+    override fun onTrackEncodingChanged(endpointId: String, trackId: String, encoding: String, encodingReason: String) {
         val encodingReasonEnum = EncodingReason.fromString(encodingReason)
         if (encodingReasonEnum == null) {
             Timber.e("Invalid encoding reason: $encodingReason")
@@ -403,12 +386,12 @@ constructor(
             return
         }
         trackContext.setEncoding(encodingEnum, encodingReasonEnum)
-        this.listener.onTrackEncodingChanged(peerId, trackId, encoding)
+        this.listener.onTrackEncodingChanged(endpointId, trackId, encoding)
     }
 
-    override fun onRemoved(peerId: String, reason: String) {
-        if (peerId != localPeer.id) {
-            Timber.e("Received onRemoved media event, but it does not refer to the local peer")
+    override fun onRemoved(endpointId: String, reason: String) {
+        if (endpointId != localEndpoint.id) {
+            Timber.e("Received onRemoved media event, but it does not refer to the local endpoint")
             return
         }
         listener.onRemoved(reason)
@@ -440,13 +423,13 @@ constructor(
 
     fun enableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         coroutineScope.launch {
-            peerConnectionManager.setTrackEncoding(trackId, encoding, true)
+            endpointConnectionManager.setTrackEncoding(trackId, encoding, true)
         }
     }
 
     fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         coroutineScope.launch {
-            peerConnectionManager.setTrackEncoding(trackId, encoding, false)
+            endpointConnectionManager.setTrackEncoding(trackId, encoding, false)
         }
     }
 
@@ -477,6 +460,6 @@ constructor(
     }
 
     fun getStats(): Map<String, RTCStats> {
-        return peerConnectionManager.getStats()
+        return endpointConnectionManager.getStats()
     }
 }

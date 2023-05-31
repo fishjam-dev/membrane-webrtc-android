@@ -15,11 +15,11 @@ import org.webrtc.Logging
  * <p>
  * The client is responsible for relaying MembraneRTC Engine specific messages through given reliable transport layer.
  * Once initialized, the client is responsible for exchanging necessary messages via provided <strong>EventTransport</strong> passed via `ConnectOptions` and managing underlying
- * `PeerConnection`. The goal of the client is to be as lean as possible, meaning that all activities regarding the session such as moderating
+ * `EndpointConnection`. The goal of the client is to be as lean as possible, meaning that all activities regarding the session such as moderating
  * should be implemented by the user himself on top of the <strong>MembraneRTC</strong>.
  * <p>
  * The user's ability of interacting with the client is greatly limited to the essential actions such as joining/leaving the session,
- * adding/removing local tracks and receiving information about remote peers and their tracks that can be played by the user.
+ * adding/removing local tracks and receiving information about remote endpoints and their tracks that can be played by the user.
  * <p>
  * User can request 3 different types of local tracks that will get forwarded to the server by the client:
  * <ul>
@@ -31,7 +31,7 @@ import org.webrtc.Logging
  * It is recommended to request necessary audio and video tracks before joining the room but it does not mean it can't be done afterwards (in case of screencast)
  * <p>
  * Once the user received <strong>onConnected</strong> notification they can call the <strong>join</strong> method to initialize joining the session.
- * After receiving `onJoinSuccess` a user will receive notification about various peers joining/leaving the session, new tracks being published and ready for playback
+ * After receiving `onJoinSuccess` a user will receive notification about various endpoints joining/leaving the session, new tracks being published and ready for playback
  * or going inactive.
  */
 class MembraneRTC
@@ -42,11 +42,11 @@ private constructor(
      * Tries to join the RTC Engine. If user is accepted then onJoinSuccess will be called.
      * In other case {@link Callbacks.onJoinError} is invoked.
      * <p>
-     * @param peerMetadata - Any information that other peers will receive in onPeerJoined
-     * after accepting this peer
+     * @param endpointMetadata - Any information that other endpoints will receive in onEndpointJoined
+     * after accepting this endpoint
      */
-    fun join(peerMetadata: Metadata) {
-        client.join(peerMetadata)
+    fun join(endpointMetadata: Metadata) {
+        client.join(endpointMetadata)
     }
 
     /**
@@ -165,23 +165,23 @@ private constructor(
     }
 
     /**
-     * Updates the metadata for the current peer.
-     * @param peerMetadata Data about this peer that other peers will receive upon joining.
+     * Updates the metadata for the current endpoint.
+     * @param endpointMetadata Data about this endpoint that other endpoints will receive upon joining.
      *
      * If the metadata is different from what is already tracked in the room, the optional
-     * callback `onPeerUpdated` will be triggered for other peers in the room.
+     * callback `onEndpointUpdated` will be triggered for other endpoints in the room.
      */
-    fun updatePeerMetadata(peerMetadata: Metadata) {
-        client.updatePeerMetadata(peerMetadata)
+    fun updateEndpointMetadata(endpointMetadata: Metadata) {
+        client.updateEndpointMetadata(endpointMetadata)
     }
 
     /**
      * Updates the metadata for a specific track.
      * @param trackId local track id of audio or video track.
-     * @param trackMetadata Data about this track that other peers will receive upon joining.
+     * @param trackMetadata Data about this track that other endpoints will receive upon joining.
      *
      * If the metadata is different from what is already tracked in the room, the optional
-     * callback `onTrackUpdated` will be triggered for other peers in the room.
+     * callback `onTrackUpdated` will be triggered for other endpoints in the room.
      */
     fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
         client.updateTrackMetadata(trackId, trackMetadata)
