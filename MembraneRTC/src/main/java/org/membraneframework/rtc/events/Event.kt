@@ -29,10 +29,10 @@ internal inline fun <I, reified O> I.convert(): O {
 
 sealed class SendableEvent
 
-data class Join(val type: String, val data: Data) : SendableEvent() {
+data class Connect(val type: String, val data: Data) : SendableEvent() {
     data class Data(val metadata: Metadata)
 
-    constructor(metadata: Metadata) : this("join", Data(metadata))
+    constructor(metadata: Metadata) : this("connect", Data(metadata))
 }
 
 data class SdpOffer(val type: String, val data: Payload) : SendableEvent() {
@@ -163,9 +163,6 @@ sealed class ReceivableEvent {
 
                     ReceivableEventType.EndpointUpdated ->
                         payload.toDataClass<EndpointUpdated>()
-
-                    ReceivableEventType.EndpointRemoved ->
-                        payload.toDataClass<EndpointRemoved>()
 
                     ReceivableEventType.TracksAdded ->
                         payload.toDataClass<TracksAdded>()

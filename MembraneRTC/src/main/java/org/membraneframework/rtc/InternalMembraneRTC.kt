@@ -90,10 +90,10 @@ constructor(
         rtcEngineCommunication.onEvent(event)
     }
 
-    fun join(endpointMetadata: Metadata) {
+    fun connect(endpointMetadata: Metadata) {
         coroutineScope.launch {
             localEndpoint = localEndpoint.copy(metadata = endpointMetadata)
-            rtcEngineCommunication.join(endpointMetadata)
+            rtcEngineCommunication.connect(endpointMetadata)
         }
     }
 

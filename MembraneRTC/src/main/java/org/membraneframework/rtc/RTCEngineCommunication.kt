@@ -23,8 +23,8 @@ constructor(
         ): RTCEngineCommunication
     }
 
-    fun join(endpointMetadata: Metadata) {
-        sendEvent(Join(endpointMetadata))
+    fun connect(endpointMetadata: Metadata) {
+        sendEvent(Connect(endpointMetadata))
     }
 
     fun updateEndpointMetadata(endpointMetadata: Metadata) {

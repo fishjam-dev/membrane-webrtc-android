@@ -240,7 +240,7 @@ class RoomViewModel(
                 )
             )
 
-            it.join(mapOf("displayName" to (localDisplayName ?: "")))
+            it.connect(mapOf("displayName" to (localDisplayName ?: "")))
 
             isCameraOn.value = localVideoTrack?.enabled() ?: false
             isMicrophoneOn.value = localAudioTrack?.enabled() ?: false
