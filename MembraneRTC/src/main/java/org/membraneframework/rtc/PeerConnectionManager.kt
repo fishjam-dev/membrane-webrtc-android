@@ -379,7 +379,10 @@ internal class PeerConnectionManager
             }
             val params = sender.parameters
             val encoding = params?.encodings?.find { it.rid == trackEncoding.rid } ?: run {
-                Timber.e("setTrackEncoding: Invalid encoding $trackEncoding, no such encoding found in peer connection")
+                Timber.e(
+                    "setTrackEncoding: Invalid encoding $trackEncoding," +
+                        "no such encoding found in peer connection"
+                )
                 return
             }
             encoding.active = enabled

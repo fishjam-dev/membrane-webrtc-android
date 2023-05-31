@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
-import org.membraneframework.rtc.models.Peer
+import org.membraneframework.rtc.models.Endpoint
 import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.Payload
 import timber.log.Timber
@@ -29,10 +29,10 @@ internal inline fun <I, reified O> I.convert(): O {
 
 sealed class SendableEvent
 
-data class Join(val type: String, val data: Data) : SendableEvent() {
+data class Connect(val type: String, val data: Data) : SendableEvent() {
     data class Data(val metadata: Metadata)
 
-    constructor(metadata: Metadata) : this("join", Data(metadata))
+    constructor(metadata: Metadata) : this("connect", Data(metadata))
 }
 
 data class SdpOffer(val type: String, val data: Payload) : SendableEvent() {
@@ -92,10 +92,10 @@ data class SelectEncoding(val type: String, val data: Payload) : SendableEvent()
         )
 }
 
-data class UpdatePeerMetadata(val type: String, val data: Data) : SendableEvent() {
+data class UpdateEndpointMetadata(val type: String, val data: Data) : SendableEvent() {
     data class Data(val metadata: Metadata)
 
-    constructor(metadata: Metadata) : this("updatePeerMetadata", Data(metadata))
+    constructor(metadata: Metadata) : this("updateEndpointMetadata", Data(metadata))
 }
 
 data class UpdateTrackMetadata(val type: String, val data: Data) : SendableEvent() {
@@ -104,24 +104,22 @@ data class UpdateTrackMetadata(val type: String, val data: Data) : SendableEvent
     constructor(trackId: String, trackMetadata: Metadata) : this("updateTrackMetadata", Data(trackId, trackMetadata))
 }
 
+data class Disconnect(val type: String) : SendableEvent() {
+    constructor() : this("disconnect")
+}
+
 enum class ReceivableEventType {
-    @SerializedName("peerAccepted")
-    PeerAccepted,
+    @SerializedName("connected")
+    Connected,
 
-    @SerializedName("peerDenied")
-    PeerDenied,
+    @SerializedName("endpointAdded")
+    EndpointAdded,
 
-    @SerializedName("peerJoined")
-    PeerJoined,
+    @SerializedName("endpointUpdated")
+    EndpointUpdated,
 
-    @SerializedName("peerLeft")
-    PeerLeft,
-
-    @SerializedName("peerUpdated")
-    PeerUpdated,
-
-    @SerializedName("peerRemoved")
-    PeerRemoved,
+    @SerializedName("endpointRemoved")
+    EndpointRemoved,
 
     @SerializedName("custom")
     Custom,
@@ -164,23 +162,17 @@ sealed class ReceivableEvent {
                 val eventBase: BaseReceivableEvent = payload.toDataClass()
 
                 return when (eventBase.type) {
-                    ReceivableEventType.PeerAccepted ->
-                        payload.toDataClass<PeerAccepted>()
+                    ReceivableEventType.Connected ->
+                        payload.toDataClass<Connected>()
 
-                    ReceivableEventType.PeerDenied ->
-                        payload.toDataClass<PeerAccepted>()
+                    ReceivableEventType.EndpointAdded ->
+                        payload.toDataClass<EndpointAdded>()
 
-                    ReceivableEventType.PeerJoined ->
-                        payload.toDataClass<PeerJoined>()
+                    ReceivableEventType.EndpointRemoved ->
+                        payload.toDataClass<EndpointRemoved>()
 
-                    ReceivableEventType.PeerLeft ->
-                        payload.toDataClass<PeerLeft>()
-
-                    ReceivableEventType.PeerUpdated ->
-                        payload.toDataClass<PeerUpdated>()
-
-                    ReceivableEventType.PeerRemoved ->
-                        payload.toDataClass<PeerRemoved>()
+                    ReceivableEventType.EndpointUpdated ->
+                        payload.toDataClass<EndpointUpdated>()
 
                     ReceivableEventType.TracksAdded ->
                         payload.toDataClass<TracksAdded>()
@@ -229,26 +221,25 @@ sealed class ReceivableEvent {
     }
 }
 
-data class PeerAccepted(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val id: String, val peersInRoom: List<Peer>)
+data class Connected(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(val id: String, val otherEndpoints: List<Endpoint>)
 }
 
-data class PeerDenied(val type: ReceivableEventType) : ReceivableEvent()
-
-data class PeerJoined(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val peer: Peer)
+data class EndpointAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(
+        val id: String,
+        val type: String,
+        val metadata: Metadata,
+        val trackIdToMetadata: Map<String, Metadata>
+    )
 }
 
-data class PeerLeft(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val peerId: String)
+data class EndpointUpdated(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(val id: String, val metadata: Metadata)
 }
 
-data class PeerUpdated(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val peerId: String, val metadata: Metadata)
-}
-
-data class PeerRemoved(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val peerId: String, val reason: String)
+data class EndpointRemoved(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
+    data class Data(val id: String, val reason: String)
 }
 
 data class OfferData(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
@@ -264,15 +255,15 @@ data class OfferData(val type: ReceivableEventType, val data: Data) : Receivable
 }
 
 data class TracksAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val peerId: String, val trackIdToMetadata: Map<String, Metadata>)
+    data class Data(val endpointId: String, val trackIdToMetadata: Map<String, Metadata>)
 }
 
 data class TracksRemoved(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val peerId: String, val trackIds: List<String>)
+    data class Data(val endpointId: String, val trackIds: List<String>)
 }
 
 data class TrackUpdated(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val peerId: String, val trackId: String, val metadata: Metadata)
+    data class Data(val endpointId: String, val trackId: String, val metadata: Metadata)
 }
 
 data class SdpAnswer(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
@@ -284,7 +275,7 @@ data class RemoteCandidate(val type: ReceivableEventType, val data: Data) : Rece
 }
 
 data class EncodingSwitched(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val peerId: String, val trackId: String, val encoding: String, val reason: String)
+    data class Data(val endpointId: String, val trackId: String, val encoding: String, val reason: String)
 }
 
 data class VadNotification(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
