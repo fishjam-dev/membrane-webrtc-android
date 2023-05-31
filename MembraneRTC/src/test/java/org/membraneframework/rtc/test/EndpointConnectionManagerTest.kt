@@ -20,7 +20,7 @@ import org.webrtc.RtpParameters.Encoding
 
 class EndpointConnectionManagerTest {
     private lateinit var manager: EndpointConnectionManager
-    private lateinit var endpointConnectionMock: EndpointConnection
+    private lateinit var endpointConnectionMock: PeerConnection
 
     @Before
     fun createMocks() {
