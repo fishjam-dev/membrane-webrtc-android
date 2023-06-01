@@ -419,7 +419,7 @@ class RoomViewModel(
         Timber.i("Endpoint has joined the room $endpoint")
     }
 
-    override fun onEndpointLeft(endpoint: Endpoint) {
+    override fun onEndpointRemoved(endpoint: Endpoint) {
         mutableParticipants.remove(endpoint.id)
 
         emitParticipants()

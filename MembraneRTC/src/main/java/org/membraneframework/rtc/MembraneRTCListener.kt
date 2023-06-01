@@ -31,7 +31,7 @@ interface MembraneRTCListener {
     fun onEndpointAdded(endpoint: Endpoint)
 
     // /Callback invoked when a endpoint leaves the room.
-    fun onEndpointLeft(endpoint: Endpoint)
+    fun onEndpointRemoved(endpoint: Endpoint)
 
     // /Callback invoked when endpoint's metadata gets updated.
     fun onEndpointUpdated(endpoint: Endpoint)

@@ -203,6 +203,8 @@ constructor(
 
     fun updateEndpointMetadata(endpointMetadata: Metadata) {
         coroutineScope.launch {
+            Timber.e("POGCZAMP UPDATE ENDPOINT MEATDATA")
+
             rtcEngineCommunication.updateEndpointMetadata(endpointMetadata)
             localEndpoint = localEndpoint.copy(metadata = endpointMetadata)
         }
@@ -210,6 +212,7 @@ constructor(
 
     fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
         coroutineScope.launch {
+            Timber.e("POGCZAMP UPDATE TRACK MEATDATA")
             rtcEngineCommunication.updateTrackMetadata(trackId, trackMetadata)
             localEndpoint = localEndpoint.withTrack(trackId, trackMetadata)
         }
@@ -247,7 +250,7 @@ constructor(
             }
         }
 
-        listener.onEndpointLeft(endpoint)
+        listener.onEndpointRemoved(endpoint)
     }
 
     override fun onEndpointUpdated(endpointId: String, endpointMetadata: Metadata) {
