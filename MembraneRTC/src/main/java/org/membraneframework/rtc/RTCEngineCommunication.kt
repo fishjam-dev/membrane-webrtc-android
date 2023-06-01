@@ -92,7 +92,7 @@ constructor(
     fun onEvent(serializedEvent: SerializedMediaEvent) {
         Timber.e(serializedEvent)
         when (val event = decodeEvent(serializedEvent)) {
-            is Connected -> engineListener.onConnected(event.data.endpointID, event.data.otherEndpoints)
+            is Connected -> engineListener.onConnected(event.data.id, event.data.otherEndpoints)
             is OfferData -> engineListener.onOfferData(event.data.integratedTurnServers, event.data.tracksTypes)
             is EndpointRemoved -> engineListener.onEndpointRemoved(event.data.endpointId)
             is EndpointAdded -> engineListener.onEndpointAdded(event.data.endpoint)

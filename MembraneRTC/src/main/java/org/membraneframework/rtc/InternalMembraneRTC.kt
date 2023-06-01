@@ -215,8 +215,8 @@ constructor(
         }
     }
 
-    override fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>) {
-        listener.onConnected(endpointID, otherEndpoints)
+    override fun onConnected(id: String, otherEndpoints: List<Endpoint>) {
+        listener.onConnected(id, otherEndpoints)
     }
 
     override fun onSendMediaEvent(event: SerializedMediaEvent) {

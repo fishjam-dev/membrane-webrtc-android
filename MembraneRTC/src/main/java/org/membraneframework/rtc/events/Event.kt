@@ -218,7 +218,7 @@ sealed class ReceivableEvent {
 }
 
 data class Connected(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val endpointID: String, val otherEndpoints: List<Endpoint>)
+    data class Data(val id: String, val otherEndpoints: List<Endpoint>)
 }
 
 data class EndpointAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {

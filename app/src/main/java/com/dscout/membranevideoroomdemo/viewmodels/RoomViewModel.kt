@@ -262,7 +262,7 @@ class RoomViewModel(
     }
 
     // MembraneRTCListener callbacks
-    override fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>) {
+    override fun onConnected(id: String, otherEndpoints: List<Endpoint>) {
         Timber.i("Successfully join the room")
 
         otherEndpoints.forEach {
