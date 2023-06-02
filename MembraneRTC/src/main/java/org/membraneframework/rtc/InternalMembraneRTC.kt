@@ -232,6 +232,9 @@ constructor(
                 this.listener.onTrackAdded(context)
             }
         }
+        coroutineScope.launch {
+            rtcEngineCommunication.renegotiateTracks()
+        }
     }
 
     override fun onPeerDenied() {
