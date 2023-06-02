@@ -104,6 +104,10 @@ data class UpdateTrackMetadata(val type: String, val data: Data) : SendableEvent
     constructor(trackId: String, trackMetadata: Metadata) : this("updateTrackMetadata", Data(trackId, trackMetadata))
 }
 
+data class Disconnect(val type: String) : SendableEvent() {
+    constructor() : this("disconnect")
+}
+
 enum class ReceivableEventType {
     @SerializedName("connected")
     Connected,
@@ -222,7 +226,12 @@ data class Connected(val type: ReceivableEventType, val data: Data) : Receivable
 }
 
 data class EndpointAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val id: String, val metadata: Metadata, val trackIdToMetadata: Map<String, Metadata>)
+    data class Data(
+        val id: String,
+        val type: String,
+        val metadata: Metadata,
+        val trackIdToMetadata: Map<String, Metadata>
+    )
 }
 
 data class EndpointUpdated(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
@@ -246,15 +255,15 @@ data class OfferData(val type: ReceivableEventType, val data: Data) : Receivable
 }
 
 data class TracksAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val id: String, val trackIdToMetadata: Map<String, Metadata>)
+    data class Data(val endpointId: String, val trackIdToMetadata: Map<String, Metadata>)
 }
 
 data class TracksRemoved(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val id: String, val trackIds: List<String>)
+    data class Data(val endpointId: String, val trackIds: List<String>)
 }
 
 data class TrackUpdated(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val id: String, val trackId: String, val metadata: Metadata)
+    data class Data(val endpointId: String, val trackId: String, val metadata: Metadata)
 }
 
 data class SdpAnswer(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
@@ -266,7 +275,7 @@ data class RemoteCandidate(val type: ReceivableEventType, val data: Data) : Rece
 }
 
 data class EncodingSwitched(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val id: String, val trackId: String, val encoding: String, val reason: String)
+    data class Data(val endpointId: String, val trackId: String, val encoding: String, val reason: String)
 }
 
 data class VadNotification(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {

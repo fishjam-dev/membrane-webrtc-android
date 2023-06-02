@@ -106,11 +106,9 @@ class RoomViewModel(
     }
 
     fun disconnect() {
-        viewModelScope.launch {
-            room.value?.disconnect()
-            room.value = null
-            transport.disconnect()
-        }
+        room.value?.disconnect()
+        room.value = null
+        transport.disconnect()
     }
 
     fun focusVideo(participantId: String) {
@@ -231,7 +229,6 @@ class RoomViewModel(
                     )
                 )
             )
-            Timber.e("DODANY LOCxxAL VIDEO")
 
             localVideoTrack = it.createVideoTrack(
                 videoParameters,
@@ -262,7 +259,7 @@ class RoomViewModel(
     }
 
     // MembraneRTCListener callbacks
-    override fun onConnected(id: String, otherEndpoints: List<Endpoint>) {
+    override fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>) {
         Timber.i("Successfully join the room")
 
         otherEndpoints.forEach {
@@ -277,8 +274,13 @@ class RoomViewModel(
         emitParticipants()
     }
 
-    override fun onJoinError(metadata: Any) {
-        Timber.e("User has been denied to join the room")
+    override fun onDisconnected() {
+        room.value = null
+        transport.disconnect()
+    }
+
+    override fun onConnectError(metadata: Any) {
+        Timber.e("User has been denied to connect to the room")
     }
 
     override fun onTrackReady(ctx: TrackContext) {

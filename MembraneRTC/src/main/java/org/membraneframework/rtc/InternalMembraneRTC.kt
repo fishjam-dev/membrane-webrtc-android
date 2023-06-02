@@ -48,7 +48,7 @@ constructor(
     )
 
     private var localEndpoint: Endpoint =
-        Endpoint(id = "", metadata = mapOf(), trackIdToMetadata = mapOf())
+        Endpoint(id = "", type = "webrtc", metadata = mapOf(), trackIdToMetadata = mapOf())
 
     // mapping from endpoint's id to the endpoint himself
     private val remoteEndpoints = HashMap<String, Endpoint>()
@@ -79,6 +79,7 @@ constructor(
 
     fun disconnect() {
         coroutineScope.launch {
+            rtcEngineCommunication.disconnect()
             localTracksMutex.withLock {
                 localTracks.forEach { it.stop() }
             }
@@ -87,8 +88,6 @@ constructor(
     }
 
     fun receiveMediaEvent(event: SerializedMediaEvent) {
-        Timber.e(event)
-        Timber.e("XDXDXD")
         rtcEngineCommunication.onEvent(event)
     }
 
@@ -116,7 +115,6 @@ constructor(
 
         localTracks.add(videoTrack)
         localEndpoint = localEndpoint.withTrack(videoTrack.id(), metadata)
-        Timber.e("DODANY LOCAL VIDEO")
         return videoTrack
     }
 
@@ -203,8 +201,6 @@ constructor(
 
     fun updateEndpointMetadata(endpointMetadata: Metadata) {
         coroutineScope.launch {
-            Timber.e("POGCZAMP UPDATE ENDPOINT MEATDATA")
-
             rtcEngineCommunication.updateEndpointMetadata(endpointMetadata)
             localEndpoint = localEndpoint.copy(metadata = endpointMetadata)
         }
@@ -212,14 +208,30 @@ constructor(
 
     fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
         coroutineScope.launch {
-            Timber.e("POGCZAMP UPDATE TRACK MEATDATA")
             rtcEngineCommunication.updateTrackMetadata(trackId, trackMetadata)
             localEndpoint = localEndpoint.withTrack(trackId, trackMetadata)
         }
     }
 
-    override fun onConnected(id: String, otherEndpoints: List<Endpoint>) {
-        listener.onConnected(id, otherEndpoints)
+    override fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>) {
+        this.localEndpoint = localEndpoint.copy(id = endpointID)
+        listener.onConnected(endpointID, otherEndpoints)
+
+        otherEndpoints.forEach {
+            this.remoteEndpoints[it.id] = it
+
+            for ((trackId, metadata) in it.trackIdToMetadata) {
+                val context = TrackContext(track = null, endpoint = it, trackId = trackId, metadata = metadata)
+
+                this.trackContexts[trackId] = context
+
+                this.listener.onTrackAdded(context)
+            }
+        }
+
+        coroutineScope.launch {
+            rtcEngineCommunication.renegotiateTracks()
+        }
     }
 
     override fun onSendMediaEvent(event: SerializedMediaEvent) {
@@ -237,6 +249,10 @@ constructor(
     }
 
     override fun onEndpointRemoved(endpointId: String) {
+        if (endpointId == localEndpoint.id) {
+            listener.onDisconnected()
+            return
+        }
         val endpoint = remoteEndpoints.remove(endpointId) ?: run {
             Timber.e("Failed to process EndpointLeft event: Endpoint not found: $endpointId")
             return
@@ -395,15 +411,6 @@ constructor(
             return
         }
         trackContext.setEncoding(encodingEnum, encodingReasonEnum)
-        this.listener.onTrackEncodingChanged(endpointId, trackId, encoding)
-    }
-
-    override fun onRemoved(endpointId: String, reason: String) {
-        if (endpointId != localEndpoint.id) {
-            Timber.e("Received onRemoved media event, but it does not refer to the local endpoint")
-            return
-        }
-        listener.onRemoved(reason)
     }
 
     override fun onVadNotification(trackId: String, status: String) {

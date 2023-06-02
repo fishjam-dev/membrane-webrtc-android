@@ -9,7 +9,6 @@ import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.SerializedMediaEvent
 import org.webrtc.Logging
-import timber.log.Timber
 
 /**
  * MembraneRTC client.
@@ -31,8 +30,8 @@ import timber.log.Timber
  * <p>
  * It is recommended to request necessary audio and video tracks before connecting to the room but it does not mean it can't be done afterwards (in case of screencast)
  * <p>
- * Once the user received <strong>onConnected</strong> notification they can call the <strong>connect</strong> method to initialize connecting to the session.
- * After receiving `onJoinSuccess` a user will receive notification about various endpoints connecting to/leaving the session, new tracks being published and ready for playback
+ * Once the user created MembraneRTC client, they can call the <strong>connect</strong> method to initialize connecting to the session.
+ * After receiving `onConnected` a user will receive notification about various endpoints connecting to/leaving the session, new tracks being published and ready for playback
  * or going inactive.
  */
 class MembraneRTC
@@ -40,8 +39,8 @@ private constructor(
     private var client: InternalMembraneRTC
 ) {
     /**
-     * Tries to connect the RTC Engine. If user is accepted then onJoinSuccess will be called.
-     * In other case {@link Callbacks.onJoinError} is invoked.
+     * Tries to connect the RTC Engine. If user is accepted then onConnected will be called.
+     * In other case {@link Callbacks.onConnectError} is invoked.
      * <p>
      * @param endpointMetadata - Any information that other endpoints will receive in onEndpointAdded
      * after accepting this endpoint
@@ -67,7 +66,6 @@ private constructor(
      * @param mediaEvent - String data received over custom signalling layer.
      */
     fun receiveMediaEvent(mediaEvent: SerializedMediaEvent) {
-        Timber.e("KOLANKO")
         client.receiveMediaEvent(mediaEvent)
     }
 

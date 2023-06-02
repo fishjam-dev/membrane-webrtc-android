@@ -72,6 +72,10 @@ constructor(
         )
     }
 
+    fun disconnect() {
+        sendEvent(Disconnect())
+    }
+
     private fun sendEvent(event: SendableEvent) {
         val serializedMediaEvent = gson.toJson(event.serializeToMap())
         engineListener.onSendMediaEvent(serializedMediaEvent)
@@ -96,7 +100,9 @@ constructor(
             is Connected -> engineListener.onConnected(event.data.id, event.data.otherEndpoints)
             is OfferData -> engineListener.onOfferData(event.data.integratedTurnServers, event.data.tracksTypes)
             is EndpointRemoved -> engineListener.onEndpointRemoved(event.data.id)
-            is EndpointAdded -> engineListener.onEndpointAdded(Endpoint(event.data.id, event.data.metadata, mapOf()))
+            is EndpointAdded -> engineListener.onEndpointAdded(
+                Endpoint(event.data.id, event.data.type, event.data.metadata, mapOf())
+            )
             is EndpointUpdated -> engineListener.onEndpointUpdated(event.data.id, event.data.metadata)
             is RemoteCandidate -> engineListener.onRemoteCandidate(
                 event.data.candidate,
@@ -105,14 +111,14 @@ constructor(
             )
             is SdpAnswer -> engineListener.onSdpAnswer(event.data.type, event.data.sdp, event.data.midToTrackId)
             is TrackUpdated -> engineListener.onTrackUpdated(
-                event.data.id,
+                event.data.endpointId,
                 event.data.trackId,
                 event.data.metadata
             )
-            is TracksAdded -> engineListener.onTracksAdded(event.data.id, event.data.trackIdToMetadata)
-            is TracksRemoved -> engineListener.onTracksRemoved(event.data.id, event.data.trackIds)
+            is TracksAdded -> engineListener.onTracksAdded(event.data.endpointId, event.data.trackIdToMetadata)
+            is TracksRemoved -> engineListener.onTracksRemoved(event.data.endpointId, event.data.trackIds)
             is EncodingSwitched -> engineListener.onTrackEncodingChanged(
-                event.data.id,
+                event.data.endpointId,
                 event.data.trackId,
                 event.data.encoding,
                 event.data.reason

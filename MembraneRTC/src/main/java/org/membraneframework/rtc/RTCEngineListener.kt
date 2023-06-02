@@ -18,7 +18,6 @@ internal interface RTCEngineListener {
     fun onTracksRemoved(endpointId: String, trackIds: List<String>)
     fun onTrackUpdated(endpointId: String, trackId: String, metadata: Metadata)
     fun onTrackEncodingChanged(endpointId: String, trackId: String, encoding: String, encodingReason: String)
-    fun onRemoved(endpointId: String, reason: String)
     fun onVadNotification(trackId: String, status: String)
     fun onBandwidthEstimation(estimation: Long)
 }

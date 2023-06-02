@@ -101,8 +101,6 @@ class PhoenixTransport constructor(
             }
 
         channel?.on("mediaEvent") { message ->
-            Timber.e(message.toString())
-            Timber.e("MAREK")
             val data = message.payload["data"] as String
             listener.onEvent(data)
         }
@@ -112,7 +110,7 @@ class PhoenixTransport constructor(
         }
     }
 
-    suspend fun disconnect() {
+    fun disconnect() {
         if (channel != null) {
             channel
                 ?.leave()
@@ -124,7 +122,7 @@ class PhoenixTransport constructor(
         }
     }
 
-    suspend fun send(event: SerializedMediaEvent) {
+    fun send(event: SerializedMediaEvent) {
         val payload = mapOf(
             "data" to event
         )

@@ -445,7 +445,6 @@ internal class PeerConnectionManager
 
     override fun onAddTrack(receiver: RtpReceiver?, mediaStreams: Array<out MediaStream>?) {
         var trackId: String? = null
-        Timber.e("XDXDXDXDXDDXXD")
         coroutineScope.launch {
             peerConnectionMutex.withLock {
                 val pc = peerConnection ?: return@launch
