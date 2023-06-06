@@ -146,7 +146,6 @@ class RoomViewModel(
     // TODO: we should preserve some order...
     private fun emitParticipants() {
         val candidates = mutableParticipants.values
-        Timber.e(candidates.toString())
 
         if (candidates.isNotEmpty()) {
             val primary = candidates.first()
@@ -418,18 +417,18 @@ class RoomViewModel(
         )
 
         emitParticipants()
-        Timber.i("Endpoint has joined the room $endpoint")
+        Timber.i("Endpoint $endpoint has been added")
     }
 
     override fun onEndpointRemoved(endpoint: Endpoint) {
         mutableParticipants.remove(endpoint.id)
 
         emitParticipants()
-        Timber.i("Endpoint has left the room $endpoint")
+        Timber.i("Endpoint $endpoint has been removed")
     }
 
     override fun onEndpointUpdated(endpoint: Endpoint) {
-        Timber.i("Endpoint has updated $endpoint")
+        Timber.i("Endpoint $endpoint has been updated")
     }
 
     fun startScreencast(mediaProjectionPermission: Intent) {
