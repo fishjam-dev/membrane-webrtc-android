@@ -5,6 +5,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import org.membraneframework.rtc.events.*
+import org.membraneframework.rtc.models.Endpoint
 import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.SerializedMediaEvent
 import timber.log.Timber
@@ -23,12 +24,12 @@ constructor(
         ): RTCEngineCommunication
     }
 
-    fun join(peerMetadata: Metadata) {
-        sendEvent(Join(peerMetadata))
+    fun connect(endpointMetadata: Metadata) {
+        sendEvent(Connect(endpointMetadata))
     }
 
-    fun updatePeerMetadata(peerMetadata: Metadata) {
-        sendEvent(UpdatePeerMetadata(peerMetadata))
+    fun updateEndpointMetadata(endpointMetadata: Metadata) {
+        sendEvent(UpdateEndpointMetadata(endpointMetadata))
     }
 
     fun updateTrackMetadata(trackId: String, trackMetadata: Metadata) {
@@ -71,6 +72,10 @@ constructor(
         )
     }
 
+    fun disconnect() {
+        sendEvent(Disconnect())
+    }
+
     private fun sendEvent(event: SendableEvent) {
         val serializedMediaEvent = gson.toJson(event.serializeToMap())
         engineListener.onSendMediaEvent(serializedMediaEvent)
@@ -91,24 +96,28 @@ constructor(
 
     fun onEvent(serializedEvent: SerializedMediaEvent) {
         when (val event = decodeEvent(serializedEvent)) {
+            is Connected -> engineListener.onConnected(event.data.id, event.data.otherEndpoints)
             is OfferData -> engineListener.onOfferData(event.data.integratedTurnServers, event.data.tracksTypes)
-            is PeerAccepted -> engineListener.onPeerAccepted(event.data.id, event.data.peersInRoom)
-            is PeerRemoved -> engineListener.onRemoved(event.data.peerId, event.data.reason)
-            is PeerDenied -> engineListener.onPeerDenied()
-            is PeerJoined -> engineListener.onPeerJoined(event.data.peer)
-            is PeerLeft -> engineListener.onPeerLeft(event.data.peerId)
-            is PeerUpdated -> engineListener.onPeerUpdated(event.data.peerId, event.data.metadata)
+            is EndpointRemoved -> engineListener.onEndpointRemoved(event.data.id)
+            is EndpointAdded -> engineListener.onEndpointAdded(
+                Endpoint(event.data.id, event.data.type, event.data.metadata, mapOf())
+            )
+            is EndpointUpdated -> engineListener.onEndpointUpdated(event.data.id, event.data.metadata)
             is RemoteCandidate -> engineListener.onRemoteCandidate(
                 event.data.candidate,
                 event.data.sdpMLineIndex,
                 event.data.sdpMid
             )
             is SdpAnswer -> engineListener.onSdpAnswer(event.data.type, event.data.sdp, event.data.midToTrackId)
-            is TrackUpdated -> engineListener.onTrackUpdated(event.data.peerId, event.data.trackId, event.data.metadata)
-            is TracksAdded -> engineListener.onTracksAdded(event.data.peerId, event.data.trackIdToMetadata)
-            is TracksRemoved -> engineListener.onTracksRemoved(event.data.peerId, event.data.trackIds)
+            is TrackUpdated -> engineListener.onTrackUpdated(
+                event.data.endpointId,
+                event.data.trackId,
+                event.data.metadata
+            )
+            is TracksAdded -> engineListener.onTracksAdded(event.data.endpointId, event.data.trackIdToMetadata)
+            is TracksRemoved -> engineListener.onTracksRemoved(event.data.endpointId, event.data.trackIds)
             is EncodingSwitched -> engineListener.onTrackEncodingChanged(
-                event.data.peerId,
+                event.data.endpointId,
                 event.data.trackId,
                 event.data.encoding,
                 event.data.reason

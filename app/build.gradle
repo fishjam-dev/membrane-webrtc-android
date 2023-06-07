@@ -20,7 +20,7 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
-        buildConfigField "String" , "VIDEOROOM_URL" ,  "\"https://videoroom.membrane.work/socket\""
+        buildConfigField "String" , "VIDEOROOM_URL" , "\"https://videoroom.membrane.work/socket\""
     }
 
     buildTypes {

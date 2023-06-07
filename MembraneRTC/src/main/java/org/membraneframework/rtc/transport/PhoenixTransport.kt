@@ -110,7 +110,7 @@ class PhoenixTransport constructor(
         }
     }
 
-    suspend fun disconnect() {
+    fun disconnect() {
         if (channel != null) {
             channel
                 ?.leave()
@@ -122,12 +122,10 @@ class PhoenixTransport constructor(
         }
     }
 
-    suspend fun send(event: SerializedMediaEvent) {
-        coroutineScope.async {
-            val payload = mapOf(
-                "data" to event
-            )
-            channel?.push("mediaEvent", payload)
-        }
+    fun send(event: SerializedMediaEvent) {
+        val payload = mapOf(
+            "data" to event
+        )
+        channel?.push("mediaEvent", payload)
     }
 }
