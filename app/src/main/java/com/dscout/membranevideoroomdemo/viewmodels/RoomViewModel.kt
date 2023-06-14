@@ -101,7 +101,7 @@ class RoomViewModel(
                 listener = this@RoomViewModel
             )
 
-            setupTracksAndJoinRoom()
+            room.value?.connect(mapOf("displayName" to (localDisplayName ?: "")))
         }
     }
 
@@ -206,7 +206,7 @@ class RoomViewModel(
         }
     }
 
-    private fun setupTracksAndJoinRoom() {
+    private fun setupTracks() {
         room.value?.let {
             localAudioTrack = it.createAudioTrack(
                 mapOf(
@@ -238,8 +238,6 @@ class RoomViewModel(
                 )
             )
 
-            it.connect(mapOf("displayName" to (localDisplayName ?: "")))
-
             isCameraOn.value = localVideoTrack?.enabled() ?: false
             isMicrophoneOn.value = localAudioTrack?.enabled() ?: false
 
@@ -252,8 +250,6 @@ class RoomViewModel(
                 participant.videoTrack?.id(),
                 mapOf("active" to isCameraOn.value)
             )
-
-            emitParticipants()
         }
     }
 
@@ -270,6 +266,7 @@ class RoomViewModel(
             )
         }
 
+        setupTracks()
         emitParticipants()
     }
 

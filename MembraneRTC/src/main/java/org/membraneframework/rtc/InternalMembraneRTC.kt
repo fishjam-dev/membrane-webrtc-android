@@ -42,7 +42,7 @@ constructor(
 ) : RTCEngineListener, PeerConnectionListener {
     private val rtcEngineCommunication = rtcEngineCommunicationFactory.create(this)
     private val peerConnectionFactoryWrapper = peerConnectionFactoryWrapperFactory.create(createOptions)
-    private val endpointConnectionManager = peerConnectionManagerFactory.create(
+    private val peerConnectionManager = peerConnectionManagerFactory.create(
         this,
         peerConnectionFactoryWrapper
     )
@@ -83,7 +83,7 @@ constructor(
             localTracksMutex.withLock {
                 localTracks.forEach { it.stop() }
             }
-            endpointConnectionManager.close()
+            peerConnectionManager.close()
         }
     }
 
@@ -115,6 +115,12 @@ constructor(
 
         localTracks.add(videoTrack)
         localEndpoint = localEndpoint.withTrack(videoTrack.id(), metadata)
+
+        coroutineScope.launch {
+            peerConnectionManager.addTrack(videoTrack)
+            rtcEngineCommunication.renegotiateTracks()
+        }
+
         return videoTrack
     }
 
@@ -129,18 +135,23 @@ constructor(
         localTracks.add(audioTrack)
         localEndpoint = localEndpoint.withTrack(audioTrack.id(), metadata)
 
+        coroutineScope.launch {
+            peerConnectionManager.addTrack(audioTrack)
+            rtcEngineCommunication.renegotiateTracks()
+        }
+
         return audioTrack
     }
 
     fun setTrackBandwidth(trackId: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         coroutineScope.launch {
-            endpointConnectionManager.setTrackBandwidth(trackId, bandwidthLimit)
+            peerConnectionManager.setTrackBandwidth(trackId, bandwidthLimit)
         }
     }
 
     fun setEncodingBandwidth(trackId: String, encoding: String, bandwidthLimit: TrackBandwidthLimit.BandwidthLimit) {
         coroutineScope.launch {
-            endpointConnectionManager.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
+            peerConnectionManager.setEncodingBandwidth(trackId, encoding, bandwidthLimit)
         }
     }
 
@@ -170,10 +181,8 @@ constructor(
             screencastTrack.start()
         }
 
-        val streamIds = listOf(UUID.randomUUID().toString())
-
         coroutineScope.launch {
-            endpointConnectionManager.addTrack(screencastTrack, streamIds)
+            peerConnectionManager.addTrack(screencastTrack)
             rtcEngineCommunication.renegotiateTracks()
         }
 
@@ -188,7 +197,7 @@ constructor(
                     return@runBlocking false
                 }
 
-                endpointConnectionManager.removeTrack(track.id())
+                peerConnectionManager.removeTrack(track.id())
 
                 localTracks.remove(track)
                 localEndpoint = localEndpoint.withoutTrack(trackId)
@@ -227,10 +236,6 @@ constructor(
 
                 this.listener.onTrackAdded(context)
             }
-        }
-
-        coroutineScope.launch {
-            rtcEngineCommunication.renegotiateTracks()
         }
     }
 
@@ -283,7 +288,7 @@ constructor(
             try {
                 val offer =
                     localTracksMutex.withLock {
-                        endpointConnectionManager.getSdpOffer(integratedTurnServers, tracksTypes, localTracks)
+                        peerConnectionManager.getSdpOffer(integratedTurnServers, tracksTypes, localTracks)
                     }
                 rtcEngineCommunication.sdpOffer(
                     offer.description,
@@ -298,7 +303,7 @@ constructor(
 
     override fun onSdpAnswer(type: String, sdp: String, midToTrackId: Map<String, String>) {
         coroutineScope.launch {
-            endpointConnectionManager.onSdpAnswer(sdp, midToTrackId)
+            peerConnectionManager.onSdpAnswer(sdp, midToTrackId)
 
             localTracksMutex.withLock {
                 // temporary workaround, the backend doesn't add ~ in sdp answer
@@ -312,7 +317,7 @@ constructor(
                     }
                     listOf(TrackEncoding.L, TrackEncoding.M, TrackEncoding.H).forEach {
                         if (config?.activeEncodings?.contains(it) == false) {
-                            endpointConnectionManager.setTrackEncoding(localTrack.id(), it, false)
+                            peerConnectionManager.setTrackEncoding(localTrack.id(), it, false)
                         }
                     }
                 }
@@ -328,7 +333,7 @@ constructor(
                 candidate
             )
 
-            endpointConnectionManager.onRemoteCandidate(iceCandidate)
+            peerConnectionManager.onRemoteCandidate(iceCandidate)
         }
     }
 
@@ -439,13 +444,13 @@ constructor(
 
     fun enableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         coroutineScope.launch {
-            endpointConnectionManager.setTrackEncoding(trackId, encoding, true)
+            peerConnectionManager.setTrackEncoding(trackId, encoding, true)
         }
     }
 
     fun disableTrackEncoding(trackId: String, encoding: TrackEncoding) {
         coroutineScope.launch {
-            endpointConnectionManager.setTrackEncoding(trackId, encoding, false)
+            peerConnectionManager.setTrackEncoding(trackId, encoding, false)
         }
     }
 
@@ -476,6 +481,6 @@ constructor(
     }
 
     fun getStats(): Map<String, RTCStats> {
-        return endpointConnectionManager.getStats()
+        return peerConnectionManager.getStats()
     }
 }
