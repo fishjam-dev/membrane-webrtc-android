@@ -59,11 +59,11 @@
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">MembraneRTC</a></div><p class="paragraph">MembraneRTC client.</p><p>
 The client is responsible for relaying MembraneRTC Engine specific messages through given reliable transport layer.
 Once initialized, the client is responsible for exchanging necessary messages via provided <strong>EventTransport</strong> passed via `ConnectOptions` and managing underlying
-`PeerConnection`. The goal of the client is to be as lean as possible, meaning that all activities regarding the session such as moderating
+`EndpointConnection`. The goal of the client is to be as lean as possible, meaning that all activities regarding the session such as moderating
 should be implemented by the user himself on top of the <strong>MembraneRTC</strong>.
 <p>
-The user's ability of interacting with the client is greatly limited to the essential actions such as joining/leaving the session,
-adding/removing local tracks and receiving information about remote peers and their tracks that can be played by the user.
+The user's ability of interacting with the client is greatly limited to the essential actions such as connecting to/leaving the session,
+adding/removing local tracks and receiving information about remote endpoints and their tracks that can be played by the user.
 <p>
 User can request 3 different types of local tracks that will get forwarded to the server by the client:
 <ul>
@@ -72,10 +72,10 @@ User can request 3 different types of local tracks that will get forwarded to th
 <li>`LocalScreencast` - a screencast track capturing a device's screen using <string>MediaProjection</strong> mechanism</li>
 </ul>
 <p>
-It is recommended to request necessary audio and video tracks before joining the room but it does not mean it can't be done afterwards (in case of screencast)
+It is recommended to request necessary audio and video tracks before connecting to the room but it does not mean it can't be done afterwards (in case of screencast)
 <p>
-Once the user received <strong>onConnected</strong> notification they can call the <strong>join</strong> method to initialize joining the session.
-After receiving `onJoinSuccess` a user will receive notification about various peers joining/leaving the session, new tracks being published and ready for playback
+Once the user created MembraneRTC client, they can call the <strong>connect</strong> method to initialize connecting to the session.
+After receiving `onConnected` a user will receive notification about various endpoints connecting to/leaving the session, new tracks being published and ready for playback
 or going inactive.</div></div>
   </div>
   <div class="tabbedcontent">
@@ -110,6 +110,21 @@ or going inactive.</div></div>
             <div>
               <div class="title">
                 <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="change-web-r-t-c-logging-severity.html"><span class="token function">changeWebRTCLoggingSeverity</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">severity<span class="token operator">: </span><span data-unresolved-link="org.webrtc/Logging.Severity///PointingToDeclaration/">Logging.Severity</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Changes severity level of debug logs</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="815302532%2FFunctions%2F-1503147058" anchor-label="connect" id="815302532%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="connect.html"><span><span>connect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="815302532%2FFunctions%2F-1503147058"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="connect.html"><span class="token function">connect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">endpointMetadata<span class="token operator">: </span><a href="../../org.membraneframework.rtc.utils/index.html#1170992874%2FClasslikes%2F-1503147058">Metadata</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Tries to connect the RTC Engine. If user is accepted then onConnected will be called. In other case {@link Callbacks.onConnectError} is invoked.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -219,17 +234,17 @@ or going inactive.</div></div>
             </div>
           </div>
         </div>
-<a data-name="-1747288937%2FFunctions%2F-1503147058" anchor-label="join" id="-1747288937%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+<a data-name="431002564%2FFunctions%2F-1503147058" anchor-label="receiveMediaEvent" id="431002564%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
         <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="join.html"><span><span>join</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1747288937%2FFunctions%2F-1503147058"></span>
+                <div><a href="receive-media-event.html"><span>receive</span><wbr></wbr><span>Media</span><wbr></wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="431002564%2FFunctions%2F-1503147058"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="join.html"><span class="token function">join</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Starts the join process.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="receive-media-event.html"><span class="token function">receiveMediaEvent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mediaEvent<span class="token operator">: </span><a href="../../org.membraneframework.rtc.utils/index.html#-2051218753%2FClasslikes%2F-1503147058">SerializedMediaEvent</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Feeds media event received from RTC Engine to MembraneWebRTC. This function should be called whenever some media event from RTC Engine was received and can result in MembraneWebRTC generating some other media events.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -294,17 +309,17 @@ or going inactive.</div></div>
             </div>
           </div>
         </div>
-<a data-name="74487132%2FFunctions%2F-1503147058" anchor-label="updatePeerMetadata" id="74487132%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
+<a data-name="1806424073%2FFunctions%2F-1503147058" anchor-label="updateEndpointMetadata" id="1806424073%2FFunctions%2F-1503147058" data-filterable-set=":MembraneRTC:dokkaHtml/release"></a>
         <div class="table-row" data-filterable-current=":MembraneRTC:dokkaHtml/release" data-filterable-set=":MembraneRTC:dokkaHtml/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="update-peer-metadata.html"><span>update</span><wbr></wbr><span>Peer</span><wbr></wbr><span><span>Metadata</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="74487132%2FFunctions%2F-1503147058"></span>
+                <div><a href="update-endpoint-metadata.html"><span>update</span><wbr></wbr><span>Endpoint</span><wbr></wbr><span><span>Metadata</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1806424073%2FFunctions%2F-1503147058"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="update-peer-metadata.html"><span class="token function">updatePeerMetadata</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">peerMetadata<span class="token operator">: </span><a href="../../org.membraneframework.rtc.utils/index.html#1170992874%2FClasslikes%2F-1503147058">Metadata</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the metadata for the current peer.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MembraneRTC:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="update-endpoint-metadata.html"><span class="token function">updateEndpointMetadata</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">endpointMetadata<span class="token operator">: </span><a href="../../org.membraneframework.rtc.utils/index.html#1170992874%2FClasslikes%2F-1503147058">Metadata</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the metadata for the current endpoint.</p></div></div></div>
               </div>
             </div>
           </div>
