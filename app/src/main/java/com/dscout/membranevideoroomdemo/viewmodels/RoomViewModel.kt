@@ -10,21 +10,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.membraneframework.rtc.*
 import org.membraneframework.rtc.media.*
-import org.membraneframework.rtc.models.Peer
+import org.membraneframework.rtc.models.Endpoint
 import org.membraneframework.rtc.models.TrackContext
 import org.membraneframework.rtc.transport.PhoenixTransport
+import org.membraneframework.rtc.transport.PhoenixTransportError
+import org.membraneframework.rtc.transport.PhoenixTransportListener
+import org.membraneframework.rtc.utils.SerializedMediaEvent
 import timber.log.Timber
 import java.util.*
 
 class RoomViewModel(
     val url: String,
     application: Application
-) : AndroidViewModel(application), MembraneRTCListener {
+) : AndroidViewModel(application), MembraneRTCListener, PhoenixTransportListener {
     // media tracks
     var localAudioTrack: LocalAudioTrack? = null
     var localVideoTrack: LocalVideoTrack? = null
     var localScreencastTrack: LocalScreencastTrack? = null
-    private val localPeerId: String = UUID.randomUUID().toString()
+    private val localEndpointId: String = UUID.randomUUID().toString()
 
     var localDisplayName: String? = null
 
@@ -44,6 +47,8 @@ class RoomViewModel(
 
     private val globalToLocalTrackId = HashMap<String, String>()
     private val params = mapOf<String, Any>("token" to "mocktoken")
+
+    private lateinit var transport: PhoenixTransport
 
     val videoSimulcastConfig = MutableStateFlow(
         SimulcastConfig(
@@ -67,30 +72,43 @@ class RoomViewModel(
             // disconnect from the current view
             room.value?.disconnect()
 
-            room.value = MembraneRTC.connect(
+            val transport = PhoenixTransport(
+                url,
+                "room:$roomName",
+                Dispatchers.IO,
+                params,
+                mapOf("isSimulcastOn" to true)
+            )
+
+            try {
+                transport.connect(this@RoomViewModel)
+            } catch (e: Exception) {
+                Timber.i(e, "Failed to connect")
+
+                errorMessage.value = "Encountered an error, go back and try again..."
+                return@launch
+            }
+
+            this@RoomViewModel.transport = transport
+
+            room.value = MembraneRTC.create(
                 appContext = getApplication(),
-                options = ConnectOptions(
-                    transport = PhoenixTransport(
-                        url,
-                        "room:$roomName",
-                        Dispatchers.IO,
-                        params,
-                        mapOf("isSimulcastOn" to true)
-                    ),
-                    config = mapOf("displayName" to displayName),
+                options = CreateOptions(
                     encoderOptions = EncoderOptions(
                         encoderType = EncoderType.SOFTWARE
                     )
                 ),
                 listener = this@RoomViewModel
             )
+
+            room.value?.connect(mapOf("displayName" to (localDisplayName ?: "")))
         }
     }
 
     fun disconnect() {
         room.value?.disconnect()
-
         room.value = null
+        transport.disconnect()
     }
 
     fun focusVideo(participantId: String) {
@@ -148,9 +166,9 @@ class RoomViewModel(
             room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "audio"))
         }
 
-        val p = mutableParticipants[localPeerId]
+        val p = mutableParticipants[localEndpointId]
         if (p != null) {
-            mutableParticipants[localPeerId] = p.updateTrackMetadata(
+            mutableParticipants[localEndpointId] = p.updateTrackMetadata(
                 p.audioTrack?.id(),
                 mapOf("active" to isMicrophoneOn.value)
             )
@@ -167,9 +185,9 @@ class RoomViewModel(
             room.value?.updateTrackMetadata(it.id(), mapOf("active" to enabled, "type" to "camera"))
         }
 
-        val p = mutableParticipants[localPeerId]
+        val p = mutableParticipants[localEndpointId]
         if (p != null) {
-            mutableParticipants[localPeerId] = p.updateTrackMetadata(
+            mutableParticipants[localEndpointId] = p.updateTrackMetadata(
                 p.videoTrack?.id(),
                 mapOf("active" to isCameraOn.value)
             )
@@ -182,8 +200,13 @@ class RoomViewModel(
         localVideoTrack?.flipCamera()
     }
 
-    // MembraneRTCListener callbacks
-    override fun onConnected() {
+    override fun onSendMediaEvent(event: SerializedMediaEvent) {
+        viewModelScope.launch {
+            this@RoomViewModel.transport.send(event)
+        }
+    }
+
+    private fun setupTracks() {
         room.value?.let {
             localAudioTrack = it.createAudioTrack(
                 mapOf(
@@ -215,29 +238,26 @@ class RoomViewModel(
                 )
             )
 
-            it.join()
-
             isCameraOn.value = localVideoTrack?.enabled() ?: false
             isMicrophoneOn.value = localAudioTrack?.enabled() ?: false
 
-            val participant = Participant(localPeerId, "Me", localVideoTrack, localAudioTrack)
+            val participant = Participant(localEndpointId, "Me", localVideoTrack, localAudioTrack)
 
-            mutableParticipants[localPeerId] = participant.updateTrackMetadata(
+            mutableParticipants[localEndpointId] = participant.updateTrackMetadata(
                 participant.audioTrack?.id(),
                 mapOf("active" to isMicrophoneOn.value)
             ).updateTrackMetadata(
                 participant.videoTrack?.id(),
                 mapOf("active" to isCameraOn.value)
             )
-
-            emitParticipants()
         }
     }
 
-    override fun onJoinSuccess(peerID: String, peersInRoom: List<Peer>) {
+    // MembraneRTCListener callbacks
+    override fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>) {
         Timber.i("Successfully join the room")
 
-        peersInRoom.forEach {
+        otherEndpoints.forEach {
             mutableParticipants[it.id] = Participant(
                 it.id,
                 it.metadata["displayName"] as? String ?: "UNKNOWN",
@@ -246,15 +266,21 @@ class RoomViewModel(
             )
         }
 
+        setupTracks()
         emitParticipants()
     }
 
-    override fun onJoinError(metadata: Any) {
-        Timber.e("User has been denied to join the room")
+    override fun onDisconnected() {
+        room.value = null
+        transport.disconnect()
+    }
+
+    override fun onConnectError(metadata: Any) {
+        Timber.e("User has been denied to connect to the room")
     }
 
     override fun onTrackReady(ctx: TrackContext) {
-        val participant = mutableParticipants[ctx.peer.id] ?: return
+        val participant = mutableParticipants[ctx.endpoint.id] ?: return
 
         val (id, newParticipant) = when (ctx.track) {
             is RemoteVideoTrack -> {
@@ -272,7 +298,7 @@ class RoomViewModel(
                 } else {
                     val p = participant.copy(videoTrack = ctx.track as RemoteVideoTrack)
                     Pair(
-                        ctx.peer.id,
+                        ctx.endpoint.id,
                         p.copy(
                             tracksMetadata = p.tracksMetadata + (
                                 (
@@ -288,7 +314,7 @@ class RoomViewModel(
                 globalToLocalTrackId[ctx.trackId] = (ctx.track as RemoteAudioTrack).id()
                 val p = participant.copy(audioTrack = ctx.track as RemoteAudioTrack)
                 Pair(
-                    ctx.peer.id,
+                    ctx.endpoint.id,
                     p.copy(
                         tracksMetadata = p.tracksMetadata + (
                             (
@@ -308,9 +334,9 @@ class RoomViewModel(
         emitParticipants()
 
         ctx.setOnVoiceActivityChangedListener {
-            val p = mutableParticipants[it.peer.id]
+            val p = mutableParticipants[it.endpoint.id]
             if (p != null) {
-                mutableParticipants[it.peer.id] = p.copy(vadStatus = it.vadStatus)
+                mutableParticipants[it.endpoint.id] = p.copy(vadStatus = it.vadStatus)
                 emitParticipants()
             }
         }
@@ -330,8 +356,8 @@ class RoomViewModel(
 
             emitParticipants()
         } else {
-            val participant = mutableParticipants[ctx.peer.id]
-                ?: throw IllegalArgumentException("No participant with id ${ctx.peer.id}")
+            val participant = mutableParticipants[ctx.endpoint.id]
+                ?: throw IllegalArgumentException("No participant with id ${ctx.endpoint.id}")
 
             val localTrackId = globalToLocalTrackId[ctx.trackId]
             val audioTrackId = participant.audioTrack?.id()
@@ -346,13 +372,13 @@ class RoomViewModel(
 
                 else ->
                     throw IllegalArgumentException(
-                        "Track ${ctx.trackId} has not been found for given peer ${ctx.peer.id}"
+                        "Track ${ctx.trackId} has not been found for given endpoint ${ctx.endpoint.id}"
                     )
             }
 
             globalToLocalTrackId.remove(ctx.trackId)
 
-            mutableParticipants[ctx.peer.id] = newParticipant
+            mutableParticipants[ctx.endpoint.id] = newParticipant
 
             emitParticipants()
         }
@@ -361,16 +387,16 @@ class RoomViewModel(
     }
 
     override fun onTrackUpdated(ctx: TrackContext) {
-        val p = mutableParticipants[ctx.peer.id]
+        val p = mutableParticipants[ctx.endpoint.id]
         if (p != null) {
             // Updates metadata of given track
             if (ctx.metadata["type"] == "camera") {
-                mutableParticipants[ctx.peer.id] = p.updateTrackMetadata(
+                mutableParticipants[ctx.endpoint.id] = p.updateTrackMetadata(
                     p.videoTrack?.id(),
                     ctx.metadata
                 )
             } else {
-                mutableParticipants[ctx.peer.id] = p.updateTrackMetadata(
+                mutableParticipants[ctx.endpoint.id] = p.updateTrackMetadata(
                     p.audioTrack?.id(),
                     ctx.metadata
                 )
@@ -381,30 +407,25 @@ class RoomViewModel(
         Timber.i("Track has been updated $ctx")
     }
 
-    override fun onPeerJoined(peer: Peer) {
-        mutableParticipants[peer.id] = Participant(
-            id = peer.id,
-            displayName = peer.metadata["displayName"] as? String ?: "UNKNOWN"
+    override fun onEndpointAdded(endpoint: Endpoint) {
+        mutableParticipants[endpoint.id] = Participant(
+            id = endpoint.id,
+            displayName = endpoint.metadata["displayName"] as? String ?: "UNKNOWN"
         )
 
         emitParticipants()
-        Timber.i("Peer has joined the room $peer")
+        Timber.i("Endpoint $endpoint has been added")
     }
 
-    override fun onPeerLeft(peer: Peer) {
-        mutableParticipants.remove(peer.id)
+    override fun onEndpointRemoved(endpoint: Endpoint) {
+        mutableParticipants.remove(endpoint.id)
 
         emitParticipants()
-        Timber.i("Peer has left the room $peer")
+        Timber.i("Endpoint $endpoint has been removed")
     }
 
-    override fun onPeerUpdated(peer: Peer) {
-        Timber.i("Peer has updated $peer")
-    }
-
-    override fun onError(error: MembraneRTCError) {
-        Timber.e("Encountered an error $error")
-        errorMessage.value = "Encountered an error, go back and try again..."
+    override fun onEndpointUpdated(endpoint: Endpoint) {
+        Timber.i("Endpoint $endpoint has been updated")
     }
 
     fun startScreencast(mediaProjectionPermission: Intent) {
@@ -478,5 +499,17 @@ class RoomViewModel(
 
     fun toggleScreencastTrackEncoding(encoding: TrackEncoding) {
         localScreencastTrack?.id()?.let { toggleTrackEncoding(screencastSimulcastConfig, it, encoding) }
+    }
+
+    override fun onEvent(event: SerializedMediaEvent) {
+        room.value?.receiveMediaEvent(event)
+    }
+
+    override fun onError(error: PhoenixTransportError) {
+        Timber.e("Encountered an error $error")
+        errorMessage.value = "Encountered an error, go back and try again..."
+    }
+
+    override fun onClose() {
     }
 }

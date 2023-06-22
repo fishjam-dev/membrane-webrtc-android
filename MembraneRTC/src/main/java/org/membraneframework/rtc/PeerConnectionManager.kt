@@ -51,6 +51,8 @@ internal class PeerConnectionManager
     private val coroutineScope: CoroutineScope =
         ClosableCoroutineScope(SupervisorJob())
 
+    private var streamIds: List<String> = listOf(UUID.randomUUID().toString())
+
     private fun getSendEncodingsFromConfig(simulcastConfig: SimulcastConfig): List<RtpParameters.Encoding> {
         val sendEncodings = Constants.simulcastEncodings()
         simulcastConfig.activeEncodings.forEach {
@@ -59,7 +61,11 @@ internal class PeerConnectionManager
         return sendEncodings
     }
 
-    suspend fun addTrack(track: LocalTrack, streamIds: List<String>) {
+    suspend fun addTrack(track: LocalTrack) {
+        addTrack(track, streamIds)
+    }
+
+    private suspend fun addTrack(track: LocalTrack, streamIds: List<String>) {
         val videoParameters =
             (track as? LocalVideoTrack)?.videoParameters ?: (track as? LocalScreencastTrack)?.videoParameters
 
@@ -207,8 +213,6 @@ internal class PeerConnectionManager
         peerConnectionMutex.withLock {
             this@PeerConnectionManager.peerConnection = pc
         }
-
-        val streamIds = listOf(UUID.randomUUID().toString())
 
         localTracks.forEach {
             addTrack(it, streamIds)
@@ -379,7 +383,10 @@ internal class PeerConnectionManager
             }
             val params = sender.parameters
             val encoding = params?.encodings?.find { it.rid == trackEncoding.rid } ?: run {
-                Timber.e("setTrackEncoding: Invalid encoding $trackEncoding, no such encoding found in peer connection")
+                Timber.e(
+                    "setTrackEncoding: Invalid encoding $trackEncoding," +
+                        "no such encoding found in peer connection"
+                )
                 return
             }
             encoding.active = enabled
