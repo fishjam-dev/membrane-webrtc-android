@@ -1,5 +1,7 @@
 # membrane-webrtc-android
 
+[![Run lint & tests](https://github.com/jellyfish-dev/membrane-webrtc-android/actions/workflows/run_lint_and_tests.yaml/badge.svg)](https://github.com/jellyfish-dev/membrane-webrtc-android/actions/workflows/run_lint_and_tests.yaml)
+
 ## Components
 The repository consists of 2 components:
 - `MembraneRTC` - Standalone Membrane WebRTC client fully compatible with `Membrane RTC Engine` bases on a [web version](https://github.com/jellyfish-dev/membrane_rtc_engine)
@@ -23,7 +25,7 @@ The demo application consists of 2 activities:
 
 The user has the following control buttons at hand:
 - microphone mute/unmute toggle
-- camera video mute/unmute toggle
+- camera video enable/disable toggle
 - leave call button
 - front/back camera switch
 - screencast toggle
@@ -48,7 +50,7 @@ Add jitpack repo to your build.gradle:
 Add the dependency:
 ```gradle
 	dependencies {
-	  implementation 'com.github.membraneframework:membrane-webrtc-android:1.0.3'
+	  implementation 'com.github.membraneframework:membrane-webrtc-android:5.0.0'
 	}
 ```
 
