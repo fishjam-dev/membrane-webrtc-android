@@ -1,9 +1,24 @@
 package org.membraneframework.rtc.media
 
 import android.content.Context
+import android.util.Log
+import org.membraneframework.rtc.VideoEffectProcessor
+import org.membraneframework.rtc.VideoFrameProcessor
 import org.webrtc.*
 import timber.log.Timber
+import java.nio.ByteBuffer
 import java.util.*
+
+
+class videoFramePRocessor: VideoFrameProcessor {
+    override fun process(frame: VideoFrame?): VideoFrame {
+        Log.e("KAROL", "TUTUAJTJAJ")
+
+        val buffer = frame!!.buffer
+        Log.e("KAROL", "TAM")
+        return VideoFrame(buffer, 270, frame.timestampNs)
+    }
+}
 
 /**
  * A class representing a local video track.
@@ -39,6 +54,9 @@ constructor(
                 cameraName
             )
 
+            val frameProc = videoFramePRocessor()
+            val videoEffectProcessor = VideoEffectProcessor(frameProc)
+            source.setVideoProcessor(videoEffectProcessor)
             return LocalVideoTrack(track, capturer, eglBase, videoParameters)
         }
 
