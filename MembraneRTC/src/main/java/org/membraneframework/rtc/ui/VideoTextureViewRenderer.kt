@@ -10,7 +10,6 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
-import org.membraneframework.rtc.VideoEffectProcessor
 import org.webrtc.*
 import org.webrtc.RendererCommon.RendererEvents
 import org.webrtc.RendererCommon.ScalingType
@@ -19,7 +18,6 @@ import java.util.concurrent.CountDownLatch
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.roundToInt
-
 
 open class VideoTextureViewRenderer :
     TextureView,

@@ -6,11 +6,9 @@ import org.membraneframework.rtc.VideoEffectProcessor
 import org.membraneframework.rtc.VideoFrameProcessor
 import org.webrtc.*
 import timber.log.Timber
-import java.nio.ByteBuffer
 import java.util.*
 
-
-class videoFramePRocessor: VideoFrameProcessor {
+class videoFramePRocessor : VideoFrameProcessor {
     override fun process(frame: VideoFrame?): VideoFrame {
         Log.e("KAROL", "TUTUAJTJAJ")
 
