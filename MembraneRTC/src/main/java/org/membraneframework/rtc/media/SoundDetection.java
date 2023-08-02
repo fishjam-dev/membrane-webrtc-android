@@ -5,8 +5,6 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
-import org.membraneframework.rtc.models.VadStatus;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,7 +13,7 @@ import timber.log.Timber;
 public class SoundVolumeMonitor {
     private Timer timer;
     private AudioRecord audioRecord;
-    private OnSoundVolumeChangedListener onSoundVolumeChangedListener;
+    private OnSoundDetectedListener onSoundDetectedListener;
     public boolean isRecording = false;
     private int bufferSize;
     private final int volumeThreshold = -100;
@@ -58,24 +56,23 @@ public class SoundVolumeMonitor {
         }
     }
 
-    public void setSoundVolumeListener() {
+    public void setSoundDetectionListener() {
     }
 
-    public void setSoundVolumeListener(OnSoundVolumeChangedListener listener) {
-        onSoundVolumeChangedListener = listener;
+    public void setSoundDetectionListener(OnSoundDetectedListener listener) {
+        onSoundDetectedListener = listener;
     }
-    public void setIsSoundDetected(VadStatus newValue) {
-        onSoundVolumeChangedListener.onSoundVolumeChangedListener(newValue);
+
+    public void setIsSoundDetected(boolean newValue) {
+        onSoundDetectedListener.onSoundDetected(newValue);
     }
-    private void detectSound(int volumeValue){
-        detectSound(volumeThreshold,volumeValue);
+
+    private void detectSound(int volumeValue) {
+        detectSound(volumeThreshold, volumeValue);
     }
+
     private void detectSound(int volumeThreshold, int volumeValue) {
-        if (volumeValue > volumeThreshold) {
-            setIsSoundDetected(VadStatus.SPEECH);
-        } else {
-            setIsSoundDetected(VadStatus.SILENCE);
-        }
+        setIsSoundDetected(volumeValue > volumeThreshold);
     }
 
     private int getMaxAmplitude(short[] buffer, int bytesRead) {
