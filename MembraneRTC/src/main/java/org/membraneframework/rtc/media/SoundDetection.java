@@ -10,7 +10,7 @@ import java.util.TimerTask;
 
 import timber.log.Timber;
 
-public class SoundVolumeMonitor {
+public class SoundDetection {
     private Timer timer;
     private AudioRecord audioRecord;
     private OnSoundDetectedListener onSoundDetectedListener;
