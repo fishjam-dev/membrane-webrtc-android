@@ -14,8 +14,8 @@ public class SoundDetection {
     private Timer timer;
     private AudioRecord audioRecord;
     private OnSoundDetectedListener onSoundDetectedListener;
-    public boolean isRecording = false;
     private int bufferSize;
+    public boolean isRecording = false;
     private final int volumeThreshold = -100;
     private final int monitorInterval = 1;
     private final int samplingRate = 22050;
@@ -56,15 +56,14 @@ public class SoundDetection {
         }
     }
 
-    public void setSoundDetectionListener() {
-    }
-
     public void setSoundDetectionListener(OnSoundDetectedListener listener) {
         onSoundDetectedListener = listener;
     }
 
     public void setIsSoundDetected(boolean newValue) {
-        onSoundDetectedListener.onSoundDetected(newValue);
+        if (onSoundDetectedListener != null) {
+            onSoundDetectedListener.onSoundDetected(newValue);
+        }
     }
 
     private void detectSound(int volumeValue) {
@@ -77,8 +76,8 @@ public class SoundDetection {
 
     private int getMaxAmplitude(short[] buffer, int bytesRead) {
         int maxAmplitude = 0;
-        for (int sample : buffer) {
-            maxAmplitude = Math.max(maxAmplitude, Math.abs(sample));
+        for (int i = 0; i < bytesRead; i++) {
+            maxAmplitude = Math.max(maxAmplitude, Math.abs(buffer[i]));
         }
         return maxAmplitude;
     }
@@ -101,6 +100,8 @@ public class SoundDetection {
             public void run() {
                 short[] buffer = new short[bufferSize];
                 int bytesRead = readAudioData(buffer);
+                if (bytesRead == AudioRecord.ERROR_INVALID_OPERATION || bytesRead == AudioRecord.ERROR_BAD_VALUE)
+                    return;
                 int amplitude = getMaxAmplitude(buffer, bytesRead);
                 int value = calculateValue(amplitude);
                 detectSound(value);
