@@ -271,8 +271,6 @@ $dokka.location:org.membraneframework.rtc.media/LocalVideoTrack/videoParameters/
 $dokka.location:org.membraneframework.rtc.media/MediaTrackProvider///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-media-track-provider/index.html
 $dokka.location:org.membraneframework.rtc.media/MediaTrackProvider/id/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-media-track-provider/id.html
 $dokka.location:org.membraneframework.rtc.media/MediaTrackProvider/rtcTrack/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-media-track-provider/rtc-track.html
-$dokka.location:org.membraneframework.rtc.media/OnSoundDetectedListener///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-on-sound-detected-listener/index.html
-$dokka.location:org.membraneframework.rtc.media/OnSoundDetectedListener/onSoundDetected/#java.lang.Boolean/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-on-sound-detected-listener/on-sound-detected.html
 $dokka.location:org.membraneframework.rtc.media/RemoteAudioTrack///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-remote-audio-track/index.html
 $dokka.location:org.membraneframework.rtc.media/RemoteAudioTrack/RemoteAudioTrack/#org.webrtc.AudioTrack/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-remote-audio-track/-remote-audio-track.html
 $dokka.location:org.membraneframework.rtc.media/RemoteAudioTrack/enabled/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-remote-audio-track/enabled.html
@@ -284,12 +282,6 @@ $dokka.location:org.membraneframework.rtc.media/RemoteVideoTrack///PointingToDec
 $dokka.location:org.membraneframework.rtc.media/RemoteVideoTrack/RemoteVideoTrack/#org.webrtc.VideoTrack#org.webrtc.EglBase/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-remote-video-track/-remote-video-track.html
 $dokka.location:org.membraneframework.rtc.media/RemoteVideoTrack/enabled/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-remote-video-track/enabled.html
 $dokka.location:org.membraneframework.rtc.media/RemoteVideoTrack/setEnabled/#kotlin.Boolean/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-remote-video-track/set-enabled.html
-$dokka.location:org.membraneframework.rtc.media/SoundDetection///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-sound-detection/index.html
-$dokka.location:org.membraneframework.rtc.media/SoundDetection/isRecording/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-sound-detection/is-recording.html
-$dokka.location:org.membraneframework.rtc.media/SoundDetection/setSoundDetectionListener/#org.membraneframework.rtc.media.OnSoundDetectedListener/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-sound-detection/set-sound-detection-listener.html
-$dokka.location:org.membraneframework.rtc.media/SoundDetection/start/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-sound-detection/start.html
-$dokka.location:org.membraneframework.rtc.media/SoundDetection/start/#int#int#int/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-sound-detection/start.html
-$dokka.location:org.membraneframework.rtc.media/SoundDetection/stop/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-sound-detection/stop.html
 $dokka.location:org.membraneframework.rtc.media/TrackBandwidthLimit.BandwidthLimit///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-track-bandwidth-limit/-bandwidth-limit/index.html
 $dokka.location:org.membraneframework.rtc.media/TrackBandwidthLimit.BandwidthLimit/BandwidthLimit/#kotlin.Int/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-track-bandwidth-limit/-bandwidth-limit/-bandwidth-limit.html
 $dokka.location:org.membraneframework.rtc.media/TrackBandwidthLimit.BandwidthLimit/limit/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-track-bandwidth-limit/-bandwidth-limit/limit.html
