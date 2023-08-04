@@ -60,7 +60,7 @@ public class SoundDetection {
         onSoundDetectedListener = listener;
     }
 
-    public void setIsSoundDetected(boolean newValue) {
+    private void setIsSoundDetected(boolean newValue) {
         if (onSoundDetectedListener != null) {
             onSoundDetectedListener.onSoundDetected(newValue);
         }
@@ -77,7 +77,13 @@ public class SoundDetection {
         }
         return maxAmplitude;
     }
-
+    /**
+     * Calculates the sound level value in decibels (dB) based on the given maxAmplitude.
+     * If maxAmplitude is non-positive (<= 0), returns a default value of -160 dB.
+     * Otherwise, computes the value using the formula: 20 * log10(maxAmplitude / 32767),
+     * where 32767 is the maximum value for a 16-bit PCM audio sample.
+     * The calculated dB value represents the loudness of the audio signal.
+     **/
     private int calculateValue(int maxAmplitude) {
         if (maxAmplitude <= 0) {
             return -160;
