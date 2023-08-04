@@ -21,10 +21,10 @@ public class SoundDetection {
     private final int samplingRate = 22050;
 
     public void start() throws SecurityException {
-        start(monitorInterval, samplingRate);
+        start(monitorInterval, samplingRate, volumeThreshold);
     }
 
-    public void start(int monitorInterval, int samplingRate) throws SecurityException {
+    public void start(int monitorInterval, int samplingRate, int volumeThreshold) throws SecurityException {
         if (isRecording) return;
 
         bufferSize = AudioRecord.getMinBufferSize(samplingRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
@@ -33,7 +33,7 @@ public class SoundDetection {
         if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
             audioRecord.startRecording();
             isRecording = true;
-            startTimer(monitorInterval);
+            startTimer(monitorInterval,volumeThreshold);
         } else {
             Timber.e("COULDNT_PREPARE_RECORDING AudioRecord couldn't be initialized.");
         }
@@ -66,10 +66,6 @@ public class SoundDetection {
         }
     }
 
-    private void detectSound(int volumeValue) {
-        detectSound(volumeThreshold, volumeValue);
-    }
-
     private void detectSound(int volumeThreshold, int volumeValue) {
         setIsSoundDetected(volumeValue > volumeThreshold);
     }
@@ -93,7 +89,7 @@ public class SoundDetection {
         return audioRecord.read(buffer, 0, bufferSize);
     }
 
-    private void startTimer(int monitorInterval) {
+    private void startTimer(int monitorInterval, int volumeThreshold) {
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -104,7 +100,7 @@ public class SoundDetection {
                     return;
                 int amplitude = getMaxAmplitude(buffer, bytesRead);
                 int value = calculateValue(amplitude);
-                detectSound(value);
+                detectSound(value,volumeThreshold);
             }
         }, 0, monitorInterval);
     }
