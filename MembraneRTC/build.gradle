@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.github.membraneframework'
-version = '2.0.0'
+version = '5.0.0'
 
 android {
     namespace = "org.membraneframework.rtc"
