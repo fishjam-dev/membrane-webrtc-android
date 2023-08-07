@@ -8,10 +8,11 @@ import org.webrtc.*
 import timber.log.Timber
 import java.util.*
 
-class videoFramePRocessor : VideoFrameProcessor {
+class VideoFrameProcessor : VideoFrameProcessor {
     override fun process(frame: VideoFrame?): VideoFrame {
         Log.e("KAROL", "TUTUAJTJAJ")
 
+        // Create custom buffer here with applied filters / blured background etc.
         val buffer = frame!!.buffer
         Log.e("KAROL", "TAM")
         return VideoFrame(buffer, 270, frame.timestampNs)
@@ -52,7 +53,7 @@ constructor(
                 cameraName
             )
 
-            val frameProc = videoFramePRocessor()
+            val frameProc = VideoFrameProcessor()
             val videoEffectProcessor = VideoEffectProcessor(frameProc)
             source.setVideoProcessor(videoEffectProcessor)
             return LocalVideoTrack(track, capturer, eglBase, videoParameters)
