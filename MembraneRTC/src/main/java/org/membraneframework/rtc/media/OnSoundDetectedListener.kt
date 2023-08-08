@@ -1,5 +1,6 @@
 package org.membraneframework.rtc.media
 
-fun interface OnSoundDetectedListener {
-    fun onSoundDetected(value: Boolean)
+interface OnSoundDetectedListener {
+    fun onSoundDetected(isDetected: Boolean)
+    fun onSoundVolumeChanged(volume: Int)
 }

@@ -44,8 +44,16 @@ class RoomViewModel(
     val isCameraOn = MutableStateFlow(false)
     val isScreenCastOn = MutableStateFlow(false)
     val errorMessage = MutableStateFlow<String?>(null)
-    val soundDetectionListener = OnSoundDetectedListener { detection ->
-        isSoundDetected.value = detection
+    val soundVolumedB = MutableStateFlow(0)
+
+    val soundDetectionListener = object : OnSoundDetectedListener {
+        override fun onSoundDetected(isDetected: Boolean) {
+            isSoundDetected.value = isDetected
+        }
+
+        override fun onSoundVolumeChanged(volume: Int) {
+            soundVolumedB.value = volume
+        }
     }
 
     private var localScreencastId: String? = null

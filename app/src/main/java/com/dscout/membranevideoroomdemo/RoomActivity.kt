@@ -80,6 +80,8 @@ class RoomActivity : AppCompatActivity() {
         val primaryParticipant = viewModel.primaryParticipant.collectAsState()
         val errorMessage = viewModel.errorMessage.collectAsState()
         val videoSimulcastConfig = viewModel.videoSimulcastConfig.collectAsState()
+        val soundVolumedB = viewModel.soundVolumedB.collectAsState()
+        val isSoundDetectionOn = viewModel.isSoundDetectionOn.collectAsState()
         val scrollState = rememberScrollState()
 
         Scaffold(
@@ -102,6 +104,16 @@ class RoomActivity : AppCompatActivity() {
                             textAlign = TextAlign.Center
                         )
                     }
+                    Text(
+                        if (isSoundDetectionOn.value) {
+                            "volume (dB): ${soundVolumedB.value} "
+                        } else {
+                            "volume (dB): turn on sound detection first"
+                        },
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center
+                    )
 
                     Row(
                         horizontalArrangement = Arrangement.Start

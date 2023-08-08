@@ -102,13 +102,26 @@ class SoundDetection {
     }
 
     /**
-     * Performs sound detection based on the volume threshold and the current volume value.
+     * Sets the sound level value and notifies the listener if available.
+     *
+     * @param soundVolume The new sound level value to be set.
+     */
+    private fun setIsSoundVolumeChanged(soundVolume: Int) {
+        onSoundDetectedListener?.onSoundVolumeChanged(soundVolume)
+    }
+
+    /**
+     * Evaluates whether the provided `volumeValue` surpasses the given `volumeThreshold`,
+     * indicating sound detection. Updates the sound detection status using
+     * `setIsSoundDetected` and informs listeners of sound level change via
+     * `setIsSoundVolumeChanged` with the provided `volumeValue`.
      *
      * @param volumeThreshold The threshold value in decibels (dB) above which a sound is considered detected.
      * @param volumeValue The current volume value in decibels (dB).
      */
     private fun detectSound(volumeThreshold: Int, volumeValue: Int) {
         setIsSoundDetected(volumeValue > volumeThreshold)
+        setIsSoundVolumeChanged(volumeValue)
     }
 
     /**
