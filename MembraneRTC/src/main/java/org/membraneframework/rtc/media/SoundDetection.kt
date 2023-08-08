@@ -1,6 +1,5 @@
 package org.membraneframework.rtc.media
 
-import android.annotation.SuppressLint
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
@@ -27,7 +26,6 @@ class SoundDetection {
      * @param samplingRate The audio sampling rate in Hz.
      * @param volumeThreshold The threshold value in decibels (dB) above which a sound is considered detected.
      */
-    @SuppressLint("MissingPermission")
     fun start(monitorInterval: Int = 1, samplingRate: Int = 22050, volumeThreshold: Int = -60) {
         if (isRecording) {
             Timber.w("Sound detection is already in progress. Ignoring the start request.")
@@ -59,7 +57,7 @@ class SoundDetection {
             startTimer(monitorInterval, volumeThreshold)
         } else {
             Timber.e("COULDNT_PREPARE_RECORDING AudioRecord couldn't be initialized.")
-            throw RuntimeException("AudioRecord couldn't be initialized.")
+            throw IllegalStateException("AudioRecord couldn't be initialized.")
         }
     }
 
