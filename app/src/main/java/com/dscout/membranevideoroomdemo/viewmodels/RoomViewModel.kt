@@ -28,6 +28,7 @@ class RoomViewModel(
     var localVideoTrack: LocalVideoTrack? = null
     var localScreencastTrack: LocalScreencastTrack? = null
     private val localEndpointId: String = UUID.randomUUID().toString()
+    private var soundDetection: SoundDetection? = null
 
     var localDisplayName: String? = null
 
@@ -37,11 +38,15 @@ class RoomViewModel(
 
     val primaryParticipant = MutableStateFlow<Participant?>(null)
     val participants = MutableStateFlow<List<Participant>>(emptyList())
-
+    val isSoundDetected = MutableStateFlow(false)
+    val isSoundDetectionOn = MutableStateFlow(false)
     val isMicrophoneOn = MutableStateFlow(false)
     val isCameraOn = MutableStateFlow(false)
     val isScreenCastOn = MutableStateFlow(false)
     val errorMessage = MutableStateFlow<String?>(null)
+    val soundDetectionListener = OnSoundDetectedListener { detection ->
+        isSoundDetected.value = detection
+    }
 
     private var localScreencastId: String? = null
 
@@ -177,6 +182,18 @@ class RoomViewModel(
         emitParticipants()
     }
 
+    fun toggleSoundDetection() {
+        if (!isSoundDetectionOn.value) {
+            soundDetection = SoundDetection()
+            soundDetection?.setSoundDetectionListener(soundDetectionListener)
+            soundDetection?.start()
+        } else {
+            soundDetection?.stop()
+            soundDetection = null
+        }
+        isSoundDetectionOn.value = !isSoundDetectionOn.value
+    }
+
     fun toggleCamera() {
         localVideoTrack?.let {
             val enabled = !it.enabled()
@@ -310,6 +327,7 @@ class RoomViewModel(
                     )
                 }
             }
+
             is RemoteAudioTrack -> {
                 globalToLocalTrackId[ctx.trackId] = (ctx.track as RemoteAudioTrack).id()
                 val p = participant.copy(audioTrack = ctx.track as RemoteAudioTrack)
@@ -325,6 +343,7 @@ class RoomViewModel(
                     )
                 )
             }
+
             else ->
                 throw IllegalArgumentException("invalid type of incoming remote track")
         }
