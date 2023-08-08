@@ -28,12 +28,11 @@ class SoundDetection {
      * @param volumeThreshold The threshold value in decibels (dB) above which a sound is considered detected.
      */
     @SuppressLint("MissingPermission")
-    fun start(monitorInterval: Int = 1, samplingRate: Int = 22050, volumeThreshold: Int = -100) {
+    fun start(monitorInterval: Int = 1, samplingRate: Int = 22050, volumeThreshold: Int = -60) {
         if (isRecording) {
             Timber.w("Sound detection is already in progress. Ignoring the start request.")
             return
         }
-
         bufferSize = AudioRecord.getMinBufferSize(
             samplingRate,
             AudioFormat.CHANNEL_IN_MONO,
@@ -122,9 +121,7 @@ class SoundDetection {
      * @return The maximum amplitude value from the buffer.
      */
     private fun getMaxAmplitude(buffer: ShortArray, bytesRead: Int): Int {
-        return buffer.take(bytesRead)
-            .map { abs(it.toInt()) }
-            .maxOrNull() ?: 0
+        return buffer.take(bytesRead).maxOfOrNull { abs(it.toInt()) } ?: 0
     }
 
     /**
@@ -174,7 +171,7 @@ class SoundDetection {
                     }
                     val amplitude = getMaxAmplitude(buffer, bytesRead)
                     val value = calculateValue(amplitude)
-                    detectSound(value, volumeThreshold)
+                    detectSound(volumeThreshold, value)
                 }
             },
             0,
