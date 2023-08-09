@@ -26,7 +26,7 @@ class SoundDetection {
      * @param samplingRate The audio sampling rate in Hz.
      * @param volumeThreshold The threshold value in decibels (dB) above which a sound is considered detected.
      */
-    fun start(monitorInterval: Int = 1, samplingRate: Int = 22050, volumeThreshold: Int = -60) {
+    fun start(monitorInterval: Int = 50, samplingRate: Int = 22050, volumeThreshold: Int = -60) {
         if (isRecording) {
             Timber.w("Sound detection is already in progress. Ignoring the start request.")
             return
