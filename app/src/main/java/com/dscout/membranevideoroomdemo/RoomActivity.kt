@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -79,6 +80,8 @@ class RoomActivity : AppCompatActivity() {
         val primaryParticipant = viewModel.primaryParticipant.collectAsState()
         val errorMessage = viewModel.errorMessage.collectAsState()
         val videoSimulcastConfig = viewModel.videoSimulcastConfig.collectAsState()
+        val soundVolumedB = viewModel.soundVolumedB.collectAsState()
+        val isSoundDetectionOn = viewModel.isSoundDetectionOn.collectAsState()
         val scrollState = rememberScrollState()
 
         Scaffold(
@@ -101,6 +104,16 @@ class RoomActivity : AppCompatActivity() {
                             textAlign = TextAlign.Center
                         )
                     }
+                    Text(
+                        if (isSoundDetectionOn.value) {
+                            "volume (dB): ${soundVolumedB.value} "
+                        } else {
+                            "volume (dB): turn on sound detection first"
+                        },
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center
+                    )
 
                     Row(
                         horizontalArrangement = Arrangement.Start
@@ -206,8 +219,14 @@ fun ParticipantCard(
 ) {
     fun isTrackNotActive(trackType: String): Boolean {
         return when (trackType) {
-            "audio" -> { (participant.tracksMetadata[participant.audioTrack?.id()]?.get("active") as? Boolean) != true }
-            "video" -> { (participant.tracksMetadata[participant.videoTrack?.id()]?.get("active") as? Boolean) != true }
+            "audio" -> {
+                (participant.tracksMetadata[participant.audioTrack?.id()]?.get("active") as? Boolean) != true
+            }
+
+            "video" -> {
+                (participant.tracksMetadata[participant.videoTrack?.id()]?.get("active") as? Boolean) != true
+            }
+
             else -> {
                 throw IllegalArgumentException("Invalid media type: $trackType")
             }
@@ -221,11 +240,13 @@ fun ParticipantCard(
                     participant.tracksMetadata.isNotEmpty() && isTrackNotActive(trackType)
                     )
             }
+
             "video" -> {
                 participant.videoTrack == null || (
                     participant.tracksMetadata.isNotEmpty() && isTrackNotActive(trackType)
                     )
             }
+
             else -> {
                 throw IllegalArgumentException("Invalid media type: $trackType")
             }
@@ -316,69 +337,84 @@ fun ControlIcons(roomViewModel: RoomViewModel, startScreencast: () -> Unit, onEn
             .size(50.dp)
 
     val isMicOn = roomViewModel.isMicrophoneOn.collectAsState()
+    val isSoundDetectionOn = roomViewModel.isSoundDetectionOn.collectAsState()
+    val isSoundDetected = roomViewModel.isSoundDetected.collectAsState()
     val isCamOn = roomViewModel.isCameraOn.collectAsState()
     val isScreenCastOn = roomViewModel.isScreenCastOn.collectAsState()
-
-    Row(
+    LazyRow(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .background(Blue.darker(0.7f))
     ) {
-        IconButton(onClick = { roomViewModel.toggleMicrophone() }) {
-            Icon(
-                painter = painterResource(if (isMicOn.value) R.drawable.ic_mic_on else R.drawable.ic_mic_off),
-                contentDescription = "microphone control",
-                modifier = iconModifier,
-                tint = Color.White
-            )
-        }
-
-        IconButton(onClick = { roomViewModel.toggleCamera() }) {
-            Icon(
-                painter = painterResource(if (isCamOn.value) R.drawable.ic_video_on else R.drawable.ic_video_off),
-                contentDescription = "camera control",
-                modifier = iconModifier,
-                tint = Color.White
-            )
-        }
-
-        IconButton(onClick = {
-            onEnd()
-        }) {
-            Icon(
-                painter = painterResource(R.drawable.ic_call_end),
-                contentDescription = "call end control",
-                modifier = iconModifier,
-                tint = Color.Red
-            )
-        }
-
-        IconButton(onClick = { roomViewModel.flipCamera() }) {
-            Icon(
-                painter = painterResource(R.drawable.ic_camera_flip),
-                contentDescription = "camera flip control",
-                modifier = iconModifier,
-                tint = Color.White
-            )
-        }
-
-        IconButton(onClick = {
-            if (isScreenCastOn.value) {
-                roomViewModel.stopScreencast()
-            } else {
-                startScreencast()
+        item {
+            IconButton(onClick = { roomViewModel.toggleMicrophone() }) {
+                Icon(
+                    painter = painterResource(if (isMicOn.value) R.drawable.ic_mic_on else R.drawable.ic_mic_off),
+                    contentDescription = "microphone control",
+                    modifier = iconModifier,
+                    tint = Color.White
+                )
             }
-        }) {
-            Icon(
-                painter = painterResource(
-                    if (!isScreenCastOn.value) R.drawable.ic_screen_on else R.drawable.ic_screen_off
-                ),
-                contentDescription = "screen cast control",
-                modifier = iconModifier,
-                tint = Color.White
-            )
+            if (isMicOn.value) {
+                IconButton(onClick = { roomViewModel.toggleSoundDetection() }) {
+                    Icon(
+                        painter = painterResource(
+                            if (isSoundDetectionOn.value) R.drawable.ic_mic_on else R.drawable.ic_mic_off
+                        ),
+                        contentDescription = "sound detection control",
+                        modifier = iconModifier,
+                        tint = if (isSoundDetected.value) Color.Blue else Color.DarkGray
+                    )
+                }
+            }
+
+            IconButton(onClick = { roomViewModel.toggleCamera() }) {
+                Icon(
+                    painter = painterResource(if (isCamOn.value) R.drawable.ic_video_on else R.drawable.ic_video_off),
+                    contentDescription = "camera control",
+                    modifier = iconModifier,
+                    tint = Color.White
+                )
+            }
+
+            IconButton(onClick = {
+                onEnd()
+            }) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_call_end),
+                    contentDescription = "call end control",
+                    modifier = iconModifier,
+                    tint = Color.Red
+                )
+            }
+
+            IconButton(onClick = { roomViewModel.flipCamera() }) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_camera_flip),
+                    contentDescription = "camera flip control",
+                    modifier = iconModifier,
+                    tint = Color.White
+                )
+            }
+
+            IconButton(onClick = {
+                if (isScreenCastOn.value) {
+                    roomViewModel.stopScreencast()
+                } else {
+                    startScreencast()
+                }
+            }) {
+                Icon(
+                    painter = painterResource(
+                        if (!isScreenCastOn.value) R.drawable.ic_screen_on else R.drawable.ic_screen_off
+                    ),
+                    contentDescription = "screen cast control",
+                    modifier = iconModifier,
+                    tint = Color.White
+                )
+            }
         }
     }
 }
