@@ -273,6 +273,7 @@ $dokka.location:org.membraneframework.rtc.media/MediaTrackProvider/id/#/Pointing
 $dokka.location:org.membraneframework.rtc.media/MediaTrackProvider/rtcTrack/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-media-track-provider/rtc-track.html
 $dokka.location:org.membraneframework.rtc.media/OnSoundDetectedListener///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-on-sound-detected-listener/index.html
 $dokka.location:org.membraneframework.rtc.media/OnSoundDetectedListener/onSoundDetected/#kotlin.Boolean/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-on-sound-detected-listener/on-sound-detected.html
+$dokka.location:org.membraneframework.rtc.media/OnSoundDetectedListener/onSoundVolumeChanged/#kotlin.Int/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-on-sound-detected-listener/on-sound-volume-changed.html
 $dokka.location:org.membraneframework.rtc.media/RemoteAudioTrack///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-remote-audio-track/index.html
 $dokka.location:org.membraneframework.rtc.media/RemoteAudioTrack/RemoteAudioTrack/#org.webrtc.AudioTrack/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-remote-audio-track/-remote-audio-track.html
 $dokka.location:org.membraneframework.rtc.media/RemoteAudioTrack/enabled/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.media/-remote-audio-track/enabled.html
