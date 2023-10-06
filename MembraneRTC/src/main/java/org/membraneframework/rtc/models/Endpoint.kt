@@ -5,12 +5,12 @@ import org.membraneframework.rtc.utils.Metadata
 data class Endpoint(
     val id: String,
     val type: String,
-    val metadata: Metadata,
-    val trackIdToMetadata: Map<String, Metadata>
+    val metadata: Metadata = mapOf(),
+    val trackIdToMetadata: Map<String, Metadata> = mapOf()
 ) {
-    fun withTrack(trackId: String, metadata: Metadata): Endpoint {
+    fun withTrack(trackId: String, metadata: Metadata?): Endpoint {
         val newTrackIdToMetadata = this.trackIdToMetadata.toMutableMap()
-        newTrackIdToMetadata[trackId] = metadata
+        newTrackIdToMetadata[trackId] = metadata ?: mapOf()
         return this.copy(trackIdToMetadata = newTrackIdToMetadata)
     }
 
