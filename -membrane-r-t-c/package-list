@@ -346,7 +346,7 @@ $dokka.location:org.membraneframework.rtc.models/Endpoint/id/#/PointingToDeclara
 $dokka.location:org.membraneframework.rtc.models/Endpoint/metadata/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-endpoint/metadata.html
 $dokka.location:org.membraneframework.rtc.models/Endpoint/trackIdToMetadata/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-endpoint/track-id-to-metadata.html
 $dokka.location:org.membraneframework.rtc.models/Endpoint/type/#/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-endpoint/type.html
-$dokka.location:org.membraneframework.rtc.models/Endpoint/withTrack/#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.Any]/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-endpoint/with-track.html
+$dokka.location:org.membraneframework.rtc.models/Endpoint/withTrack/#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.Any]?/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-endpoint/with-track.html
 $dokka.location:org.membraneframework.rtc.models/Endpoint/withoutTrack/#kotlin.String/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-endpoint/without-track.html
 $dokka.location:org.membraneframework.rtc.models/OnEncodingChangedListener///PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-on-encoding-changed-listener/index.html
 $dokka.location:org.membraneframework.rtc.models/OnEncodingChangedListener/onEncodingChanged/#org.membraneframework.rtc.models.TrackContext/PointingToDeclaration/-membrane-r-t-c/org.membraneframework.rtc.models/-on-encoding-changed-listener/on-encoding-changed.html
