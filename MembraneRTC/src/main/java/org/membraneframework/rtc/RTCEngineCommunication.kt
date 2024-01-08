@@ -100,7 +100,7 @@ constructor(
             is OfferData -> engineListener.onOfferData(event.data.integratedTurnServers, event.data.tracksTypes)
             is EndpointRemoved -> engineListener.onEndpointRemoved(event.data.id)
             is EndpointAdded -> engineListener.onEndpointAdded(
-                Endpoint(event.data.id, event.data.type, event.data.metadata, mapOf())
+                Endpoint(event.data.id, event.data.type, event.data.metadata, mapOf(), mapOf())
             )
             is EndpointUpdated -> engineListener.onEndpointUpdated(event.data.id, event.data.metadata)
             is RemoteCandidate -> engineListener.onRemoteCandidate(
@@ -114,7 +114,7 @@ constructor(
                 event.data.trackId,
                 event.data.metadata
             )
-            is TracksAdded -> engineListener.onTracksAdded(event.data.endpointId, event.data.trackIdToMetadata)
+            is TracksAdded -> engineListener.onTracksAdded(event.data.endpointId, event.data.trackIdToMetadata, event.data.tracks)
             is TracksRemoved -> engineListener.onTracksRemoved(event.data.endpointId, event.data.trackIds)
             is EncodingSwitched -> engineListener.onTrackEncodingChanged(
                 event.data.endpointId,

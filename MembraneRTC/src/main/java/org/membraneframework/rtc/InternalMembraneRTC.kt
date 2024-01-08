@@ -9,6 +9,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.OfferData
+import org.membraneframework.rtc.events.TracksAdded
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.EncodingReason
 import org.membraneframework.rtc.models.Endpoint
@@ -48,7 +49,7 @@ constructor(
     )
 
     private var localEndpoint: Endpoint =
-        Endpoint(id = "", type = "webrtc", metadata = mapOf(), trackIdToMetadata = mapOf())
+        Endpoint(id = "", type = "webrtc", metadata = mapOf(), trackIdToMetadata = mapOf(), tracks = mapOf())
 
     // mapping from endpoint's id to the endpoint himself
     private val remoteEndpoints = HashMap<String, Endpoint>()
@@ -230,7 +231,7 @@ constructor(
             this.remoteEndpoints[it.id] = it
 
             for ((trackId, metadata) in it.trackIdToMetadata) {
-                val context = TrackContext(track = null, endpoint = it, trackId = trackId, metadata = metadata)
+                val context = TrackContext(track = null, endpoint = it, trackId = trackId, metadata = metadata, simulcastConfig = it.tracks[trackId]?.simulcastConfig)
 
                 this.trackContexts[trackId] = context
 
@@ -337,7 +338,7 @@ constructor(
         }
     }
 
-    override fun onTracksAdded(endpointId: String, trackIdToMetadata: Map<String, Metadata>) {
+    override fun onTracksAdded(endpointId: String, trackIdToMetadata: Map<String, Metadata>, tracks: Map<String, TracksAdded.Data.TrackData>) {
         if (localEndpoint.id == endpointId) return
 
         val endpoint = remoteEndpoints.remove(endpointId) ?: run {
@@ -345,12 +346,12 @@ constructor(
             return
         }
 
-        val updatedEndpoint = endpoint.copy(trackIdToMetadata = trackIdToMetadata)
+        val updatedEndpoint = endpoint.copy(trackIdToMetadata = trackIdToMetadata, tracks = tracks)
 
         remoteEndpoints[updatedEndpoint.id] = updatedEndpoint
 
         for ((trackId, metadata) in updatedEndpoint.trackIdToMetadata) {
-            val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata)
+            val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata, simulcastConfig = updatedEndpoint.tracks[trackId]?.simulcastConfig)
 
             this.trackContexts[trackId] = context
 
