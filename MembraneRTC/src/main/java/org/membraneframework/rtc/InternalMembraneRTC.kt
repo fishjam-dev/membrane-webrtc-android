@@ -2,6 +2,7 @@ package org.membraneframework.rtc
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -229,6 +230,7 @@ constructor(
 
         otherEndpoints.forEach {
             this.remoteEndpoints[it.id] = it
+            Timber.tag("AAA").d(it.toString())
 
             for ((trackId, metadata) in it.trackIdToMetadata) {
                 val context = TrackContext(track = null, endpoint = it, trackId = trackId, metadata = metadata, simulcastConfig = it.tracks[trackId]?.simulcastConfig)
@@ -351,8 +353,10 @@ constructor(
         remoteEndpoints[updatedEndpoint.id] = updatedEndpoint
 
         for ((trackId, metadata) in updatedEndpoint.trackIdToMetadata) {
-            val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata, simulcastConfig = updatedEndpoint.tracks[trackId]?.simulcastConfig)
 
+
+            val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata, simulcastConfig = updatedEndpoint.tracks[trackId]?.simulcastConfig)
+            Timber.tag("AAA").d(context.toString())
             this.trackContexts[trackId] = context
 
             this.listener.onTrackAdded(context)
