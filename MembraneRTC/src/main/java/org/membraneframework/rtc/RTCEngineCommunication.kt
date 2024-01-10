@@ -1,5 +1,6 @@
 package org.membraneframework.rtc
 
+import android.util.Log
 import com.google.gson.reflect.TypeToken
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -95,7 +96,12 @@ constructor(
     }
 
     fun onEvent(serializedEvent: SerializedMediaEvent) {
-        when (val event = decodeEvent(serializedEvent)) {
+        Log.d("AAA","Before serialization" +  serializedEvent)
+        val event = decodeEvent(serializedEvent)
+        Log.d("AAA", event?.javaClass?.toString() ?: "not possible to obtain class")
+        Log.d("AAA", event?.toString()?: "not possible to string")
+
+        when (event) {
             is Connected -> engineListener.onConnected(event.data.id, event.data.otherEndpoints)
             is OfferData -> engineListener.onOfferData(event.data.integratedTurnServers, event.data.tracksTypes)
             is EndpointRemoved -> engineListener.onEndpointRemoved(event.data.id)
