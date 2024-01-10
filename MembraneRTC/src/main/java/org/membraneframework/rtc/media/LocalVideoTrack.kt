@@ -11,81 +11,84 @@ import java.util.*
  * Internally it wraps a WebRTC <strong>VideoTrack</strong>.
  */
 class LocalVideoTrack
-constructor(
-    mediaTrack: org.webrtc.VideoTrack,
-    private val capturer: Capturer,
-    eglBase: EglBase,
-    val videoParameters: VideoParameters
-) : VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
+    constructor(
+        mediaTrack: org.webrtc.VideoTrack,
+        private val capturer: Capturer,
+        eglBase: EglBase,
+        val videoParameters: VideoParameters
+    ) : VideoTrack(mediaTrack, eglBase.eglBaseContext), LocalTrack {
+        data class CaptureDevice(val deviceName: String, val isFrontFacing: Boolean, val isBackFacing: Boolean)
 
-    data class CaptureDevice(val deviceName: String, val isFrontFacing: Boolean, val isBackFacing: Boolean)
+        companion object {
+            fun create(
+                context: Context,
+                factory: PeerConnectionFactory,
+                eglBase: EglBase,
+                videoParameters: VideoParameters,
+                cameraName: String? = null
+            ): LocalVideoTrack {
+                val source = factory.createVideoSource(false)
+                val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
 
-    companion object {
-        fun create(
-            context: Context,
-            factory: PeerConnectionFactory,
-            eglBase: EglBase,
-            videoParameters: VideoParameters,
-            cameraName: String? = null
-        ): LocalVideoTrack {
-            val source = factory.createVideoSource(false)
-            val track = factory.createVideoTrack(UUID.randomUUID().toString(), source)
+                val capturer =
+                    CameraCapturer(
+                        context = context,
+                        source = source,
+                        rootEglBase = eglBase,
+                        videoParameters = videoParameters,
+                        cameraName
+                    )
 
-            val capturer = CameraCapturer(
-                context = context,
-                source = source,
-                rootEglBase = eglBase,
-                videoParameters = videoParameters,
-                cameraName
-            )
+                return LocalVideoTrack(track, capturer, eglBase, videoParameters)
+            }
 
-            return LocalVideoTrack(track, capturer, eglBase, videoParameters)
+            fun getCaptureDevices(context: Context): List<CaptureDevice> {
+                val enumerator =
+                    if (Camera2Enumerator.isSupported(context)) {
+                        Camera2Enumerator(context)
+                    } else {
+                        Camera1Enumerator(true)
+                    }
+                return enumerator.deviceNames.map { name ->
+                    CaptureDevice(
+                        name,
+                        enumerator.isFrontFacing(name),
+                        enumerator.isBackFacing(name)
+                    )
+                }
+            }
         }
 
-        fun getCaptureDevices(context: Context): List<CaptureDevice> {
-            val enumerator = if (Camera2Enumerator.isSupported(context)) {
-                Camera2Enumerator(context)
-            } else {
-                Camera1Enumerator(true)
-            }
-            return enumerator.deviceNames.map { name ->
-                CaptureDevice(
-                    name,
-                    enumerator.isFrontFacing(name),
-                    enumerator.isBackFacing(name)
-                )
-            }
+        override fun start() {
+            capturer.startCapture()
+        }
+
+        override fun stop() {
+            capturer.stopCapture()
+        }
+
+        override fun enabled(): Boolean {
+            return videoTrack.enabled()
+        }
+
+        override fun setEnabled(enabled: Boolean) {
+            videoTrack.setEnabled(enabled)
+        }
+
+        fun flipCamera() {
+            (capturer as? CameraCapturer)?.flipCamera()
+        }
+
+        fun switchCamera(deviceName: String) {
+            (capturer as? CameraCapturer)?.switchCamera(deviceName)
         }
     }
-
-    override fun start() {
-        capturer.startCapture()
-    }
-
-    override fun stop() {
-        capturer.stopCapture()
-    }
-
-    override fun enabled(): Boolean {
-        return videoTrack.enabled()
-    }
-
-    override fun setEnabled(enabled: Boolean) {
-        videoTrack.setEnabled(enabled)
-    }
-
-    fun flipCamera() {
-        (capturer as? CameraCapturer)?.flipCamera()
-    }
-
-    fun switchCamera(deviceName: String) {
-        (capturer as? CameraCapturer)?.switchCamera(deviceName)
-    }
-}
 
 interface Capturer {
     fun capturer(): VideoCapturer
+
     fun startCapture()
+
     fun stopCapture()
 }
 
@@ -128,11 +131,12 @@ class CameraCapturer constructor(
     }
 
     private fun createCapturer(providedDeviceName: String?) {
-        val enumerator = if (Camera2Enumerator.isSupported(context)) {
-            Camera2Enumerator(context)
-        } else {
-            Camera1Enumerator(true)
-        }
+        val enumerator =
+            if (Camera2Enumerator.isSupported(context)) {
+                Camera2Enumerator(context)
+            } else {
+                Camera1Enumerator(true)
+            }
 
         var deviceName = providedDeviceName
 
@@ -153,15 +157,17 @@ class CameraCapturer constructor(
             source.capturerObserver
         )
 
-        val sizes = enumerator.getSupportedFormats(deviceName)
-            ?.map { Size(it.width, it.height) }
-            ?: emptyList()
+        val sizes =
+            enumerator.getSupportedFormats(deviceName)
+                ?.map { Size(it.width, it.height) }
+                ?: emptyList()
 
-        this.size = CameraEnumerationAndroid.getClosestSupportedSize(
-            sizes,
-            videoParameters.dimensions.width,
-            videoParameters.dimensions.height
-        )
+        this.size =
+            CameraEnumerationAndroid.getClosestSupportedSize(
+                sizes,
+                videoParameters.dimensions.width,
+                videoParameters.dimensions.height
+            )
     }
 
     override fun onCameraSwitchDone(isFrontCamera: Boolean) {

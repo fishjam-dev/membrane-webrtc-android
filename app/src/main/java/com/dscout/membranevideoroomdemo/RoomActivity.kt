@@ -57,8 +57,9 @@ class RoomActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val (room, displayName) = intent.getParcelableExtra<BundleArgs>(ARGS)
-            ?: throw NullPointerException("Failed to decode intent's parcelable")
+        val (room, displayName) =
+            intent.getParcelableExtra<BundleArgs>(ARGS)
+                ?: throw NullPointerException("Failed to decode intent's parcelable")
         viewModel.connect(room, displayName)
 
         setContent {
@@ -75,7 +76,11 @@ class RoomActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun Content(viewModel: RoomViewModel, startScreencast: () -> Unit, onEnd: () -> Unit) {
+    fun Content(
+        viewModel: RoomViewModel,
+        startScreencast: () -> Unit,
+        onEnd: () -> Unit
+    ) {
         val participants = viewModel.participants.collectAsState()
         val primaryParticipant = viewModel.primaryParticipant.collectAsState()
         val errorMessage = viewModel.errorMessage.collectAsState()
@@ -91,9 +96,10 @@ class RoomActivity : AppCompatActivity() {
             Box {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight()
                 ) {
                     errorMessage.value?.let {
                         Text(
@@ -125,15 +131,16 @@ class RoomActivity : AppCompatActivity() {
                                     viewModel.toggleVideoTrackEncoding(it)
                                 },
                                 colors = AppButtonColors(),
-                                modifier = Modifier.then(
-                                    if (videoSimulcastConfig.value.activeEncodings.contains(it)) {
-                                        Modifier.alpha(1f)
-                                    } else {
-                                        Modifier.alpha(
-                                            0.5f
-                                        )
-                                    }
-                                ),
+                                modifier =
+                                    Modifier.then(
+                                        if (videoSimulcastConfig.value.activeEncodings.contains(it)) {
+                                            Modifier.alpha(1f)
+                                        } else {
+                                            Modifier.alpha(
+                                                0.5f
+                                            )
+                                        }
+                                    ),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(it.name)
@@ -150,20 +157,22 @@ class RoomActivity : AppCompatActivity() {
                     }
 
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(248.dp)
-                            .padding(10.dp)
-                            .verticalScroll(scrollState),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(248.dp)
+                                .padding(10.dp)
+                                .verticalScroll(scrollState),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         participants.value.chunked(2).forEach {
                             Row(
                                 horizontalArrangement = Arrangement.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
                             ) {
                                 ParticipantCard(
                                     participant = it[0],
@@ -238,13 +247,13 @@ fun ParticipantCard(
             "audio" -> {
                 participant.audioTrack == null || (
                     participant.tracksMetadata.isNotEmpty() && isTrackNotActive(trackType)
-                    )
+                )
             }
 
             "video" -> {
                 participant.videoTrack == null || (
                     participant.tracksMetadata.isNotEmpty() && isTrackNotActive(trackType)
-                    )
+                )
             }
 
             else -> {
@@ -259,25 +268,27 @@ fun ParticipantCard(
             .size(20.dp)
 
     Box(
-        modifier = Modifier
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) {
-                onClick?.invoke()
-            }
-            .clip(RoundedCornerShape(10.dp))
-            .height(size.height.dp)
-            .width(size.width.dp)
-            .border(if (participant.vadStatus == VadStatus.SPEECH) 10.dp else 0.dp, Color.White)
-            .background(Blue.darker(0.7f))
+        modifier =
+            Modifier
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    onClick?.invoke()
+                }
+                .clip(RoundedCornerShape(10.dp))
+                .height(size.height.dp)
+                .width(size.width.dp)
+                .border(if (participant.vadStatus == VadStatus.SPEECH) 10.dp else 0.dp, Color.White)
+                .background(Blue.darker(0.7f))
     ) {
         if (shouldShowIcon("video")) {
             Box(
-                modifier = Modifier
-                    .background(Blue.darker(0.7f))
-                    .fillMaxHeight()
-                    .fillMaxWidth()
+                modifier =
+                    Modifier
+                        .background(Blue.darker(0.7f))
+                        .fillMaxHeight()
+                        .fillMaxWidth()
             ) {
                 Row(modifier = Modifier.align(Alignment.Center)) {
                     Icon(
@@ -292,11 +303,12 @@ fun ParticipantCard(
             ParticipantVideoView(
                 participant = participant,
                 videoViewLayout = videoViewLayout,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .background(Blue.darker(0.7f))
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .background(Blue.darker(0.7f))
             )
         }
 
@@ -307,16 +319,18 @@ fun ParticipantCard(
             text = participant.displayName,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .width(size.width.dp - 20.dp)
-                .padding(20.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .width(size.width.dp - 20.dp)
+                    .padding(20.dp)
         )
 
         if (shouldShowIcon("audio")) {
             Row(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
+                modifier =
+                    Modifier
+                        .align(Alignment.TopStart)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_mic_off),
@@ -330,7 +344,11 @@ fun ParticipantCard(
 }
 
 @Composable
-fun ControlIcons(roomViewModel: RoomViewModel, startScreencast: () -> Unit, onEnd: () -> Unit) {
+fun ControlIcons(
+    roomViewModel: RoomViewModel,
+    startScreencast: () -> Unit,
+    onEnd: () -> Unit
+) {
     val iconModifier =
         Modifier
             .padding(10.dp)
@@ -344,9 +362,10 @@ fun ControlIcons(roomViewModel: RoomViewModel, startScreencast: () -> Unit, onEn
     LazyRow(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Blue.darker(0.7f))
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(Blue.darker(0.7f))
     ) {
         item {
             IconButton(onClick = { roomViewModel.toggleMicrophone() }) {
@@ -360,9 +379,10 @@ fun ControlIcons(roomViewModel: RoomViewModel, startScreencast: () -> Unit, onEn
             if (isMicOn.value) {
                 IconButton(onClick = { roomViewModel.toggleSoundDetection() }) {
                     Icon(
-                        painter = painterResource(
-                            if (isSoundDetectionOn.value) R.drawable.ic_mic_on else R.drawable.ic_mic_off
-                        ),
+                        painter =
+                            painterResource(
+                                if (isSoundDetectionOn.value) R.drawable.ic_mic_on else R.drawable.ic_mic_off
+                            ),
                         contentDescription = "sound detection control",
                         modifier = iconModifier,
                         tint = if (isSoundDetected.value) Color.Blue else Color.DarkGray
@@ -407,9 +427,10 @@ fun ControlIcons(roomViewModel: RoomViewModel, startScreencast: () -> Unit, onEn
                 }
             }) {
                 Icon(
-                    painter = painterResource(
-                        if (!isScreenCastOn.value) R.drawable.ic_screen_on else R.drawable.ic_screen_off
-                    ),
+                    painter =
+                        painterResource(
+                            if (!isScreenCastOn.value) R.drawable.ic_screen_on else R.drawable.ic_screen_off
+                        ),
                     contentDescription = "screen cast control",
                     modifier = iconModifier,
                     tint = Color.White
