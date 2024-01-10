@@ -78,9 +78,10 @@ class MainActivity : AppCompatActivity() {
             backgroundColor = Blue.darker(0.5f)
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollableState),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollableState),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -89,9 +90,10 @@ class MainActivity : AppCompatActivity() {
                 Image(
                     painter = painterResource(R.drawable.logo),
                     contentDescription = "Application logo",
-                    modifier = Modifier
-                        .height(200.dp)
-                        .fillMaxWidth(0.9f)
+                    modifier =
+                        Modifier
+                            .height(200.dp)
+                            .fillMaxWidth(0.9f)
                 )
 
                 OutlinedTextField(
@@ -104,9 +106,10 @@ class MainActivity : AppCompatActivity() {
                     label = { Text("Room name") },
                     modifier = Modifier.focusOrder(first) { down = second },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    )
+                    keyboardActions =
+                        KeyboardActions(
+                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                        )
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
@@ -119,9 +122,10 @@ class MainActivity : AppCompatActivity() {
                     label = { Text("Display name") },
                     modifier = Modifier.focusOrder(second) { down = third },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    )
+                    keyboardActions =
+                        KeyboardActions(
+                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                        )
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -137,9 +141,10 @@ class MainActivity : AppCompatActivity() {
                         enabled = !(roomName.value.text.isEmpty() || displayName.value.text.isEmpty()),
                         colors = AppButtonColors(),
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .width(200.dp)
-                            .focusOrder(third)
+                        modifier =
+                            Modifier
+                                .width(200.dp)
+                                .focusOrder(third)
                     ) {
                         Text("Join room")
                     }
@@ -151,12 +156,13 @@ class MainActivity : AppCompatActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
     @Composable
     fun ConnectWithPermissions(content: @Composable () -> Unit) {
-        val multiplePermissionsState = rememberMultiplePermissionsState(
-            listOf(
-                RECORD_AUDIO,
-                CAMERA
+        val multiplePermissionsState =
+            rememberMultiplePermissionsState(
+                listOf(
+                    RECORD_AUDIO,
+                    CAMERA
+                )
             )
-        )
 
         val alreadyRequested = remember { mutableStateOf(false) }
 
@@ -164,21 +170,23 @@ class MainActivity : AppCompatActivity() {
             content()
         } else {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val textToShow = when {
-                    multiplePermissionsState.shouldShowRationale ->
-                        "Application requires an access to a microphone and camera for it to work"
+                val textToShow =
+                    when {
+                        multiplePermissionsState.shouldShowRationale ->
+                            "Application requires an access to a microphone and camera for it to work"
 
-                    !multiplePermissionsState.shouldShowRationale && alreadyRequested.value ->
-                        "You need to explicitly grant the access to the camera and microphone in system settings..."
+                        !multiplePermissionsState.shouldShowRationale && alreadyRequested.value ->
+                            "You need to explicitly grant the access to the camera and microphone in system settings..."
 
-                    else ->
-                        null
-                }
+                        else ->
+                            null
+                    }
 
                 Button(
                     colors = AppButtonColors(),

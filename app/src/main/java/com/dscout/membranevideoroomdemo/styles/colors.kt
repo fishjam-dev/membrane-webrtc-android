@@ -6,7 +6,10 @@ import androidx.compose.ui.graphics.colorspace.ColorSpaces
 val Primary = Color(0xff1e3d80)
 val Blue = Color(0xff447bfe)
 
-fun Color.mix(with: Color, amount: Float): Color {
+fun Color.mix(
+    with: Color,
+    amount: Float
+): Color {
     val red1 = this.red
     val red2 = with.red
     val green1 = this.green

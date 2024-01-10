@@ -7,7 +7,9 @@ package org.membraneframework.rtc
  * `"l"` - original encoding scaled down by 4
  */
 enum class TrackEncoding(val rid: String) {
-    L("l"), M("m"), H("h");
+    L("l"),
+    M("m"),
+    H("h");
 
     companion object {
         fun fromString(s: String): TrackEncoding? {

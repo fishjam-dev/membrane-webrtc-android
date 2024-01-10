@@ -14,11 +14,15 @@ data class Participant(
     val tracksMetadata: Map<String, Metadata> = emptyMap(),
     val vadStatus: VadStatus = VadStatus.SILENCE
 ) {
-    fun updateTrackMetadata(trackId: String?, metadata: Metadata): Participant {
+    fun updateTrackMetadata(
+        trackId: String?,
+        metadata: Metadata
+    ): Participant {
         return this.copy(
-            tracksMetadata = this.tracksMetadata + (
-                (trackId ?: "")
-                    to metadata
+            tracksMetadata =
+                this.tracksMetadata + (
+                    (trackId ?: "")
+                        to metadata
                 )
         )
     }

@@ -25,7 +25,6 @@ internal open class SimulcastVideoEncoderFactoryWrapper(
     sharedContext: EglBase.Context?,
     encoderOptions: EncoderOptions
 ) : VideoEncoderFactory {
-
     /**
      * Factory that prioritizes software encoder.
      *
@@ -51,7 +50,6 @@ internal open class SimulcastVideoEncoderFactoryWrapper(
      */
     private class FallbackFactory(private val hardwareVideoEncoderFactory: VideoEncoderFactory) :
         VideoEncoderFactory {
-
         private val softwareVideoEncoderFactory: VideoEncoderFactory = SoftwareVideoEncoderFactory()
 
         override fun createEncoder(info: VideoCodecInfo): VideoEncoder? {
@@ -80,18 +78,21 @@ internal open class SimulcastVideoEncoderFactoryWrapper(
      * - Always calls the encoder on the thread.
      */
     private class StreamEncoderWrapper(private val encoder: VideoEncoder) : VideoEncoder {
-
         val executor: ExecutorService = Executors.newSingleThreadExecutor()
         var streamSettings: VideoEncoder.Settings? = null
 
-        override fun initEncode(settings: VideoEncoder.Settings, callback: VideoEncoder.Callback?): VideoCodecStatus {
+        override fun initEncode(
+            settings: VideoEncoder.Settings,
+            callback: VideoEncoder.Callback?
+        ): VideoCodecStatus {
             streamSettings = settings
 
-            val future = executor.submit(
-                Callable {
-                    return@Callable encoder.initEncode(settings, callback)
-                }
-            )
+            val future =
+                executor.submit(
+                    Callable {
+                        return@Callable encoder.initEncode(settings, callback)
+                    }
+                )
             return future.get()
         }
 
@@ -100,45 +101,54 @@ internal open class SimulcastVideoEncoderFactoryWrapper(
             return future.get()
         }
 
-        override fun encode(frame: VideoFrame, encodeInfo: VideoEncoder.EncodeInfo?): VideoCodecStatus {
-            val future = executor.submit(
-                Callable {
-                    if (streamSettings == null) {
-                        return@Callable encoder.encode(frame, encodeInfo)
-                    } else if (frame.buffer.width == streamSettings!!.width) {
-                        return@Callable encoder.encode(frame, encodeInfo)
-                    } else {
-                        // The incoming buffer is different than the streamSettings received in initEncode()
-                        // Need to scale.
-                        val originalBuffer = frame.buffer
-                        // TODO: Do we need to handle when the scale factor is weird?
-                        val adaptedBuffer = originalBuffer.cropAndScale(
-                            0,
-                            0,
-                            originalBuffer.width,
-                            originalBuffer.height,
-                            streamSettings!!.width,
-                            streamSettings!!.height
-                        )
-                        val adaptedFrame = VideoFrame(adaptedBuffer, frame.rotation, frame.timestampNs)
-                        val result = encoder.encode(adaptedFrame, encodeInfo)
-                        adaptedBuffer.release()
-                        return@Callable result
+        override fun encode(
+            frame: VideoFrame,
+            encodeInfo: VideoEncoder.EncodeInfo?
+        ): VideoCodecStatus {
+            val future =
+                executor.submit(
+                    Callable {
+                        if (streamSettings == null) {
+                            return@Callable encoder.encode(frame, encodeInfo)
+                        } else if (frame.buffer.width == streamSettings!!.width) {
+                            return@Callable encoder.encode(frame, encodeInfo)
+                        } else {
+                            // The incoming buffer is different than the streamSettings received in initEncode()
+                            // Need to scale.
+                            val originalBuffer = frame.buffer
+                            // TODO: Do we need to handle when the scale factor is weird?
+                            val adaptedBuffer =
+                                originalBuffer.cropAndScale(
+                                    0,
+                                    0,
+                                    originalBuffer.width,
+                                    originalBuffer.height,
+                                    streamSettings!!.width,
+                                    streamSettings!!.height
+                                )
+                            val adaptedFrame = VideoFrame(adaptedBuffer, frame.rotation, frame.timestampNs)
+                            val result = encoder.encode(adaptedFrame, encodeInfo)
+                            adaptedBuffer.release()
+                            return@Callable result
+                        }
                     }
-                }
-            )
+                )
             return future.get()
         }
 
-        override fun setRateAllocation(allocation: VideoEncoder.BitrateAllocation?, frameRate: Int): VideoCodecStatus {
-            val future = executor.submit(
-                Callable {
-                    return@Callable encoder.setRateAllocation(
-                        allocation,
-                        frameRate
-                    )
-                }
-            )
+        override fun setRateAllocation(
+            allocation: VideoEncoder.BitrateAllocation?,
+            frameRate: Int
+        ): VideoCodecStatus {
+            val future =
+                executor.submit(
+                    Callable {
+                        return@Callable encoder.setRateAllocation(
+                            allocation,
+                            frameRate
+                        )
+                    }
+                )
             return future.get()
         }
 
@@ -198,19 +208,21 @@ internal open class SimulcastVideoEncoderFactoryWrapper(
     private val native: SimulcastVideoEncoderFactory
 
     init {
-        val hardwareVideoEncoderFactory = HardwareVideoEncoderFactory(
-            sharedContext,
-            encoderOptions.enableIntelVp8Encoder,
-            encoderOptions.enableH264HighProfile
-        )
+        val hardwareVideoEncoderFactory =
+            HardwareVideoEncoderFactory(
+                sharedContext,
+                encoderOptions.enableIntelVp8Encoder,
+                encoderOptions.enableH264HighProfile
+            )
         val softwareVideoEncoderFactory = SoftwareVideoEncoderFactory()
         primary = StreamEncoderWrapperFactory(hardwareVideoEncoderFactory)
         fallback = StreamEncoderWrapperFactory(FallbackFactory(primary))
-        native = if (encoderOptions.encoderType == EncoderType.HARDWARE) {
-            SimulcastVideoEncoderFactory(StreamEncoderWrapperFactory(hardwareVideoEncoderFactory), fallback)
-        } else {
-            SimulcastVideoEncoderFactory(StreamEncoderWrapperFactory(softwareVideoEncoderFactory), fallback)
-        }
+        native =
+            if (encoderOptions.encoderType == EncoderType.HARDWARE) {
+                SimulcastVideoEncoderFactory(StreamEncoderWrapperFactory(hardwareVideoEncoderFactory), fallback)
+            } else {
+                SimulcastVideoEncoderFactory(StreamEncoderWrapperFactory(softwareVideoEncoderFactory), fallback)
+            }
     }
 
     override fun createEncoder(info: VideoCodecInfo?): VideoEncoder? {

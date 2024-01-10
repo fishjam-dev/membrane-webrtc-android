@@ -11,7 +11,9 @@ import timber.log.Timber
 
 sealed class PhoenixTransportError : Exception() {
     data class Unauthorized(val reason: String) : PhoenixTransportError()
+
     data class ConnectionError(val reason: String) : PhoenixTransportError()
+
     data class Unexpected(val reason: String) : PhoenixTransportError()
 
     override fun toString(): String {
@@ -31,7 +33,9 @@ sealed class PhoenixTransportError : Exception() {
  */
 interface PhoenixTransportListener {
     fun onEvent(event: SerializedMediaEvent)
+
     fun onError(error: PhoenixTransportError)
+
     fun onClose()
 }
 
@@ -61,17 +65,20 @@ class PhoenixTransport constructor(
         var socketRefs: Array<String> = emptyArray()
 
         suspendCancellableCoroutine<Unit> { continuation ->
-            val openRef = socket!!.onOpen {
-                continuation.resumeWith(Result.success(Unit))
-            }
+            val openRef =
+                socket!!.onOpen {
+                    continuation.resumeWith(Result.success(Unit))
+                }
 
-            val errorRef = socket!!.onError { error, _ ->
-                continuation.cancel(PhoenixTransportError.ConnectionError(error.toString()))
-            }
+            val errorRef =
+                socket!!.onError { error, _ ->
+                    continuation.cancel(PhoenixTransportError.ConnectionError(error.toString()))
+                }
 
-            val closeRef = socket!!.onClose {
-                continuation.cancel(PhoenixTransportError.ConnectionError("closed"))
-            }
+            val closeRef =
+                socket!!.onClose {
+                    continuation.cancel(PhoenixTransportError.ConnectionError("closed"))
+                }
 
             socketRefs += openRef
             socketRefs += errorRef
@@ -123,9 +130,10 @@ class PhoenixTransport constructor(
     }
 
     fun send(event: SerializedMediaEvent) {
-        val payload = mapOf(
-            "data" to event
-        )
+        val payload =
+            mapOf(
+                "data" to event
+            )
         channel?.push("mediaEvent", payload)
     }
 }
