@@ -10,7 +10,10 @@ interface MembraneRTCListener {
     fun onSendMediaEvent(event: SerializedMediaEvent)
 
     // Callback invoked when the client has been approved to participate in media exchange.
-    fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>)
+    fun onConnected(
+        endpointID: String,
+        otherEndpoints: List<Endpoint>
+    )
 
     // Called when endpoint of this MembraneRTC instance was removed
     fun onDisconnected()

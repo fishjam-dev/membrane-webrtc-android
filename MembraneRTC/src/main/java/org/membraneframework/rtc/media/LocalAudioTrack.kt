@@ -16,7 +16,6 @@ import java.util.*
 class LocalAudioTrack constructor(
     var mediaTrack: org.webrtc.AudioTrack
 ) : AudioTrack(mediaTrack), LocalTrack {
-
     override fun start() {
     }
 
@@ -32,20 +31,24 @@ class LocalAudioTrack constructor(
     }
 
     companion object {
-        fun create(context: Context, factory: PeerConnectionFactory): LocalAudioTrack {
+        fun create(
+            context: Context,
+            factory: PeerConnectionFactory
+        ): LocalAudioTrack {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) !=
                 PackageManager.PERMISSION_GRANTED
             ) {
                 throw SecurityException("Missing permissions to start recording the audio")
             }
 
-            val items = listOf(
-                MediaConstraints.KeyValuePair("googEchoCancellation", "true"),
-                MediaConstraints.KeyValuePair("googAutoGainControl", "true"),
-                MediaConstraints.KeyValuePair("googHighpassFilter", "true"),
-                MediaConstraints.KeyValuePair("googNoiseSuppression", "true"),
-                MediaConstraints.KeyValuePair("googTypingNoiseDetection", "true")
-            )
+            val items =
+                listOf(
+                    MediaConstraints.KeyValuePair("googEchoCancellation", "true"),
+                    MediaConstraints.KeyValuePair("googAutoGainControl", "true"),
+                    MediaConstraints.KeyValuePair("googHighpassFilter", "true"),
+                    MediaConstraints.KeyValuePair("googNoiseSuppression", "true"),
+                    MediaConstraints.KeyValuePair("googTypingNoiseDetection", "true")
+                )
 
             val audioConstraints = MediaConstraints()
             audioConstraints.optional.addAll(items)

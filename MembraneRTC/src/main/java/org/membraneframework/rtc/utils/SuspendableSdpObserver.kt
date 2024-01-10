@@ -58,25 +58,27 @@ internal class SuspendableSdpObserver : SdpObserver {
         }
     }
 
-    suspend fun awaitCreate() = suspendCoroutine<Result<SessionDescription>> { cont ->
-        if (returnedResults) throw IllegalStateException("observer already returned")
-        createCont = cont
+    suspend fun awaitCreate() =
+        suspendCoroutine<Result<SessionDescription>> { cont ->
+            if (returnedResults) throw IllegalStateException("observer already returned")
+            createCont = cont
 
-        pendingCreate?.let {
-            cont.resume(it)
-            returnedResults = true
+            pendingCreate?.let {
+                cont.resume(it)
+                returnedResults = true
+            }
         }
-    }
 
-    suspend fun awaitSet() = suspendCoroutine<Result<Unit>> { cont ->
-        if (returnedResults) throw IllegalStateException("observer already returned")
-        setCont = cont
+    suspend fun awaitSet() =
+        suspendCoroutine<Result<Unit>> { cont ->
+            if (returnedResults) throw IllegalStateException("observer already returned")
+            setCont = cont
 
-        pendingSet?.let {
-            cont.resume(it)
-            returnedResults = true
+            pendingSet?.let {
+                cont.resume(it)
+                returnedResults = true
+            }
         }
-    }
 }
 
 internal suspend fun PeerConnection.createOffer(constraints: MediaConstraints): Result<SessionDescription> {

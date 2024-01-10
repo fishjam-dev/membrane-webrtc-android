@@ -26,30 +26,36 @@ class SoundDetection {
      * @param samplingRate The audio sampling rate in Hz.
      * @param volumeThreshold The threshold value in decibels (dB) above which a sound is considered detected.
      */
-    fun start(monitorInterval: Int = 50, samplingRate: Int = 22050, volumeThreshold: Int = -60) {
+    fun start(
+        monitorInterval: Int = 50,
+        samplingRate: Int = 22050,
+        volumeThreshold: Int = -60
+    ) {
         if (isRecording) {
             Timber.w("Sound detection is already in progress. Ignoring the start request.")
             return
         }
-        bufferSize = AudioRecord.getMinBufferSize(
-            samplingRate,
-            AudioFormat.CHANNEL_IN_MONO,
-            AudioFormat.ENCODING_PCM_16BIT
-        )
-        audioRecord = try {
-            AudioRecord(
-                MediaRecorder.AudioSource.MIC,
+        bufferSize =
+            AudioRecord.getMinBufferSize(
                 samplingRate,
                 AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                bufferSize
+                AudioFormat.ENCODING_PCM_16BIT
             )
-        } catch (e: SecurityException) {
-            throw SecurityException(
-                "Unable to initialize the AudioRecord." +
-                    " Ensure that the recording permission is granted."
-            )
-        }
+        audioRecord =
+            try {
+                AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    samplingRate,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    bufferSize
+                )
+            } catch (e: SecurityException) {
+                throw SecurityException(
+                    "Unable to initialize the AudioRecord." +
+                        " Ensure that the recording permission is granted."
+                )
+            }
 
         if (audioRecord?.state == AudioRecord.STATE_INITIALIZED) {
             audioRecord?.startRecording()
@@ -119,7 +125,10 @@ class SoundDetection {
      * @param volumeThreshold The threshold value in decibels (dB) above which a sound is considered detected.
      * @param volumeValue The current volume value in decibels (dB).
      */
-    private fun detectSound(volumeThreshold: Int, volumeValue: Int) {
+    private fun detectSound(
+        volumeThreshold: Int,
+        volumeValue: Int
+    ) {
         setIsSoundDetected(volumeValue > volumeThreshold)
         setIsSoundVolumeChanged(volumeValue)
     }
@@ -131,7 +140,10 @@ class SoundDetection {
      * @param bytesRead The number of bytes read from the audio buffer.
      * @return The maximum amplitude value from the buffer.
      */
-    private fun getMaxAmplitude(buffer: ShortArray, bytesRead: Int): Int {
+    private fun getMaxAmplitude(
+        buffer: ShortArray,
+        bytesRead: Int
+    ): Int {
         return buffer.take(bytesRead).maxOfOrNull { abs(it.toInt()) } ?: 0
     }
 
@@ -169,7 +181,10 @@ class SoundDetection {
      * @param monitorInterval The time interval (in milliseconds) between sound detection checks.
      * @param volumeThreshold The threshold value in decibels (dB) above which a sound is considered detected.
      */
-    private fun startTimer(monitorInterval: Int, volumeThreshold: Int) {
+    private fun startTimer(
+        monitorInterval: Int,
+        volumeThreshold: Int
+    ) {
         timer = Timer()
         timer?.scheduleAtFixedRate(
             object : TimerTask() {

@@ -79,7 +79,7 @@ open class VideoTextureViewRenderer :
         this.rendererEvents = rendererEvents
         rotatedFrameWidth = 0
         rotatedFrameHeight = 0
-        eglRenderer.init(sharedContext, this /* rendererEvents */, configAttributes, drawer)
+        eglRenderer.init(sharedContext, this, configAttributes, drawer)
     }
 
     /**
@@ -101,7 +101,11 @@ open class VideoTextureViewRenderer :
      * required.
      * @param drawer   Custom drawer to use for this frame listener.
      */
-    fun addFrameListener(listener: EglRenderer.FrameListener?, scale: Float, drawerParam: RendererCommon.GlDrawer?) {
+    fun addFrameListener(
+        listener: EglRenderer.FrameListener?,
+        scale: Float,
+        drawerParam: RendererCommon.GlDrawer?
+    ) {
         eglRenderer.addFrameListener(listener, scale, drawerParam)
     }
 
@@ -114,7 +118,10 @@ open class VideoTextureViewRenderer :
      * @param scale    The scale of the Bitmap passed to the callback, or 0 if no Bitmap is
      * required.
      */
-    fun addFrameListener(listener: EglRenderer.FrameListener?, scale: Float) {
+    fun addFrameListener(
+        listener: EglRenderer.FrameListener?,
+        scale: Float
+    ) {
         eglRenderer.addFrameListener(listener, scale)
     }
 
@@ -152,7 +159,10 @@ open class VideoTextureViewRenderer :
         requestLayout()
     }
 
-    fun setScalingType(scalingTypeMatchOrientation: ScalingType?, scalingTypeMismatchOrientation: ScalingType?) {
+    fun setScalingType(
+        scalingTypeMatchOrientation: ScalingType?,
+        scalingTypeMismatchOrientation: ScalingType?
+    ) {
         ThreadUtils.checkIsOnMainThread()
 
         videoLayoutMeasure.setScalingType(
@@ -181,7 +191,10 @@ open class VideoTextureViewRenderer :
     }
 
     // View layout interface.
-    override fun onMeasure(widthSpec: Int, heightSpec: Int) {
+    override fun onMeasure(
+        widthSpec: Int,
+        heightSpec: Int
+    ) {
         ThreadUtils.checkIsOnMainThread()
 
         val size =
@@ -191,16 +204,23 @@ open class VideoTextureViewRenderer :
         logD("onMeasure() New size: ${size.x}x${size.y}")
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+    override fun onLayout(
+        changed: Boolean,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int
+    ) {
         ThreadUtils.checkIsOnMainThread()
 
-        val aspectRatio = when (this.scalingType) {
-            ScalingType.SCALE_ASPECT_FIT ->
-                rotatedFrameWidth.toFloat() / max(rotatedFrameHeight, 1)
+        val aspectRatio =
+            when (this.scalingType) {
+                ScalingType.SCALE_ASPECT_FIT ->
+                    rotatedFrameWidth.toFloat() / max(rotatedFrameHeight, 1)
 
-            else ->
-                (right - left) / (bottom - top).toFloat()
-        }
+                else ->
+                    (right - left) / (bottom - top).toFloat()
+            }
 
         eglRenderer.setLayoutAspectRatio(aspectRatio)
         updateSurfaceSize()
@@ -262,7 +282,10 @@ open class VideoTextureViewRenderer :
     /**
      * Sets the TextureView transform to preserve the aspect ratio of the video.
      */
-    private fun adjustAspectRatio(videoWidth: Float, videoHeight: Float) {
+    private fun adjustAspectRatio(
+        videoWidth: Float,
+        videoHeight: Float
+    ) {
         val viewWidth = width
         val viewHeight = height
         val aspectRatio = videoHeight / videoWidth
@@ -304,10 +327,20 @@ open class VideoTextureViewRenderer :
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {}
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
+
+    override fun surfaceChanged(
+        holder: SurfaceHolder,
+        format: Int,
+        width: Int,
+        height: Int
+    ) {}
 
     // TextureView.SurfaceTextureListener implementation
-    override fun onSurfaceTextureAvailable(surface: SurfaceTexture, i: Int, i1: Int) {
+    override fun onSurfaceTextureAvailable(
+        surface: SurfaceTexture,
+        i: Int,
+        i1: Int
+    ) {
         ThreadUtils.checkIsOnMainThread()
         eglRenderer.createEglSurface(Surface(surfaceTexture))
         surfaceHeight = 0
@@ -315,7 +348,11 @@ open class VideoTextureViewRenderer :
         updateSurfaceSize()
     }
 
-    override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
+    override fun onSurfaceTextureSizeChanged(
+        surface: SurfaceTexture,
+        width: Int,
+        height: Int
+    ) {
         ThreadUtils.checkIsOnMainThread()
 
         logD("surfaceChanged: size: $width x $height")
@@ -353,7 +390,11 @@ open class VideoTextureViewRenderer :
         rendererEvents?.onFirstFrameRendered()
     }
 
-    override fun onFrameResolutionChanged(videoWidth: Int, videoHeight: Int, rotation: Int) {
+    override fun onFrameResolutionChanged(
+        videoWidth: Int,
+        videoHeight: Int,
+        rotation: Int
+    ) {
         logD("Resolution changed to $videoWidth x $videoHeight with rotation of $rotation")
         rendererEvents?.onFrameResolutionChanged(videoWidth, videoHeight, rotation)
 
