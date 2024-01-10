@@ -92,10 +92,10 @@ internal class InternalMembraneRTC
             rtcEngineCommunication.onEvent(event)
         }
 
-        fun connect(endpointMetadata: Metadata) {
+        fun connect(endpointMetadata: Metadata? = mapOf()) {
             coroutineScope.launch {
                 localEndpoint = localEndpoint.copy(metadata = endpointMetadata)
-                rtcEngineCommunication.connect(endpointMetadata)
+                rtcEngineCommunication.connect(endpointMetadata ?: mapOf())
             }
         }
 

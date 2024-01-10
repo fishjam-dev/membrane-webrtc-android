@@ -309,7 +309,7 @@ class RoomViewModel(
             mutableParticipants[it.id] =
                 Participant(
                     it.id,
-                    it.metadata["displayName"] as? String ?: "UNKNOWN",
+                    it.metadata?.get("displayName") as? String ?: "UNKNOWN",
                     null,
                     null
                 )
@@ -469,7 +469,7 @@ class RoomViewModel(
         mutableParticipants[endpoint.id] =
             Participant(
                 id = endpoint.id,
-                displayName = endpoint.metadata["displayName"] as? String ?: "UNKNOWN"
+                displayName = endpoint.metadata?.get("displayName") as? String ?: "UNKNOWN"
             )
 
         emitParticipants()

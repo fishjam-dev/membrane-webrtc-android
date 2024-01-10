@@ -5,7 +5,7 @@ import org.membraneframework.rtc.utils.Metadata
 data class Endpoint(
     val id: String,
     val type: String,
-    val metadata: Metadata = mapOf(),
+    val metadata: Metadata? = mapOf(),
     val trackIdToMetadata: Map<String, Metadata> = mapOf()
 ) {
     fun withTrack(
