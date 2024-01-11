@@ -1,6 +1,7 @@
 package org.membraneframework.rtc
 
 import org.membraneframework.rtc.events.OfferData
+import org.membraneframework.rtc.events.TracksAdded
 import org.membraneframework.rtc.models.Endpoint
 import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.SerializedMediaEvent
@@ -14,7 +15,7 @@ internal interface RTCEngineListener {
     fun onOfferData(integratedTurnServers: List<OfferData.TurnServer>, tracksTypes: Map<String, Int>)
     fun onSdpAnswer(type: String, sdp: String, midToTrackId: Map<String, String>)
     fun onRemoteCandidate(candidate: String, sdpMLineIndex: Int, sdpMid: String?)
-    fun onTracksAdded(endpointId: String, trackIdToMetadata: Map<String, Metadata>)
+    fun onTracksAdded(endpointId: String, trackIdToMetadata: Map<String, Metadata>, tracks: Map<String, TracksAdded.Data.TrackData>)
     fun onTracksRemoved(endpointId: String, trackIds: List<String>)
     fun onTrackUpdated(endpointId: String, trackId: String, metadata: Metadata)
     fun onTrackEncodingChanged(endpointId: String, trackId: String, encoding: String, encodingReason: String)
