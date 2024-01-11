@@ -96,12 +96,7 @@ constructor(
     }
 
     fun onEvent(serializedEvent: SerializedMediaEvent) {
-        Log.d("AAA","Before serialization" +  serializedEvent)
-        val event = decodeEvent(serializedEvent)
-        Log.d("AAA", event?.javaClass?.toString() ?: "not possible to obtain class")
-        Log.d("AAA", event?.toString()?: "not possible to string")
-
-        when (event) {
+        when (val event = decodeEvent(serializedEvent)) {
             is Connected -> engineListener.onConnected(event.data.id, event.data.otherEndpoints)
             is OfferData -> engineListener.onOfferData(event.data.integratedTurnServers, event.data.tracksTypes)
             is EndpointRemoved -> engineListener.onEndpointRemoved(event.data.id)

@@ -352,7 +352,6 @@ constructor(
         remoteEndpoints[updatedEndpoint.id] = updatedEndpoint
 
         for ((trackId, metadata) in updatedEndpoint.trackIdToMetadata) {
-            Log.d("AAA", "${updatedEndpoint.tracks[trackId]?.simulcastConfig?.enabled} ${updatedEndpoint.tracks[trackId]?.simulcastConfig?.activeEncodings}")
             val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata, simulcastConfig = updatedEndpoint.tracks[trackId]?.simulcastConfig)
 
             this.trackContexts[trackId] = context
