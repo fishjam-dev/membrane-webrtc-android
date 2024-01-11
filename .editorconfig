@@ -1,5 +1,8 @@
 [*.{kt,kts}]
-ktlint_disabled_rules = no-wildcard-imports,filename
+ktlint_standard_no-wildcard-imports = disbaled
+ktlint_standard_filename = disabled
+ktlint_standard_function-naming = disabled
+ktlint_standard_property-naming = disabled
 ij_kotlin_allow_trailing_comma = false
 ij_kotlin_allow_trailing_comma_on_call_site = false
 ij_kotlin_imports_layout = *,java.**,javax.**,kotlin.**,^
@@ -7,7 +10,7 @@ ij_kotlin_packages_to_use_import_on_demand = java.util.*,kotlinx.android.synthet
 indent_size = 4
 indent_style = space
 insert_final_newline = true
-ktlint_code_style = official
+ktlint_code_style = ktlint_official
 ktlint_ignore_back_ticked_identifier = false
 ktlint_standard_no-wildcard-imports= disabled
 max_line_length = 120

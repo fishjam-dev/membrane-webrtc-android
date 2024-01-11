@@ -9,39 +9,39 @@ import org.webrtc.*
 import org.webrtc.audio.AudioDeviceModule
 
 internal class PeerConnectionFactoryWrapper
-@AssistedInject constructor(
-    @Assisted private val createOptions: CreateOptions,
-    audioDeviceModule: AudioDeviceModule,
-    eglBase: EglBase,
-    appContext: Context
-) {
-    @AssistedFactory
-    interface PeerConnectionFactoryWrapperFactory {
-        fun create(
-            createOptions: CreateOptions
-        ): PeerConnectionFactoryWrapper
+    @AssistedInject
+    constructor(
+        @Assisted private val createOptions: CreateOptions,
+        audioDeviceModule: AudioDeviceModule,
+        eglBase: EglBase,
+        appContext: Context
+    ) {
+        @AssistedFactory
+        interface PeerConnectionFactoryWrapperFactory {
+            fun create(createOptions: CreateOptions): PeerConnectionFactoryWrapper
+        }
+
+        val peerConnectionFactory: PeerConnectionFactory
+
+        init {
+            PeerConnectionFactory.initialize(
+                PeerConnectionFactory.InitializationOptions.builder(appContext).createInitializationOptions()
+            )
+
+            peerConnectionFactory =
+                PeerConnectionFactory.builder().setAudioDeviceModule(audioDeviceModule).setVideoEncoderFactory(
+                    SimulcastVideoEncoderFactoryWrapper(
+                        eglBase.eglBaseContext,
+                        createOptions.encoderOptions
+                    )
+                ).setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext))
+                    .createPeerConnectionFactory()
+        }
+
+        fun createPeerConnection(
+            rtcConfig: PeerConnection.RTCConfiguration,
+            observer: PeerConnection.Observer
+        ): PeerConnection? {
+            return peerConnectionFactory.createPeerConnection(rtcConfig, observer)
+        }
     }
-
-    val peerConnectionFactory: PeerConnectionFactory
-
-    init {
-        PeerConnectionFactory.initialize(
-            PeerConnectionFactory.InitializationOptions.builder(appContext).createInitializationOptions()
-        )
-
-        peerConnectionFactory =
-            PeerConnectionFactory.builder().setAudioDeviceModule(audioDeviceModule).setVideoEncoderFactory(
-                SimulcastVideoEncoderFactoryWrapper(
-                    eglBase.eglBaseContext,
-                    createOptions.encoderOptions
-                )
-            ).setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext)).createPeerConnectionFactory()
-    }
-
-    fun createPeerConnection(
-        rtcConfig: PeerConnection.RTCConfiguration,
-        observer: PeerConnection.Observer
-    ): PeerConnection? {
-        return peerConnectionFactory.createPeerConnection(rtcConfig, observer)
-    }
-}

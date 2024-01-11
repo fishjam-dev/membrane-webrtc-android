@@ -17,23 +17,27 @@ internal class ScreencastServiceConnector(private val context: Context) {
 
     private val awaitingConnects = mutableSetOf<Continuation<Unit>>()
 
-    private val connection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            synchronized(this@ScreencastServiceConnector) {
-                connected = true
-                service = (binder as ScreencastService.ScreencastBinder).service
+    private val connection =
+        object : ServiceConnection {
+            override fun onServiceConnected(
+                name: ComponentName?,
+                binder: IBinder?
+            ) {
+                synchronized(this@ScreencastServiceConnector) {
+                    connected = true
+                    service = (binder as ScreencastService.ScreencastBinder).service
 
-                onConnected()
+                    onConnected()
+                }
+            }
+
+            override fun onServiceDisconnected(p0: ComponentName?) {
+                synchronized(this@ScreencastServiceConnector) {
+                    connected = false
+                    service = null
+                }
             }
         }
-
-        override fun onServiceDisconnected(p0: ComponentName?) {
-            synchronized(this@ScreencastServiceConnector) {
-                connected = false
-                service = null
-            }
-        }
-    }
 
     private fun onConnected() {
         awaitingConnects.forEach {
@@ -43,7 +47,10 @@ internal class ScreencastServiceConnector(private val context: Context) {
         awaitingConnects.clear()
     }
 
-    fun start(notificationId: Int? = null, notification: Notification? = null) {
+    fun start(
+        notificationId: Int? = null,
+        notification: Notification? = null
+    ) {
         synchronized(this) {
             service?.start(notificationId, notification)
         }

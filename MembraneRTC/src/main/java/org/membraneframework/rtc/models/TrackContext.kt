@@ -50,7 +50,10 @@ class TrackContext(track: RemoteTrack?, val endpoint: Endpoint, val trackId: Str
     var encodingReason: EncodingReason? = null
         private set
 
-    internal fun setEncoding(encoding: TrackEncoding, encodingReason: EncodingReason) {
+    internal fun setEncoding(
+        encoding: TrackEncoding,
+        encodingReason: EncodingReason
+    ) {
         this.encoding = encoding
         this.encodingReason = encodingReason
         onTrackEncodingChangeListener?.let { onTrackEncodingChangeListener?.onEncodingChanged(this) }

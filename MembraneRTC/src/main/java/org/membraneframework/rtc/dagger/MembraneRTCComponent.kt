@@ -23,6 +23,8 @@ internal interface MembraneRTCComponent {
 
     @Component.Factory
     interface Factory {
-        fun create(@BindsInstance appContext: Context): MembraneRTCComponent
+        fun create(
+            @BindsInstance appContext: Context
+        ): MembraneRTCComponent
     }
 }

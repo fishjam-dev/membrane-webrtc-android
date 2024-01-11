@@ -42,15 +42,16 @@ data class SdpOffer(val type: String, val data: Payload) : SendableEvent() {
             "custom",
             mapOf(
                 "type" to "sdpOffer",
-                "data" to mapOf(
-                    "sdpOffer" to mapOf(
-                        "type" to "offer",
-                        "sdp" to sdp
-                    ),
-                    "trackIdToTrackMetadata" to trackIdToTrackMetadata,
-                    "midToTrackId" to midToTrackId
-                )
-
+                "data" to
+                    mapOf(
+                        "sdpOffer" to
+                            mapOf(
+                                "type" to "offer",
+                                "sdp" to sdp
+                            ),
+                        "trackIdToTrackMetadata" to trackIdToTrackMetadata,
+                        "midToTrackId" to midToTrackId
+                    )
             )
         )
 }
@@ -61,10 +62,11 @@ data class LocalCandidate(val type: String, val data: Payload) : SendableEvent()
             "custom",
             mapOf(
                 "type" to "candidate",
-                "data" to mapOf(
-                    "candidate" to candidate,
-                    "sdpMLineIndex" to sdpMLineIndex
-                )
+                "data" to
+                    mapOf(
+                        "candidate" to candidate,
+                        "sdpMLineIndex" to sdpMLineIndex
+                    )
             )
         )
 }
@@ -85,10 +87,11 @@ data class SelectEncoding(val type: String, val data: Payload) : SendableEvent()
             "custom",
             mapOf(
                 "type" to "setTargetTrackVariant",
-                "data" to mapOf(
-                    "trackId" to trackId,
-                    "variant" to encoding
-                )
+                "data" to
+                    mapOf(
+                        "trackId" to trackId,
+                        "variant" to encoding
+                    )
             )
         )
 }
@@ -156,7 +159,6 @@ enum class ReceivableEventType {
 internal data class BaseReceivableEvent(val type: ReceivableEventType)
 
 sealed class ReceivableEvent {
-
     companion object {
         fun decode(payload: Payload): ReceivableEvent? {
             try {
