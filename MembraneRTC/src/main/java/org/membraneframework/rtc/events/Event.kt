@@ -30,13 +30,13 @@ internal inline fun <I, reified O> I.convert(): O {
 sealed class SendableEvent
 
 data class Connect(val type: String, val data: Data) : SendableEvent() {
-    data class Data(val metadata: Metadata)
+    data class Data(val metadata: Metadata?)
 
-    constructor(metadata: Metadata) : this("connect", Data(metadata))
+    constructor(metadata: Metadata? = mapOf()) : this("connect", Data(metadata))
 }
 
 data class SdpOffer(val type: String, val data: Payload) : SendableEvent() {
-    constructor(sdp: String, trackIdToTrackMetadata: Map<String, Metadata>, midToTrackId: Map<String, String>) :
+    constructor(sdp: String, trackIdToTrackMetadata: Map<String, Metadata?>, midToTrackId: Map<String, String>) :
         this(
             "custom",
             mapOf(
@@ -96,15 +96,18 @@ data class SelectEncoding(val type: String, val data: Payload) : SendableEvent()
 }
 
 data class UpdateEndpointMetadata(val type: String, val data: Data) : SendableEvent() {
-    data class Data(val metadata: Metadata)
+    data class Data(val metadata: Metadata?)
 
-    constructor(metadata: Metadata) : this("updateEndpointMetadata", Data(metadata))
+    constructor(metadata: Metadata? = mapOf()) : this("updateEndpointMetadata", Data(metadata))
 }
 
 data class UpdateTrackMetadata(val type: String, val data: Data) : SendableEvent() {
-    data class Data(val trackId: String, val trackMetadata: Metadata)
+    data class Data(val trackId: String, val trackMetadata: Metadata?)
 
-    constructor(trackId: String, trackMetadata: Metadata) : this("updateTrackMetadata", Data(trackId, trackMetadata))
+    constructor(trackId: String, trackMetadata: Metadata = mapOf()) : this(
+        "updateTrackMetadata",
+        Data(trackId, trackMetadata)
+    )
 }
 
 data class Disconnect(val type: String) : SendableEvent() {
@@ -231,13 +234,13 @@ data class EndpointAdded(val type: ReceivableEventType, val data: Data) : Receiv
     data class Data(
         val id: String,
         val type: String,
-        val metadata: Metadata,
-        val trackIdToMetadata: Map<String, Metadata>
+        val metadata: Metadata?,
+        val trackIdToMetadata: Map<String, Metadata?>
     )
 }
 
 data class EndpointUpdated(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val id: String, val metadata: Metadata)
+    data class Data(val id: String, val metadata: Metadata?)
 }
 
 data class EndpointRemoved(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
@@ -257,7 +260,7 @@ data class OfferData(val type: ReceivableEventType, val data: Data) : Receivable
 }
 
 data class TracksAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val endpointId: String, val trackIdToMetadata: Map<String, Metadata>)
+    data class Data(val endpointId: String, val trackIdToMetadata: Map<String, Metadata?>)
 }
 
 data class TracksRemoved(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
@@ -265,7 +268,7 @@ data class TracksRemoved(val type: ReceivableEventType, val data: Data) : Receiv
 }
 
 data class TrackUpdated(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val endpointId: String, val trackId: String, val metadata: Metadata)
+    data class Data(val endpointId: String, val trackId: String, val metadata: Metadata?)
 }
 
 data class SdpAnswer(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {

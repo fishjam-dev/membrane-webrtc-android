@@ -67,7 +67,7 @@ internal class RTCEngineCommunication
 
         fun sdpOffer(
             sdp: String,
-            trackIdToTrackMetadata: Map<String, Metadata>,
+            trackIdToTrackMetadata: Map<String, Metadata?>,
             midToTrackId: Map<String, String>
         ) {
             sendEvent(
