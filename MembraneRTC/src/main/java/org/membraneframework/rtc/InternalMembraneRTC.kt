@@ -248,7 +248,8 @@ internal class InternalMembraneRTC
                 this.remoteEndpoints[it.id] = it
 
                 for ((trackId, metadata) in it.trackIdToMetadata) {
-                    val context = TrackContext(track = null, endpoint = it, trackId = trackId, metadata = metadata)
+                    val context =
+                        TrackContext(track = null, endpoint = it, trackId = trackId, metadata = metadata ?: mapOf())
 
                     this.trackContexts[trackId] = context
 
@@ -295,7 +296,7 @@ internal class InternalMembraneRTC
 
         override fun onEndpointUpdated(
             endpointId: String,
-            endpointMetadata: Metadata
+            endpointMetadata: Metadata?
         ) {
             val endpoint =
                 remoteEndpoints.remove(endpointId) ?: run {
@@ -374,7 +375,7 @@ internal class InternalMembraneRTC
 
         override fun onTracksAdded(
             endpointId: String,
-            trackIdToMetadata: Map<String, Metadata>
+            trackIdToMetadata: Map<String, Metadata?>
         ) {
             if (localEndpoint.id == endpointId) return
 
@@ -389,7 +390,8 @@ internal class InternalMembraneRTC
             remoteEndpoints[updatedEndpoint.id] = updatedEndpoint
 
             for ((trackId, metadata) in updatedEndpoint.trackIdToMetadata) {
-                val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata)
+                val context =
+                    TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata ?: mapOf())
 
                 this.trackContexts[trackId] = context
 
@@ -424,7 +426,7 @@ internal class InternalMembraneRTC
         override fun onTrackUpdated(
             endpointId: String,
             trackId: String,
-            metadata: Metadata
+            metadata: Metadata?
         ) {
             val endpoint =
                 remoteEndpoints[endpointId] ?: run {
@@ -438,7 +440,7 @@ internal class InternalMembraneRTC
                     return
                 }
 
-            context.metadata = metadata
+            context.metadata = metadata ?: mapOf()
 
             val updatedEndpoint =
                 endpoint

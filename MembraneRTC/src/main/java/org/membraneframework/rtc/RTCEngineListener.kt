@@ -19,7 +19,7 @@ internal interface RTCEngineListener {
 
     fun onEndpointUpdated(
         endpointId: String,
-        endpointMetadata: Metadata
+        endpointMetadata: Metadata? = mapOf()
     )
 
     fun onOfferData(
@@ -41,7 +41,7 @@ internal interface RTCEngineListener {
 
     fun onTracksAdded(
         endpointId: String,
-        trackIdToMetadata: Map<String, Metadata>
+        trackIdToMetadata: Map<String, Metadata?>
     )
 
     fun onTracksRemoved(
@@ -52,7 +52,7 @@ internal interface RTCEngineListener {
     fun onTrackUpdated(
         endpointId: String,
         trackId: String,
-        metadata: Metadata
+        metadata: Metadata? = mapOf()
     )
 
     fun onTrackEncodingChanged(
