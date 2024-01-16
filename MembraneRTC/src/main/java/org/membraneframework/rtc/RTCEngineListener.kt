@@ -7,9 +7,15 @@ import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.SerializedMediaEvent
 
 internal interface RTCEngineListener {
-    fun onConnected(endpointID: String, otherEndpoints: List<Endpoint>)
+    fun onConnected(
+        endpointID: String,
+        otherEndpoints: List<Endpoint>
+    )
+
     fun onSendMediaEvent(event: SerializedMediaEvent)
+
     fun onEndpointAdded(endpoint: Endpoint)
+
     fun onEndpointRemoved(endpointId: String)
 
     fun onEndpointUpdated(

@@ -124,7 +124,12 @@ internal class RTCEngineCommunication
                         event.data.trackId,
                         event.data.metadata
                     )
-                is TracksAdded -> engineListener.onTracksAdded(event.data.endpointId, event.data.trackIdToMetadata, event.data.tracks)
+                is TracksAdded ->
+                    engineListener.onTracksAdded(
+                        event.data.endpointId,
+                        event.data.trackIdToMetadata,
+                        event.data.tracks
+                    )
                 is TracksRemoved -> engineListener.onTracksRemoved(event.data.endpointId, event.data.trackIds)
                 is EncodingSwitched ->
                     engineListener.onTrackEncodingChanged(

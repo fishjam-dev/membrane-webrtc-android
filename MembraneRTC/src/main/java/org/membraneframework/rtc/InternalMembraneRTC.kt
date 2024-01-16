@@ -249,7 +249,14 @@ internal class InternalMembraneRTC
                 this.remoteEndpoints[it.id] = it
 
                 for ((trackId, metadata) in it.trackIdToMetadata) {
-                    val context = TrackContext(track = null, endpoint = it, trackId = trackId, metadata = metadata ?: mapOf(), simulcastConfig = it.tracks[trackId]?.simulcastConfig)
+                    val context =
+                        TrackContext(
+                            track = null,
+                            endpoint = it,
+                            trackId = trackId,
+                            metadata = metadata ?: mapOf(),
+                            simulcastConfig = it.tracks[trackId]?.simulcastConfig
+                        )
 
                     this.trackContexts[trackId] = context
 
@@ -376,7 +383,8 @@ internal class InternalMembraneRTC
         override fun onTracksAdded(
             endpointId: String,
             trackIdToMetadata: Map<String, Metadata?>,
-            tracks: Map<String, TracksAdded.Data.TrackData>) {
+            tracks: Map<String, TracksAdded.Data.TrackData>
+        ) {
             if (localEndpoint.id == endpointId) return
 
             val endpoint =
@@ -390,7 +398,14 @@ internal class InternalMembraneRTC
             remoteEndpoints[updatedEndpoint.id] = updatedEndpoint
 
             for ((trackId, metadata) in updatedEndpoint.trackIdToMetadata) {
-                val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata ?: mapOf(), simulcastConfig = updatedEndpoint.tracks[trackId]?.simulcastConfig)
+                val context =
+                    TrackContext(
+                        track = null,
+                        endpoint = endpoint,
+                        trackId = trackId,
+                        metadata = metadata ?: mapOf(),
+                        simulcastConfig = updatedEndpoint.tracks[trackId]?.simulcastConfig
+                    )
 
                 this.trackContexts[trackId] = context
 

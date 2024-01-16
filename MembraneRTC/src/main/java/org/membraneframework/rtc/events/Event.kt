@@ -261,7 +261,11 @@ data class OfferData(val type: ReceivableEventType, val data: Data) : Receivable
 }
 
 data class TracksAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val endpointId: String, val trackIdToMetadata: Map<String, Metadata?>, val tracks: Map<String, TrackData>){
+    data class Data(
+        val endpointId: String,
+        val trackIdToMetadata: Map<String, Metadata?>,
+        val tracks: Map<String, TrackData>
+    ) {
         data class TrackData(val metadata: Metadata?, val simulcastConfig: SimulcastConfig?)
     }
 }

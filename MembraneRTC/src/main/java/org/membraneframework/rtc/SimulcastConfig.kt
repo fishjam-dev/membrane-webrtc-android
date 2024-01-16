@@ -11,8 +11,10 @@ import com.google.gson.annotations.SerializedName
 enum class TrackEncoding(val rid: String) {
     @SerializedName("l")
     L("l"),
+
     @SerializedName("m")
     M("m"),
+
     @SerializedName("h")
     H("h");
 
