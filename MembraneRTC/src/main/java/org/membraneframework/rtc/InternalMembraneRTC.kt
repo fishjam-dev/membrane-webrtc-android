@@ -249,7 +249,7 @@ internal class InternalMembraneRTC
                 this.remoteEndpoints[it.id] = it
 
                 for ((trackId, metadata) in it.trackIdToMetadata) {
-                    val context = TrackContext(track = null, endpoint = it, trackId = trackId, metadata = metadata, simulcastConfig = it.tracks[trackId]?.simulcastConfig)
+                    val context = TrackContext(track = null, endpoint = it, trackId = trackId, metadata = metadata ?: mapOf(), simulcastConfig = it.tracks[trackId]?.simulcastConfig)
 
                     this.trackContexts[trackId] = context
 
@@ -296,7 +296,7 @@ internal class InternalMembraneRTC
 
         override fun onEndpointUpdated(
             endpointId: String,
-            endpointMetadata: Metadata
+            endpointMetadata: Metadata?
         ) {
             val endpoint =
                 remoteEndpoints.remove(endpointId) ?: run {
@@ -375,8 +375,8 @@ internal class InternalMembraneRTC
 
         override fun onTracksAdded(
             endpointId: String,
-            trackIdToMetadata: Map<String, Metadata>
-        , tracks: Map<String, TracksAdded.Data.TrackData>) {
+            trackIdToMetadata: Map<String, Metadata?>,
+            tracks: Map<String, TracksAdded.Data.TrackData>) {
             if (localEndpoint.id == endpointId) return
 
             val endpoint =
@@ -390,7 +390,7 @@ internal class InternalMembraneRTC
             remoteEndpoints[updatedEndpoint.id] = updatedEndpoint
 
             for ((trackId, metadata) in updatedEndpoint.trackIdToMetadata) {
-                val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata, simulcastConfig = updatedEndpoint.tracks[trackId]?.simulcastConfig)
+                val context = TrackContext(track = null, endpoint = endpoint, trackId = trackId, metadata = metadata ?: mapOf(), simulcastConfig = updatedEndpoint.tracks[trackId]?.simulcastConfig)
 
                 this.trackContexts[trackId] = context
 
@@ -425,7 +425,7 @@ internal class InternalMembraneRTC
         override fun onTrackUpdated(
             endpointId: String,
             trackId: String,
-            metadata: Metadata
+            metadata: Metadata?
         ) {
             val endpoint =
                 remoteEndpoints[endpointId] ?: run {
@@ -439,7 +439,7 @@ internal class InternalMembraneRTC
                     return
                 }
 
-            context.metadata = metadata
+            context.metadata = metadata ?: mapOf()
 
             val updatedEndpoint =
                 endpoint
