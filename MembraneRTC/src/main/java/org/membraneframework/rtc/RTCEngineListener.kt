@@ -3,6 +3,7 @@ package org.membraneframework.rtc
 import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.events.TracksAdded
 import org.membraneframework.rtc.models.Endpoint
+import org.membraneframework.rtc.models.TrackData
 import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.SerializedMediaEvent
 
@@ -42,8 +43,7 @@ internal interface RTCEngineListener {
 
     fun onTracksAdded(
         endpointId: String,
-        trackIdToMetadata: Map<String, Metadata?>,
-        tracks: Map<String, TracksAdded.Data.TrackData>
+        tracks: Map<String, TrackData>
     )
 
     fun onTracksRemoved(

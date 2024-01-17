@@ -15,6 +15,7 @@ import org.membraneframework.rtc.models.EncodingReason
 import org.membraneframework.rtc.models.Endpoint
 import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.models.TrackContext
+import org.membraneframework.rtc.models.TrackData
 import org.membraneframework.rtc.models.VadStatus
 import org.membraneframework.rtc.utils.ClosableCoroutineScope
 import org.membraneframework.rtc.utils.Metadata
@@ -50,7 +51,7 @@ internal class InternalMembraneRTC
             )
 
         private var localEndpoint: Endpoint =
-            Endpoint(id = "", type = "webrtc", metadata = mapOf(), trackIdToMetadata = mapOf(), tracks = mapOf())
+            Endpoint(id = "", type = "webrtc", metadata = mapOf(), tracks = mapOf())
 
         // mapping from endpoint's id to the endpoint himself
         private val remoteEndpoints = HashMap<String, Endpoint>()
@@ -248,14 +249,14 @@ internal class InternalMembraneRTC
             otherEndpoints.forEach {
                 this.remoteEndpoints[it.id] = it
 
-                for ((trackId, metadata) in it.trackIdToMetadata) {
+                for ((trackId, trackData) in it.tracks) {
                     val context =
                         TrackContext(
                             track = null,
                             endpoint = it,
                             trackId = trackId,
-                            metadata = metadata ?: mapOf(),
-                            simulcastConfig = it.tracks[trackId]?.simulcastConfig
+                            metadata = trackData.metadata ?: mapOf(),
+                            simulcastConfig = trackData.simulcastConfig
                         )
 
                     this.trackContexts[trackId] = context
@@ -290,7 +291,7 @@ internal class InternalMembraneRTC
                     return
                 }
 
-            val trackIds: List<String> = endpoint.trackIdToMetadata.keys.toList()
+            val trackIds: List<String> = endpoint.tracks.keys.toList()
 
             trackIds.forEach {
                 trackContexts.remove(it)?.let { ctx ->
@@ -326,7 +327,7 @@ internal class InternalMembraneRTC
                         }
                     rtcEngineCommunication.sdpOffer(
                         offer.description,
-                        localEndpoint.trackIdToMetadata,
+                        localEndpoint.tracks.mapValues { it.value.metadata },
                         offer.midToTrackIdMapping
                     )
                 } catch (e: Exception) {
@@ -382,8 +383,7 @@ internal class InternalMembraneRTC
 
         override fun onTracksAdded(
             endpointId: String,
-            trackIdToMetadata: Map<String, Metadata?>,
-            tracks: Map<String, TracksAdded.Data.TrackData>
+            tracks: Map<String, TrackData>
         ) {
             if (localEndpoint.id == endpointId) return
 
@@ -393,18 +393,18 @@ internal class InternalMembraneRTC
                     return
                 }
 
-            val updatedEndpoint = endpoint.copy(trackIdToMetadata = trackIdToMetadata, tracks = tracks)
+            val updatedEndpoint = endpoint.copy(tracks = tracks)
 
             remoteEndpoints[updatedEndpoint.id] = updatedEndpoint
 
-            for ((trackId, metadata) in updatedEndpoint.trackIdToMetadata) {
+            for ((trackId, trackData) in updatedEndpoint.tracks) {
                 val context =
                     TrackContext(
                         track = null,
                         endpoint = endpoint,
                         trackId = trackId,
-                        metadata = metadata ?: mapOf(),
-                        simulcastConfig = updatedEndpoint.tracks[trackId]?.simulcastConfig
+                        metadata = trackData.metadata ?: mapOf(),
+                        simulcastConfig = trackData.simulcastConfig
                     )
 
                 this.trackContexts[trackId] = context
