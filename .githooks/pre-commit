@@ -1,7 +1,12 @@
 #!/bin/bash
 # https://github.com/pinterest/ktlint pre-commit hook
 # On Linux xargs must be told to do nothing on no input. On MacOS (linux distribution "Darwin") this is default behavior and the xargs flag "--no-run-if-empty" flag does not exists
+echo "dupa1"
 [ "$(uname -s)" != "Darwin" ] && no_run_if_empty=--no-run-if-empty
-git diff --name-only --cached --relative --diff-filter=ACMT | grep '\.kt[s"]\?$' | xargs $no_run_if_empty ktlint --relative --format
+echo "dupa2"
+git diff --name-only --cached --relative --diff-filter=ACMT | grep '\.kt[s"]\?$' | xargs $no_run_if_empty ktlint --relative --format && echo "dupa3"
+echo "dupa4"
 if [ $? -ne 0 ]; then exit 1; fi
+echo "dupa5"
 git diff --name-only --cached --relative --diff-filter=ACMT | grep '\.kt[s"]\?$' | xargs $no_run_if_empty git add
+echo "dupa6"
