@@ -6,7 +6,7 @@ data class Endpoint(
     val id: String,
     val type: String,
     val metadata: Metadata? = mapOf(),
-    val tracks: Map<String, TrackData> = mapOf(),
+    val tracks: Map<String, TrackData> = mapOf()
 ) {
     fun withTrack(
         trackId: String,
@@ -14,7 +14,7 @@ data class Endpoint(
     ): Endpoint {
         val tracks = this.tracks.toMutableMap()
         val trackData = tracks[trackId]
-        tracks[trackId] = TrackData(metadata = metadata, simulcastConfig = trackData?.simulcastConfig);
+        tracks[trackId] = TrackData(metadata = metadata, simulcastConfig = trackData?.simulcastConfig)
         return this.copy(tracks = tracks)
     }
 

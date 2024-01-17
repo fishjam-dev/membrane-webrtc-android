@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
-import org.membraneframework.rtc.SimulcastConfig
 import org.membraneframework.rtc.models.Endpoint
 import org.membraneframework.rtc.models.TrackData
 import org.membraneframework.rtc.utils.Metadata

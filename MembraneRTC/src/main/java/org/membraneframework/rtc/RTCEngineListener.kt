@@ -1,7 +1,6 @@
 package org.membraneframework.rtc
 
 import org.membraneframework.rtc.events.OfferData
-import org.membraneframework.rtc.events.TracksAdded
 import org.membraneframework.rtc.models.Endpoint
 import org.membraneframework.rtc.models.TrackData
 import org.membraneframework.rtc.utils.Metadata

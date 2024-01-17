@@ -9,7 +9,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.membraneframework.rtc.events.OfferData
-import org.membraneframework.rtc.events.TracksAdded
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.EncodingReason
 import org.membraneframework.rtc.models.Endpoint
