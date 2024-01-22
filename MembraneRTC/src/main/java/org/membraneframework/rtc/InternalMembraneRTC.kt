@@ -114,7 +114,7 @@ internal class InternalMembraneRTC
                 ).also { it.start() }
 
             localTracks.add(videoTrack)
-            localEndpoint = localEndpoint.withTrack(videoTrack.id(), metadata)
+//            localEndpoint = localEndpoint.withTrack(videoTrack.id(), metadata)
 
 //            coroutineScope.launch {
 //                peerConnectionManager.addTrack(videoTrack)
