@@ -111,15 +111,18 @@ internal class InternalMembraneRTC
                     eglBase,
                     videoParameters,
                     captureDeviceName
-                ).also { it.start() }
+                ).also {
+                    it.start()
+                    it.setEnabled(false)
+                }
 
             localTracks.add(videoTrack)
-//            localEndpoint = localEndpoint.withTrack(videoTrack.id(), metadata)
+            localEndpoint = localEndpoint.withTrack(videoTrack.id(), metadata)
 
-//            coroutineScope.launch {
-//                peerConnectionManager.addTrack(videoTrack)
-//                rtcEngineCommunication.renegotiateTracks()
-//            }
+            coroutineScope.launch {
+                peerConnectionManager.addTrack(videoTrack)
+                rtcEngineCommunication.renegotiateTracks()
+            }
 
             return videoTrack
         }
