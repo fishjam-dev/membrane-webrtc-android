@@ -50,7 +50,7 @@ Add jitpack repo to your build.gradle:
 Add the dependency:
 ```gradle
 	dependencies {
-	  implementation 'com.github.membraneframework:membrane-webrtc-android:5.0.0'
+	  implementation 'com.github.membraneframework:membrane-webrtc-android:5.1.2'
 	}
 ```
 
