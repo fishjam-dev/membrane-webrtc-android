@@ -6,20 +6,21 @@ data class Endpoint(
     val id: String,
     val type: String,
     val metadata: Metadata? = mapOf(),
-    val trackIdToMetadata: Map<String, Metadata?> = mapOf()
+    val tracks: Map<String, TrackData> = mapOf()
 ) {
     fun withTrack(
         trackId: String,
         metadata: Metadata?
     ): Endpoint {
-        val newTrackIdToMetadata = this.trackIdToMetadata.toMutableMap()
-        newTrackIdToMetadata[trackId] = metadata ?: mapOf()
-        return this.copy(trackIdToMetadata = newTrackIdToMetadata)
+        val tracks = this.tracks.toMutableMap()
+        val trackData = tracks[trackId]
+        tracks[trackId] = TrackData(metadata = metadata, simulcastConfig = trackData?.simulcastConfig)
+        return this.copy(tracks = tracks)
     }
 
     fun withoutTrack(trackId: String): Endpoint {
-        val newTrackIdToMetadata = this.trackIdToMetadata.toMutableMap()
-        newTrackIdToMetadata.remove(trackId)
-        return this.copy(trackIdToMetadata = newTrackIdToMetadata)
+        val tracks = this.tracks.toMutableMap()
+        tracks.remove(trackId)
+        return this.copy(tracks = tracks)
     }
 }

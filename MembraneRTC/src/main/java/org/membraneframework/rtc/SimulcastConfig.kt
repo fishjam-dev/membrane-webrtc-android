@@ -1,5 +1,7 @@
 package org.membraneframework.rtc
 
+import com.google.gson.annotations.SerializedName
+
 /**
  * Enum describing possible track encodings.
  * `"h"` - original encoding
@@ -7,8 +9,13 @@ package org.membraneframework.rtc
  * `"l"` - original encoding scaled down by 4
  */
 enum class TrackEncoding(val rid: String) {
+    @SerializedName("l")
     L("l"),
+
+    @SerializedName("m")
     M("m"),
+
+    @SerializedName("h")
     H("h");
 
     companion object {

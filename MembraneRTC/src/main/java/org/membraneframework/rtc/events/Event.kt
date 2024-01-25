@@ -5,6 +5,7 @@ import com.google.gson.JsonParseException
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 import org.membraneframework.rtc.models.Endpoint
+import org.membraneframework.rtc.models.TrackData
 import org.membraneframework.rtc.utils.Metadata
 import org.membraneframework.rtc.utils.Payload
 import timber.log.Timber
@@ -235,7 +236,7 @@ data class EndpointAdded(val type: ReceivableEventType, val data: Data) : Receiv
         val id: String,
         val type: String,
         val metadata: Metadata?,
-        val trackIdToMetadata: Map<String, Metadata?>
+        val tracks: Map<String, TrackData>
     )
 }
 
@@ -260,7 +261,10 @@ data class OfferData(val type: ReceivableEventType, val data: Data) : Receivable
 }
 
 data class TracksAdded(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
-    data class Data(val endpointId: String, val trackIdToMetadata: Map<String, Metadata?>)
+    data class Data(
+        val endpointId: String,
+        val tracks: Map<String, TrackData>
+    )
 }
 
 data class TracksRemoved(val type: ReceivableEventType, val data: Data) : ReceivableEvent() {
