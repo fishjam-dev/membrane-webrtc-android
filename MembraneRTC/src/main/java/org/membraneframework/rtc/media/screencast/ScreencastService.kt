@@ -12,7 +12,6 @@ import android.os.IBinder
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 
-// TODO: this is stolen, consider giving some props to livekit team
 internal class ScreencastService : Service() {
     private var binder: IBinder = ScreencastBinder()
     private var bindCount = 0
@@ -40,6 +39,11 @@ internal class ScreencastService : Service() {
             }
 
         startForeground(notificationId ?: DEFAULT_NOTIFICATION_ID, properNotification)
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        stopForeground(true)
+        stopSelf()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
