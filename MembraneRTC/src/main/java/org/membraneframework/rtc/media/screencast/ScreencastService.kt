@@ -41,7 +41,7 @@ internal class ScreencastService : Service() {
         startForeground(notificationId ?: DEFAULT_NOTIFICATION_ID, properNotification)
     }
 
-    override fun onTaskRemoved(rootIntent: Intent?) {
+    override fun onDestroy() {
         stopForeground(true)
         stopSelf()
     }
