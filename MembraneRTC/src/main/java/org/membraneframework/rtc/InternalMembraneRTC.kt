@@ -8,6 +8,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.membraneframework.rtc.dagger.RTCModule
 import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.EncodingReason
@@ -38,10 +39,9 @@ internal class InternalMembraneRTC
         private val eglBase: EglBase,
         private val context: Context,
         rtcEngineCommunicationFactory: RTCEngineCommunication.RTCEngineCommunicationFactory,
-        peerConnectionFactoryWrapperFactory: PeerConnectionFactoryWrapper.PeerConnectionFactoryWrapperFactory
     ) : RTCEngineListener, PeerConnectionListener {
         private val rtcEngineCommunication = rtcEngineCommunicationFactory.create(this)
-        private val peerConnectionFactoryWrapper = peerConnectionFactoryWrapperFactory.create(createOptions)
+        private val peerConnectionFactoryWrapper = PeerConnectionFactoryWrapper(createOptions, RTCModule.audioDeviceModule(context), eglBase, context)
         private val peerConnectionManager = PeerConnectionManager(this, peerConnectionFactoryWrapper)
 
         private var localEndpoint: Endpoint =
