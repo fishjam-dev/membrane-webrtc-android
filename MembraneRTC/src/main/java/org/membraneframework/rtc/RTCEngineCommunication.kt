@@ -1,9 +1,6 @@
 package org.membraneframework.rtc
 
 import com.google.gson.reflect.TypeToken
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import org.membraneframework.rtc.events.*
 import org.membraneframework.rtc.models.Endpoint
 import org.membraneframework.rtc.utils.Metadata
@@ -12,12 +9,9 @@ import timber.log.Timber
 import kotlin.math.roundToLong
 
 internal class RTCEngineCommunication
-    @AssistedInject
     constructor(
-        @Assisted
         private val engineListener: RTCEngineListener
     ) {
-        @AssistedFactory
         interface RTCEngineCommunicationFactory {
             fun create(listener: RTCEngineListener): RTCEngineCommunication
         }
