@@ -38,16 +38,11 @@ internal class InternalMembraneRTC
         private val eglBase: EglBase,
         private val context: Context,
         rtcEngineCommunicationFactory: RTCEngineCommunication.RTCEngineCommunicationFactory,
-        peerConnectionManagerFactory: PeerConnectionManager.PeerConnectionManagerFactory,
         peerConnectionFactoryWrapperFactory: PeerConnectionFactoryWrapper.PeerConnectionFactoryWrapperFactory
     ) : RTCEngineListener, PeerConnectionListener {
         private val rtcEngineCommunication = rtcEngineCommunicationFactory.create(this)
         private val peerConnectionFactoryWrapper = peerConnectionFactoryWrapperFactory.create(createOptions)
-        private val peerConnectionManager =
-            peerConnectionManagerFactory.create(
-                this,
-                peerConnectionFactoryWrapper
-            )
+        private val peerConnectionManager = PeerConnectionManager(this, peerConnectionFactoryWrapper)
 
         private var localEndpoint: Endpoint =
             Endpoint(id = "", type = "webrtc", metadata = mapOf(), tracks = mapOf())

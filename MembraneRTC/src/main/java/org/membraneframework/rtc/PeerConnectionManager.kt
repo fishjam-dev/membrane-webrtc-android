@@ -1,8 +1,5 @@
 package org.membraneframework.rtc
 
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -25,12 +22,11 @@ import java.util.*
 import kotlin.math.pow
 
 internal class PeerConnectionManager
-    @AssistedInject
+
     constructor(
-        @Assisted private val peerConnectionListener: PeerConnectionListener,
-        @Assisted private val peerConnectionFactory: PeerConnectionFactoryWrapper
+        private val peerConnectionListener: PeerConnectionListener,
+        private val peerConnectionFactory: PeerConnectionFactoryWrapper
     ) : PeerConnection.Observer {
-        @AssistedFactory
         interface PeerConnectionManagerFactory {
             fun create(
                 listener: PeerConnectionListener,
