@@ -1,30 +1,21 @@
 package org.membraneframework.rtc.dagger
 
 import android.content.Context
-import dagger.BindsInstance
-import dagger.Component
 import org.membraneframework.rtc.InternalMembraneRTC
 import org.webrtc.EglBase
 import org.webrtc.audio.AudioDeviceModule
-import javax.inject.Singleton
 
-@Singleton
-@Component(
-    modules = [
-        RTCModule::class
-    ]
-)
+
 internal interface MembraneRTCComponent {
-    fun membraneRTCFactory(): InternalMembraneRTC.Factory
+    fun membraneRTCFactory(): InternalMembraneRTC
 
     fun eglBase(): EglBase
 
     fun audioDeviceModule(): AudioDeviceModule
 
-    @Component.Factory
     interface Factory {
         fun create(
-            @BindsInstance appContext: Context
+            appContext: Context
         ): MembraneRTCComponent
     }
 }

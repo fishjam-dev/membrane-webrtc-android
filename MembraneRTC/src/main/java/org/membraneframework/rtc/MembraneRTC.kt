@@ -3,7 +3,7 @@ package org.membraneframework.rtc
 import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.Dispatchers
-import org.membraneframework.rtc.dagger.DaggerMembraneRTCComponent
+import org.membraneframework.rtc.dagger.RTCModule
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.RTCStats
 import org.membraneframework.rtc.utils.Metadata
@@ -259,15 +259,7 @@ class MembraneRTC
             ): MembraneRTC {
                 val ctx = appContext.applicationContext
 
-                val component =
-                    DaggerMembraneRTCComponent
-                        .factory()
-                        .create(ctx)
-
-                val client =
-                    component
-                        .membraneRTCFactory()
-                        .create(options, listener, Dispatchers.Default)
+                val client = InternalMembraneRTC(options, listener, Dispatchers.Default, RTCModule.eglBase(), ctx)
 
                 return MembraneRTC(client)
             }

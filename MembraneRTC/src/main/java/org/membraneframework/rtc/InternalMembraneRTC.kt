@@ -2,9 +2,6 @@ package org.membraneframework.rtc
 
 import android.content.Context
 import android.content.Intent
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -28,13 +25,9 @@ import timber.log.Timber
 import java.util.*
 
 internal class InternalMembraneRTC
-    @AssistedInject
     constructor(
-        @Assisted
         private val createOptions: CreateOptions,
-        @Assisted
         private val listener: MembraneRTCListener,
-        @Assisted
         private val defaultDispatcher: CoroutineDispatcher,
         private val eglBase: EglBase,
         private val context: Context,
@@ -64,7 +57,6 @@ internal class InternalMembraneRTC
             }
         }
 
-        @AssistedFactory
         interface Factory {
             fun create(
                 createOptions: CreateOptions,
