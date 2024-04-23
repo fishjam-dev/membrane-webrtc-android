@@ -1,7 +1,6 @@
 plugins {
     id "com.android.library"
     id "kotlin-android"
-    id "kotlin-kapt"
     id 'maven-publish'
     id 'org.jetbrains.dokka'
 }
@@ -49,8 +48,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.google.dagger:dagger:2.38'
-    kapt 'com.google.dagger:dagger-compiler:2.38'
     implementation deps.coroutines.lib
     implementation deps.timber
     implementation 'com.google.code.gson:gson:2.9.0'
