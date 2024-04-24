@@ -15,7 +15,7 @@ import androidx.core.app.NotificationCompat
 
 const val TAG = "SCREENCAST"
 
-internal class ScreencastService : Service() {
+open class ScreencastService : Service() {
     private var binder: IBinder = ScreencastBinder()
     private var bindCount = 0
 
@@ -47,21 +47,6 @@ internal class ScreencastService : Service() {
         startForeground(notificationId ?: DEFAULT_NOTIFICATION_ID, properNotification)
     }
 
-    override fun onDestroy() {
-        Log.d(TAG, "onDestroy")
-
-        stopForeground(true)
-        stopSelf()
-    }
-
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        Log.d(TAG, "onTaskRemoved")
-
-        super.onTaskRemoved(rootIntent)
-        stopForeground(true)
-        stopSelf()
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel() {
         Log.d(TAG, "createNotificationChannel")
@@ -84,7 +69,6 @@ internal class ScreencastService : Service() {
         bindCount--
 
         if (bindCount == 0) {
-            stopForeground(true)
             stopSelf()
         }
 
