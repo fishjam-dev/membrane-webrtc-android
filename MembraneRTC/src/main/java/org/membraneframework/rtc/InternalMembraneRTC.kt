@@ -30,10 +30,11 @@ internal class InternalMembraneRTC
         private val listener: MembraneRTCListener,
         private val defaultDispatcher: CoroutineDispatcher,
         private val eglBase: EglBase,
-        private val context: Context,
+        private val context: Context
     ) : RTCEngineListener, PeerConnectionListener {
         private val rtcEngineCommunication = RTCEngineCommunication(this)
-        private val peerConnectionFactoryWrapper = PeerConnectionFactoryWrapper(createOptions, RTCModule.audioDeviceModule(context), eglBase, context)
+        private val peerConnectionFactoryWrapper =
+            PeerConnectionFactoryWrapper(createOptions, RTCModule.audioDeviceModule(context), eglBase, context)
         private val peerConnectionManager = PeerConnectionManager(this, peerConnectionFactoryWrapper)
 
         private var localEndpoint: Endpoint =

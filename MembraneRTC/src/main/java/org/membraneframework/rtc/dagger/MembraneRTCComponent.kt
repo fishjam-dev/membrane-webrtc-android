@@ -5,7 +5,6 @@ import org.membraneframework.rtc.InternalMembraneRTC
 import org.webrtc.EglBase
 import org.webrtc.audio.AudioDeviceModule
 
-
 internal interface MembraneRTCComponent {
     fun membraneRTCFactory(): InternalMembraneRTC
 
@@ -14,8 +13,6 @@ internal interface MembraneRTCComponent {
     fun audioDeviceModule(): AudioDeviceModule
 
     interface Factory {
-        fun create(
-            appContext: Context
-        ): MembraneRTCComponent
+        fun create(appContext: Context): MembraneRTCComponent
     }
 }

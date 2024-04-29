@@ -22,7 +22,6 @@ import java.util.*
 import kotlin.math.pow
 
 internal class PeerConnectionManager
-
     constructor(
         private val peerConnectionListener: PeerConnectionListener,
         private val peerConnectionFactory: PeerConnectionFactoryWrapper
