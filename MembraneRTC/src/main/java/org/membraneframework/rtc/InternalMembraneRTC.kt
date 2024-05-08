@@ -2,12 +2,10 @@ package org.membraneframework.rtc
 
 import android.content.Context
 import android.content.Intent
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.membraneframework.rtc.dagger.RTCModule
 import org.membraneframework.rtc.events.OfferData
 import org.membraneframework.rtc.media.*
 import org.membraneframework.rtc.models.EncodingReason
@@ -27,27 +25,17 @@ import timber.log.Timber
 import java.util.*
 
 internal class InternalMembraneRTC
-    @AssistedInject
     constructor(
-        @Assisted
         private val createOptions: CreateOptions,
-        @Assisted
         private val listener: MembraneRTCListener,
-        @Assisted
         private val defaultDispatcher: CoroutineDispatcher,
         private val eglBase: EglBase,
-        private val context: Context,
-        rtcEngineCommunicationFactory: RTCEngineCommunication.RTCEngineCommunicationFactory,
-        peerConnectionManagerFactory: PeerConnectionManager.PeerConnectionManagerFactory,
-        peerConnectionFactoryWrapperFactory: PeerConnectionFactoryWrapper.PeerConnectionFactoryWrapperFactory
+        private val context: Context
     ) : RTCEngineListener, PeerConnectionListener {
-        private val rtcEngineCommunication = rtcEngineCommunicationFactory.create(this)
-        private val peerConnectionFactoryWrapper = peerConnectionFactoryWrapperFactory.create(createOptions)
-        private val peerConnectionManager =
-            peerConnectionManagerFactory.create(
-                this,
-                peerConnectionFactoryWrapper
-            )
+        private val rtcEngineCommunication = RTCEngineCommunication(this)
+        private val peerConnectionFactoryWrapper =
+            PeerConnectionFactoryWrapper(createOptions, RTCModule.audioDeviceModule(context), eglBase, context)
+        private val peerConnectionManager = PeerConnectionManager(this, peerConnectionFactoryWrapper)
 
         private var localEndpoint: Endpoint =
             Endpoint(id = "", type = "webrtc", metadata = mapOf(), tracks = mapOf())
@@ -70,7 +58,6 @@ internal class InternalMembraneRTC
             }
         }
 
-        @AssistedFactory
         interface Factory {
             fun create(
                 createOptions: CreateOptions,

@@ -1,24 +1,16 @@
 package org.membraneframework.rtc.dagger
 
 import android.content.Context
-import dagger.Module
-import dagger.Provides
 import org.webrtc.*
 import org.webrtc.audio.AudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule
 import timber.log.Timber
-import javax.inject.Singleton
 
-@Module
 internal object RTCModule {
-    @Singleton
-    @Provides
     fun eglBase(): EglBase {
         return EglBase.create()
     }
 
-    @Singleton
-    @Provides
     fun audioDeviceModule(appContext: Context): AudioDeviceModule {
         val audioRecordErrorCallback =
             object : JavaAudioDeviceModule.AudioRecordErrorCallback {
