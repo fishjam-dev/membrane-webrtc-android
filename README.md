@@ -1,3 +1,8 @@
+> [!IMPORTANT]  
+> This repository is now archived.
+> 
+> All `membrane-webrtc-android` is now available as part of [`android-client-sdk`](https://github.com/jellyfish-dev/android-client-sdk)
+
 # membrane-webrtc-android
 
 [![Run lint & tests](https://github.com/jellyfish-dev/membrane-webrtc-android/actions/workflows/run_lint_and_tests.yaml/badge.svg)](https://github.com/jellyfish-dev/membrane-webrtc-android/actions/workflows/run_lint_and_tests.yaml)
