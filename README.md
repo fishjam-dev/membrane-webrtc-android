@@ -1,7 +1,7 @@
 > [!IMPORTANT]  
 > This repository is now archived.
 > 
-> All `membrane-webrtc-android` is now available as part of [`android-client-sdk`](https://github.com/jellyfish-dev/android-client-sdk)
+> All `membrane-webrtc-android` functionality is now available as part of [`android-client-sdk`](https://github.com/jellyfish-dev/android-client-sdk)
 
 # membrane-webrtc-android
 
